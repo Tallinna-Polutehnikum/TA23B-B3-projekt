@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Movie detail</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#fff;color:#111}
+    .container{max-width:1000px;margin:0 auto;padding:2rem 6%}
+    .back{display:inline-block;margin-bottom:1rem;color:#0b5ed7}
+    .detail{display:grid;grid-template-columns:320px 1fr;gap:2rem;align-items:start}
+    .poster{border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+    .poster img{display:block;width:100%;height:auto}
+    h1{font-size:2rem;margin:0 0 .5rem}
+    .meta{color:#666;margin-bottom:1rem}
+    .desc{line-height:1.6;margin-bottom:1.2rem}
+    .showtimes{display:flex;flex-wrap:wrap;gap:.5rem}
+    .time{background:#111;color:#fff;padding:.45rem .7rem;border-radius:6px}
+    .buy{display:inline-block;background:#f97316;color:#fff;padding:.6rem 1rem;border-radius:8px;border:0;cursor:pointer}
+    .notfound{padding:3rem;text-align:center}
+    @media(max-width:800px){.detail{grid-template-columns:1fr;}.poster{width:100%;}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="index.html">← Tagasi</a>
+    <div id="app">
+      <!-- content injected by JS -->
+      <div class="loading">Laen...</div>
+    </div>
+  </div>
+
+  <script>
+    // small demo dataset - replace with API calls when backend exists
+    const films = [
+      {id:1,title:'Elnar Monkey',poster:'uus-raha.jpg',genre:'Komöödia',country:'USA',runtime:'1h 45m',rating:'7.2',description:'Lühikirjeldus Elnar Monkeyst. Naljakas ja kerge süžee.',showtimes:['12:30','15:00','18:45']},
+      {id:2,title:'Artur Monkey',poster:'depeche-mode-m.jpg',genre:'Dokumentaal, Muusika',country:'UK',runtime:'1h 30m',rating:'8.1',description:'Kontsertdokumentaal ja kunstiline portree.',showtimes:['13:15','17:00']},
+      {id:3,title:'Sofja',poster:'must-telefon-2.jpg',genre:'Õudus',country:'USA',runtime:'1h 50m',rating:'6.8',description:'Õudusfilm, mis hoiab sind pinges.',showtimes:['20:00','22:30']},
+      {id:4,title:'Venom 3: The Last Dance',poster:'venom-3.jpg',genre:'Märul, Ulme',country:'USA',runtime:'2h 10m',rating:'7.5',description:'Järjekordne epiline võitlus Venomiga.',showtimes:['14:00','19:00']}
+    ];
+
+    function getQueryParam(name){
+      const params = new URLSearchParams(location.search);
+      return params.get(name);
+    }
+
+    function renderNotFound(){
+      document.getElementById('app').innerHTML = '<div class="notfound"><h2>Filmi ei leitud</h2><p>Proovi tagasi minna ja valida teine film.</p></div>';
+    }
+
+    (function(){
+      const id = parseInt(getQueryParam('id'),10);
+      if (!id){ renderNotFound(); return; }
+      const film = films.find(f=>f.id===id);
+      if (!film){ renderNotFound(); return; }
+
+      const el = document.getElementById('app');
+      el.innerHTML = `
+        <div class="detail">
+          <div class="poster"><img src="${film.poster}" alt="${film.title} poster"></div>
+          <div>
+            <h1>${film.title}</h1>
+            <div class="meta">${film.genre} • ${film.country} • ${film.runtime} • Rating: ${film.rating}</div>
+            <div class="desc">${film.description}</div>
+            <div>
+              <strong>Näitamise ajad</strong>
+              <div class="showtimes">
+                ${film.showtimes.map(t=>`<span class="time">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div style="margin-top:1rem">
+              <button class="buy" onclick="alert('Piletite ost on demo - integreeri makse/saalivaliku.')">Osta pilet</button>
+            </div>
+          </div>
+        </div>
+      `;
+    })();
+  </script>
+</body>
+</html>
