@@ -5,38 +5,69 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Movie detail</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#fff;color:#111}
-    .container{max-width:1000px;margin:0 auto;padding:2rem 6%}
-    .back{display:inline-block;margin-bottom:1rem;color:#0b5ed7}
-    .detail{display:grid;grid-template-columns:320px 1fr;gap:2rem;align-items:start}
-    .poster{border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+    :root{--accent:#f97316;--muted:#6b7280;--bg:#fafafa;--card:#fff}
+    *{box-sizing:border-box}
+    body{font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#0f172a}
+    .container{max-width:1100px;margin:0 auto;padding:2rem 6%}
+    .back{display:inline-flex;align-items:center;gap:.5rem;margin-bottom:1rem;color:#0b5ed7}
+
+    .detail-wrap{display:grid;grid-template-columns:360px 1fr;gap:2.25rem;align-items:start}
+    .card{background:var(--card);border-radius:12px;padding:1rem;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+
+    .poster{border-radius:10px;overflow:hidden}
     .poster img{display:block;width:100%;height:auto}
-    h1{font-size:2rem;margin:0 0 .5rem}
-    .meta{color:#666;margin-bottom:1rem}
-    .desc{line-height:1.6;margin-bottom:1.2rem}
-    .showtimes{display:flex;flex-wrap:wrap;gap:.5rem}
-    .time{background:#111;color:#fff;padding:.45rem .7rem;border-radius:6px}
-    .buy{display:inline-block;background:#f97316;color:#fff;padding:.6rem 1rem;border-radius:8px;border:0;cursor:pointer}
+
+    h1{font-size:1.8rem;margin:0 0 .4rem}
+    .submeta{color:var(--muted);font-size:.95rem;margin-bottom:.8rem}
+
+    .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+    .meta-item{background:#f3f4f6;padding:.5rem;border-radius:8px;font-size:.9rem;color:#111}
+
+    .desc{line-height:1.6;margin-bottom:1rem;color:#111}
+
+    .gallery{display:flex;gap:.5rem;margin-top:1rem}
+    .thumb{width:72px;height:104px;border-radius:6px;overflow:hidden;cursor:pointer;flex:0 0 72px;border:2px solid transparent}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb.active{border-color:var(--accent)}
+
+    .showtimes{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+    .time{background:#111;color:#fff;padding:.45rem .7rem;border-radius:8px;font-weight:600}
+
+    .actions{display:flex;gap:.75rem;margin-top:1rem}
+    .buy{background:var(--accent);color:#fff;padding:.65rem 1rem;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .reserve{background:#fff;border:1px solid #e6e6e6;padding:.6rem .9rem;border-radius:10px;cursor:pointer}
+
+    .sidebar small{color:var(--muted)}
+
+    .trailer{position:relative;margin-top:1rem;border-radius:10px;overflow:hidden}
+    .trailer img{display:block;width:100%;height:170px;object-fit:cover}
+    .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);color:#fff;padding:.6rem;border-radius:50%}
+
     .notfound{padding:3rem;text-align:center}
-    @media(max-width:800px){.detail{grid-template-columns:1fr;}.poster{width:100%;}}
+
+    @media(max-width:960px){
+      .detail-wrap{grid-template-columns:1fr}
+      .poster img{height:auto}
+      .trailer img{height:220px}
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <a class="back" href="index.html">← Tagasi</a>
-    <div id="app">
-      <!-- content injected by JS -->
-      <div class="loading">Laen...</div>
+    <div class="container">
+      <a class="back" href="index.html">← Tagasi</a>
+      <div id="app">
+        <!-- content injected by JS -->
+        <div class="loading">Laen...</div>
+      </div>
     </div>
-  </div>
 
   <script>
     // small demo dataset - replace with API calls when backend exists
     const films = [
-      {id:1,title:'Elnar Monkey',poster:'uus-raha.jpg',genre:'Komöödia',country:'USA',runtime:'1h 45m',rating:'7.2',description:'Lühikirjeldus Elnar Monkeyst. Naljakas ja kerge süžee.',showtimes:['12:30','15:00','18:45']},
-      {id:2,title:'Artur Monkey',poster:'depeche-mode-m.jpg',genre:'Dokumentaal, Muusika',country:'UK',runtime:'1h 30m',rating:'8.1',description:'Kontsertdokumentaal ja kunstiline portree.',showtimes:['13:15','17:00']},
-      {id:3,title:'Sofja',poster:'must-telefon-2.jpg',genre:'Õudus',country:'USA',runtime:'1h 50m',rating:'6.8',description:'Õudusfilm, mis hoiab sind pinges.',showtimes:['20:00','22:30']},
-      {id:4,title:'Venom 3: The Last Dance',poster:'venom-3.jpg',genre:'Märul, Ulme',country:'USA',runtime:'2h 10m',rating:'7.5',description:'Järjekordne epiline võitlus Venomiga.',showtimes:['14:00','19:00']}
+      {id:1,title:'Elnar Monkey',poster:'assets/poster-1.svg',gallery:['assets/poster-1.svg','assets/poster-2.svg'],director:'E. Director',cast:['Elnar A.','Katrin B.','M. Tamm'],genre:'Komöödia',country:'USA',runtime:'1h 45m',rating:'7.2',description:'Lühikirjeldus Elnar Monkeyst. Naljakas ja kerge süžee.',synopsis:'Elnar Monkey on soe ja naljakas lugu sõprusest ja ootamatust rikkusest. Sobib kogu perele.',showtimes:['12:30','15:00','18:45']},
+      {id:2,title:'Artur Monkey',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg','assets/poster-3.svg'],director:'A. Director',cast:['Artur K.','L. Levin'],genre:'Dokumentaal, Muusika',country:'UK',runtime:'1h 30m',rating:'8.1',description:'Kontsertdokumentaal ja kunstiline portree.',synopsis:'Sügav ja visuaalne dokumentaal bändi teekonnast ja loomeprotsessist.',showtimes:['13:15','17:00']},
+      {id:3,title:'Sofja',poster:'assets/poster-3.svg',gallery:['assets/poster-3.svg','assets/poster-4.svg'],director:'S. Director',cast:['Sofja P.','D. Grey'],genre:'Õudus',country:'USA',runtime:'1h 50m',rating:'6.8',description:'Õudusfilm, mis hoiab sind pinges.',synopsis:'Õuduslik draama, mis uurib hirmu ja mälestusi.',showtimes:['20:00','22:30']},
+      {id:4,title:'Venom 3: The Last Dance',poster:'assets/poster-4.svg',gallery:['assets/poster-4.svg','assets/poster-1.svg'],director:'V. Director',cast:['Ven','Tom R.'],genre:'Märul, Ulme',country:'USA',runtime:'2h 10m',rating:'7.5',description:'Järjekordne epiline võitlus Venomiga.',synopsis:'Suure eelarvega ulmefilm täis kihutust ja pööraseid hetki.',showtimes:['14:00','19:00']}
     ];
 
     function getQueryParam(name){
@@ -56,24 +87,71 @@
 
       const el = document.getElementById('app');
       el.innerHTML = `
-        <div class="detail">
-          <div class="poster"><img src="${film.poster}" alt="${film.title} poster"></div>
-          <div>
-            <h1>${film.title}</h1>
-            <div class="meta">${film.genre} • ${film.country} • ${film.runtime} • Rating: ${film.rating}</div>
-            <div class="desc">${film.description}</div>
-            <div>
-              <strong>Näitamise ajad</strong>
-              <div class="showtimes">
-                ${film.showtimes.map(t=>`<span class="time">${t}</span>`).join('')}
-              </div>
+        <div class="detail-wrap">
+          <div class="card sidebar">
+            <div class="poster"><img id="mainPoster" src="${film.poster}" alt="${film.title} poster"></div>
+            <div class="gallery" id="gallery">
+              ${film.gallery.map((g,i)=>`<div class="thumb ${i===0? 'active':''}" data-src="${g}"><img src="${g}" alt="thumb"></div>`).join('')}
             </div>
             <div style="margin-top:1rem">
-              <button class="buy" onclick="alert('Piletite ost on demo - integreeri makse/saalivaliku.')">Osta pilet</button>
+              <small>Režissöör</small>
+              <div style="font-weight:600">${film.director}</div>
+            </div>
+            <div style="margin-top:.6rem">
+              <small>Näitlejad</small>
+              <div style="color:var(--muted)">${film.cast.join(', ')}</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <h1>${film.title}</h1>
+              <div class="submeta">${film.genre} • ${film.country} • ${film.runtime} • Rating: ${film.rating}</div>
+              <div class="meta-grid">
+                <div class="meta-item"><strong>Kestus</strong><div>${film.runtime}</div></div>
+                <div class="meta-item"><strong>Hind</strong><div>7.50€</div></div>
+              </div>
+              <div class="desc"><strong>Synopsis</strong><p>${film.synopsis}</p></div>
+
+              <div>
+                <strong>Näitamise ajad</strong>
+                <div class="showtimes">
+                  ${film.showtimes.map(t=>`<button class="time" data-time="${t}">${t}</button>`).join('')}
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="buy" id="buyBtn">Osta pilet</button>
+                <button class="reserve">Broneeri koht</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:1rem">
+              <small>Treiler</small>
+              <div class="trailer">
+                <img src="${film.gallery[0]}" alt="trailer thumbnail">
+                <div class="play">▶</div>
+              </div>
             </div>
           </div>
         </div>
       `;
+
+      // gallery click handlers
+      const gallery = el.querySelectorAll('.thumb');
+      gallery.forEach(t=>t.addEventListener('click', (e)=>{
+        gallery.forEach(x=>x.classList.remove('active'));
+        t.classList.add('active');
+        const src = t.getAttribute('data-src');
+        const main = document.getElementById('mainPoster');
+        if(main) main.src = src;
+      }));
+
+      // buy/reserve handlers (demo)
+      const buyBtn = document.getElementById('buyBtn');
+      if(buyBtn) buyBtn.addEventListener('click', ()=>{
+        alert('Demo: suunatakse ostule (implmenteeri tegelik checkout).');
+      });
     })();
   </script>
 </body>
