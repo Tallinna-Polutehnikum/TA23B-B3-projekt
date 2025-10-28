@@ -5,233 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cinema</title>
 
-  <style>
-    /* === GLOBAL STYLES === */
-    body {
-      font-family: "Poppins", "Arial", sans-serif;
-      margin: 0;
-      background-color: #fff;
-      color: #111;
-      overflow-x: hidden;
-    }
-
-    h1, h2, h3, h4, p {
-      margin: 0;
-    }
-
-    img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    /* === HEADER / BANNER === */
-    header {
-      background: linear-gradient(to right, #f7f7f7, #ffffff);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 3rem 6%;
-      flex-wrap: wrap;
-    }
-
-    .banner-text {
-      flex: 1;
-      min-width: 280px;
-      padding-right: 2rem;
-    }
-
-    .banner-text p {
-      color: #555;
-      font-size: 1.1rem;
-    }
-
-    .banner-text h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin: 0.4rem 0 1rem;
-      line-height: 1.2;
-    }
-
-    .banner-text .sub {
-      font-size: 1.1rem;
-      color: #444;
-    }
-
-    .banner-image {
-      flex: 1;
-      min-width: 280px;
-    }
-
-    .banner-image img {
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
-
-    /* === FILTER BAR === */
-    .filter-bar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
-      background-color: #111;
-      padding: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .filter-bar select {
-      padding: 0.8rem 1rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      background-color: #f5f5f5;
-    }
-
-    .filter-bar button {
-      background-color: #f97316;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .filter-bar button:hover {
-      background-color: #ea580c;
-    }
-
-    /* === MAIN SECTION === */
-    main {
-      padding: 3rem 6%;
-    }
-
-    main h2 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .film-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .film-grid {
-      margin-top: 1.5rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* === FILM CARD === */
-    .film {
-      background-color: #f9f9f9;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .film:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    }
-
-    .film img {
-      height: 200px;
-      object-fit: cover;
-    }
-
-    .film-info {
-      padding: 1rem 1.2rem 1.5rem;
-    }
-
-    .film-info h3 {
-      font-size: 1.3rem;
-      margin-bottom: 0.4rem;
-      color: #111;
-    }
-
-    .film-info p {
-      color: #666;
-      font-size: 0.95rem;
-    }
-
-    .rating {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: #111;
-      color: #fff;
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-    }
-
-    /* === FOOTER === */
-    footer {
-      background-color: #111;
-      color: #eee;
-      padding: 2rem 6%;
-      text-align: center;
-      margin-top: 3rem;
-    }
-
-    footer p {
-      font-size: 0.9rem;
-      color: #aaa;
-    }
-
-    /* === RESPONSIVE === */
-    @media (max-width: 768px) {
-      .banner-text h1 {
-        font-size: 2.2rem;
-      }
-
-      .banner-text p {
-        font-size: 1rem;
-      }
-
-      header {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .banner-text {
-        padding-right: 0;
-        margin-bottom: 2rem;
-      }
-    }
-
-.hero-banner {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 2rem;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 1.5rem;
-  padding: 0 6%;
-  background-color: #f0f0f0; /* Added gray background */
-}
-
-.hero-banner img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  background-color: #e0e0e0; /* Added slightly darker gray for image placeholder */
-}
-
-  </style>
-</head>
+  <link rel="stylesheet" href="style.css">
 <body>
 
   <!-- HEADER / BANNER -->
@@ -248,11 +22,14 @@
 
   <!-- FILTER BAR -->
   <section class="filter-bar">
-    <select aria-label="Vali näitamine">
-      <option>Example 1</option>
-      <option>Example 2</option>
-      <option>Example 3</option>
-      <option>Example 4</option>
+    <select id="genreFilter" aria-label="Filtreeri žanri järgi">
+      <option value="all">Kõik žanrid</option>
+      <option value="comedy">Komöödia</option>
+      <option value="documentary">Dokumentaal</option>
+      <option value="music">Muusika</option>
+      <option value="horror">Õudus</option>
+      <option value="action">Märul</option>
+      <option value="scifi">Ulme</option>
     </select>
     <button type="button">Vaata kinokava</button>
   </section>
@@ -265,11 +42,11 @@
 
 
     <h2>Top films</h2>
-     <div class="film-grid">
+    <div class="film-grid">
 
 
       <!-- Film 1 -->
-      <a class="film-link" href="movie.html?id=1" aria-label="Elnar Monkey details">
+      <a class="film-link" href="movie.html?id=1" aria-label="Elnar Monkey details" data-genre="comedy">
         <div class="film">
           <img src="uus-raha.jpg" alt="Elnar Monkey">
           <div class="film-info">
@@ -279,19 +56,20 @@
         </div>
       </a>
 
-      <!-- Film 2 (fixed) -->
-      <a class="film-link" href="movie.html?id=2" aria-label="Artur Monkey details">
+
+      <!-- Film 2 -->
+      <a class="film-link" href="movie.html?id=2" aria-label="Artur Monkey details" data-genre="documentary,music">
         <div class="film">
-          <img src="depeche-mode-m.jpg" alt="Artur Monkey">
+          <img src="depeche-mode-m.jpg" alt="DEPECHE MODE: M">
           <div class="film-info">
             <h3>Artur Monkey</h3>
-            <p>Dokumentaal, Muusika</p>
+            <p>Dokumentaal • Muusika</p>
           </div>
         </div>
       </a>
 
       <!-- Film 3 -->
-      <a class="film-link" href="movie.html?id=3" aria-label="Sofja details">
+      <a class="film-link" href="movie.html?id=3" aria-label="Sofja details" data-genre="horror">
         <div class="film">
           <img src="must-telefon-2.jpg" alt="Sofja">
           <div class="film-info">
@@ -301,8 +79,9 @@
         </div>
       </a>
 
+
       <!-- Film 4 -->
-      <a class="film-link" href="movie.html?id=4" aria-label="Venom 3 details">
+      <a class="film-link" href="movie.html?id=4" aria-label="Venom 3 details" data-genre="action,scifi">
         <div class="film">
           <img src="venom-3.jpg" alt="Venom 3: The Last Dance">
           <div class="film-info">
@@ -320,16 +99,7 @@
     <p>© 2025 Our Kino • Kõik õigused kaitstud</p>
   </footer>
 
-  <script>
-    // Example JS: handle dropdown selection (for demo)
-    (function(){
-      const select = document.querySelector('select');
-      if (!select) return;
-      select.addEventListener('change', ()=>{
-        try{ window.alert('Valitud kino: ' + select.value); } catch(e){ console.log('Valitud kino:', select.value); }
-      });
-    })();
-  </script>
+  <script src="script.js"></script>
 
 </body>
 </html>
