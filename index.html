@@ -242,19 +242,19 @@
       <p class="sub">Wheeew</p>
     </div>
     <div class="banner-image">
-      <img src="banner-image.jpg" alt="Lihtsalt üks õnnetus poster">
+      <img src="banner-image.jpg" alt="Poster">
     </div>
   </header>
 
   <!-- FILTER BAR -->
   <section class="filter-bar">
-    <select>
+    <select aria-label="Vali näitamine">
       <option>Example 1</option>
       <option>Example 2</option>
-      <option>Exampe 3</option>
+      <option>Example 3</option>
       <option>Example 4</option>
     </select>
-    <button>Vaata kinokava</button>
+    <button type="button">Vaata kinokava</button>
   </section>
 
   <!-- MAIN CONTENT -->
@@ -265,43 +265,51 @@
 
 
     <h2>Top films</h2>
-    <div class="film-grid">
+     <div class="film-grid">
 
       <!-- Film 1 -->
-      <div class="film">
-        <img src="uus-raha.jpg" alt="Uus raha">
-        <div class="film-info">
-          <h3>Elnar Monkey</h3>
-          <p>Komöödia • USA</p>
+      <a class="film-link" href="movie.html?id=1" aria-label="Elnar Monkey details">
+        <div class="film">
+          <img src="uus-raha.jpg" alt="Elnar Monkey">
+          <div class="film-info">
+            <h3>Elnar Monkey</h3>
+            <p>Komöödia • USA</p>
+          </div>
         </div>
-      </div>
+      </a>
 
-      <!-- Film 2 -->
-      <div class="film">
-        <img src="depeche-mode-m.jpg" alt="DEPECHE MODE: M">
-        <div class="film-info">
-          <h3>Artur Good Boy</h3>
-          <p>Dokumentaal, Muusika</p>
+      <!-- Film 2 (fixed) -->
+      <a class="film-link" href="movie.html?id=2" aria-label="Artur Monkey details">
+        <div class="film">
+          <img src="depeche-mode-m.jpg" alt="Artur Monkey">
+          <div class="film-info">
+            <h3>Artur Monkey</h3>
+            <p>Dokumentaal, Muusika</p>
+          </div>
         </div>
-      </div>
+      </a>
 
       <!-- Film 3 -->
-      <div class="film">
-        <img src="must-telefon-2.jpg" alt="Must telefon 2">
-        <div class="film-info">
-          <h3>Sofja</h3>
-          <p>Õudus • USA</p>
+      <a class="film-link" href="movie.html?id=3" aria-label="Sofja details">
+        <div class="film">
+          <img src="must-telefon-2.jpg" alt="Sofja">
+          <div class="film-info">
+            <h3>Sofja</h3>
+            <p>Õudus • USA</p>
+          </div>
         </div>
-      </div>
+      </a>
 
       <!-- Film 4 -->
-      <div class="film">
-        <img src="venom-3.jpg" alt="Venom 3: The Last Dance">
-        <div class="film-info">
-          <h3>Venom 3: The Last Dance</h3>
-          <p>Märul, Ulme</p>
+      <a class="film-link" href="movie.html?id=4" aria-label="Venom 3 details">
+        <div class="film">
+          <img src="venom-3.jpg" alt="Venom 3: The Last Dance">
+          <div class="film-info">
+            <h3>Venom 3: The Last Dance</h3>
+            <p>Märul • Ulme</p>
+          </div>
         </div>
-      </div>
+      </a>
 
     </div>
   </main>
@@ -313,10 +321,13 @@
 
   <script>
     // Example JS: handle dropdown selection (for demo)
-    const select = document.querySelector("select");
-    select.addEventListener("change", () => {
-      alert("Valitud kino: " + select.value);
-    });
+    (function(){
+      const select = document.querySelector('select');
+      if (!select) return;
+      select.addEventListener('change', ()=>{
+        try{ window.alert('Valitud kino: ' + select.value); } catch(e){ console.log('Valitud kino:', select.value); }
+      });
+    })();
   </script>
 
 </body>
