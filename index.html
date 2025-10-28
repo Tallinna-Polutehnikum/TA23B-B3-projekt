@@ -123,6 +123,12 @@
       gap: 1.5rem;
     }
 
+    .film-grid {
+      margin-top: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
     /* === FILM CARD === */
     .film {
       background-color: #f9f9f9;
@@ -202,6 +208,28 @@
         margin-bottom: 2rem;
       }
     }
+
+.hero-banner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.5rem;
+  padding: 0 6%;
+  background-color: #f0f0f0; /* Added gray background */
+}
+
+.hero-banner img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  background-color: #e0e0e0; /* Added slightly darker gray for image placeholder */
+}
+
   </style>
 </head>
 <body>
@@ -231,6 +259,11 @@
 
   <!-- MAIN CONTENT -->
   <main>
+<section class="hero-banner">
+  <img src="add.jpg" alt="Hero banner">
+</section>
+
+
     <h2>Top films</h2>
     <div class="film-grid">
 
@@ -247,7 +280,7 @@
       <div class="film">
         <img src="depeche-mode-m.jpg" alt="DEPECHE MODE: M">
         <div class="film-info">
-          <h3>Artur Monkey</h3>
+          <h3>Artur Good Boy</h3>
           <p>Dokumentaal, Muusika</p>
         </div>
       </div>
