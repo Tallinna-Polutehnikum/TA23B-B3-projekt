@@ -1,13 +1,55 @@
 // Shared script: films data and page initializers
 const films = [
-  {id:1,title:'Elnar Monkey',poster:'assets/poster-1.svg',gallery:['assets/poster-1.svg','assets/poster-2.svg'],director:'E. Director',cast:['Elnar A.','Katrin B.','M. Tamm'],genre:'comedy',genreLabel:'Komöödia',country:'USA',runtime:'1h 45m',rating:'7.2',description:'Lühikirjeldus Elnar Monkeyst. Naljakas ja kerge süžee.',synopsis:'Elnar Monkey on soe ja naljakas lugu sõprusest ja ootamatust rikkusest. Sobib kogu perele.',showtimes:['12:30','15:00','18:45']},
-  {id:2,title:'Artur Monkey',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg','assets/poster-3.svg'],director:'A. Director',cast:['Artur K.','L. Levin'],genre:'documentary,music',genreLabel:'Dokumentaal • Muusika',country:'UK',runtime:'1h 30m',rating:'8.1',description:'Kontsertdokumentaal ja kunstiline portree.',synopsis:'Sügav ja visuaalne dokumentaal bändi teekonnast ja loomeprotsessist.',showtimes:['13:15','17:00']},
-  {id:3,title:'Sofja',poster:'assets/poster-3.svg',gallery:['assets/poster-3.svg','assets/poster-4.svg'],director:'S. Director',cast:['Sofja P.','D. Grey'],genre:'horror',genreLabel:'Õudus',country:'USA',runtime:'1h 50m',rating:'6.8',description:'Õudusfilm, mis hoiab sind pinges.',synopsis:'Õuduslik draama, mis uurib hirmu ja mälestusi.',showtimes:['20:00','22:30']},
-  {id:4,title:'Venom 3: The Last Dance',poster:'assets/poster-4.svg',gallery:['assets/poster-4.svg','assets/poster-1.svg'],director:'V. Director',cast:['Ven','Tom R.'],genre:'action,scifi',genreLabel:'Märul • Ulme',country:'USA',runtime:'2h 10m',rating:'7.5',description:'Järjekordne epiline võitlus Venomiga.',synopsis:'Suure eelarvega ulmefilm täis kihutust ja pööraseid hetki.',showtimes:['14:00','19:00']}
+  {id:1,title:'Elnar Monkey',poster:'assets/poster-1.svg',gallery:['assets/poster-1.svg','assets/poster-2.svg'],director:'E. Director',cast:['Elnar A.','Katrin B.','M. Tamm'],genre:'comedy',genreLabel:'Komöödia',country:'USA',runtime:'1h 45m',rating:'7.2',description:'Lühikirjeldus Elnar Monkeyst. Naljakas ja kerge süžee.',synopsis:'Elnar Monkey on soe ja naljakas lugu sõprusest ja ootamatust rikkusest. Sobib kogu perele.',showtimes:['12:30','15:00','18:45'],upcoming:false},
+  {id:2,title:'Artur Monkey',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg','assets/poster-3.svg'],director:'A. Director',cast:['Artur K.','L. Levin'],genre:'documentary,music',genreLabel:'Dokumentaal • Muusika',country:'UK',runtime:'1h 30m',rating:'8.1',description:'Kontsertdokumentaal ja kunstiline portree.',synopsis:'Sügav ja visuaalne dokumentaal bändi teekonnast ja loomeprotsessist.',showtimes:['13:15','17:00'],upcoming:false},
+  {id:3,title:'Sofja',poster:'assets/poster-3.svg',gallery:['assets/poster-3.svg','assets/poster-4.svg'],director:'S. Director',cast:['Sofja P.','D. Grey'],genre:'horror',genreLabel:'Õudus',country:'USA',runtime:'1h 50m',rating:'6.8',description:'Õudusfilm, mis hoiab sind pinges.',synopsis:'Õuduslik draama, mis uurib hirmu ja mälestusi.',showtimes:['20:00','22:30'],upcoming:false},
+  {id:4,title:'Venom 3: The Last Dance',poster:'assets/poster-4.svg',gallery:['assets/poster-4.svg','assets/poster-1.svg'],director:'V. Director',cast:['Ven','Tom R.'],genre:'action,scifi',genreLabel:'Märul • Ulme',country:'USA',runtime:'2h 10m',rating:'7.5',description:'Järjekordne epiline võitlus Venomiga.',synopsis:'Suure eelarvega ulmefilm täis kihutust ja pööraseid hetki.',showtimes:['14:00','19:00'],upcoming:true},
+  // upcoming example
+  {id:5,title:'Aurora: Coming Soon',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg'],director:'A. Nova',cast:['L. Star'],genre:'scifi',genreLabel:'Ulme',country:'EE',runtime:'1h 50m',rating:'-',description:'Tulekul suur ulmefilm.',synopsis:'Lühikirjeldus tulevasest filmist. Püsige lainel.',showtimes:[],upcoming:true}
 ];
+
+function renderFilmCard(f){
+  // create anchor wrapper
+  const a = document.createElement('a');
+  a.className = 'film-link';
+  a.href = `movie.html?id=${f.id}`;
+  a.setAttribute('aria-label', `${f.title} details`);
+  a.dataset.genre = f.genre || '';
+
+  const div = document.createElement('div');
+  div.className = 'film';
+
+  const img = document.createElement('img');
+  img.src = f.poster;
+  img.alt = f.title;
+
+  const info = document.createElement('div');
+  info.className = 'film-info';
+  info.innerHTML = `<h3>${f.title}</h3><p>${f.genreLabel || f.genre} • ${f.country}</p>`;
+
+  div.appendChild(img);
+  div.appendChild(info);
+  a.appendChild(div);
+  return a;
+}
 
 function initIndex(){
   const genreSelect = document.getElementById('genreFilter');
+  const filmGrid = document.getElementById('filmGrid');
+  const upcomingGrid = document.getElementById('upcomingGrid');
+  if (!filmGrid) return;
+
+  // clear and render
+  filmGrid.innerHTML = '';
+  upcomingGrid.innerHTML = '';
+
+  films.forEach(f => {
+    const node = renderFilmCard(f);
+    if (f.upcoming) upcomingGrid.appendChild(node);
+    else filmGrid.appendChild(node);
+  });
+
+  // now wire up filtering across both grids
   const filmLinks = Array.from(document.querySelectorAll('.film-link'));
   if (!genreSelect) return;
 
