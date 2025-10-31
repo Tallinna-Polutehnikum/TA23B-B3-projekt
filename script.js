@@ -147,8 +147,56 @@ function initMovie(){
   });
 }
 
+// Slideshow functionality
+function initSlideshow() {
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+  let currentSlide = 0;
+
+  function showSlide(n) {
+    slides.forEach(slide => {
+      slide.classList.remove('active');
+    });
+    dots.forEach(dot => {
+      dot.classList.remove('active');
+    });
+
+    slides[n].classList.add('active');
+    dots[n].classList.add('active');
+  }
+
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide(currentSlide);
+  }
+
+  // Initialize first slide
+  showSlide(0);
+
+  // Add click events to dots
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      currentSlide = index;
+      showSlide(currentSlide);
+    });
+  });
+
+  // Auto advance slides every 30 seconds
+  setInterval(nextSlide, 30000);
+}
+
 // auto-init depending on page
-document.addEventListener('DOMContentLoaded', ()=>{
-  if (document.querySelector('.film-grid')) initIndex();
-  if (document.getElementById('app') && location.pathname.endsWith('movie.html')) initMovie();
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if we're on the main page (index.html)
+  if (location.pathname.endsWith('index.html') || location.pathname === '/' || location.pathname.endsWith('/')) {
+    initIndex();
+    // Only initialize slideshow on main page
+    if (document.querySelector('.slideshow-container')) {
+      initSlideshow();
+    }
+  }
+  // Movie detail page initialization
+  if (document.getElementById('app') && location.pathname.endsWith('movie.html')) {
+    initMovie();
+  }
 });
