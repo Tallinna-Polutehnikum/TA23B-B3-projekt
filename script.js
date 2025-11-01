@@ -156,12 +156,20 @@ function initSlideshow() {
   function showSlide(n) {
     slides.forEach(slide => {
       slide.classList.remove('active');
+      // Ensure links remain clickable
+      if (slide.querySelector('a')) {
+        slide.querySelector('a').style.pointerEvents = 'none';
+      }
     });
     dots.forEach(dot => {
       dot.classList.remove('active');
     });
 
     slides[n].classList.add('active');
+    // Enable clicking on the active slide
+    if (slides[n].querySelector('a')) {
+      slides[n].querySelector('a').style.pointerEvents = 'auto';
+    }
     dots[n].classList.add('active');
   }
 

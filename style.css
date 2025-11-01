@@ -36,6 +36,7 @@ header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
   height: 400px;
   border-radius: 10px;
   overflow: hidden;
+  pointer-events: none; /* Disable container events by default */
 }
 
 .slide {
@@ -55,6 +56,32 @@ header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
   height: 100%;
   object-fit: cover;
   border-radius: 10px;
+}
+
+.slide a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: white;
+  position: relative;
+  z-index: 10;
+}
+
+.slide:not(.active) a {
+  pointer-events: none;
+}
+
+.slide.active a {
+  pointer-events: auto;
+}
+
+.slide a:hover .slide-text {
+  background: linear-gradient(transparent, rgba(0,0,0,0.9));
+}
+
+.slide a:hover h3 {
+  text-decoration: underline;
 }
 
 .slide-text {
@@ -83,6 +110,8 @@ header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
   right: 20px;
   display: flex;
   gap: 8px;
+  z-index: 20;
+  pointer-events: auto;
 }
 
 .dot {
@@ -91,6 +120,12 @@ header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
   background: rgba(255,255,255,0.5);
   border-radius: 50%;
   cursor: pointer;
+  pointer-events: auto;
+  transition: background-color 0.3s ease;
+}
+
+.dot:hover {
+  background: rgba(255,255,255,0.8);
 }
 
 .dot.active {
@@ -108,6 +143,106 @@ h2{font-size:2rem;margin:0 0 1rem}
 .film-info h3{font-size:1.15rem;margin-bottom:.25rem}
 .film-info p{color:#666;font-size:.95rem}
 .film-link{display:block}
+
+/* Event pages */
+.event-page {
+    padding: 2rem 0;
+}
+
+.event-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.event-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.event-details {
+    padding: 2rem;
+}
+
+.event-details h2 {
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+}
+
+.event-date {
+    color: var(--accent);
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.event-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.event-description h3 {
+    margin: 1.5rem 0 1rem;
+    font-size: 1.3rem;
+}
+
+.event-description ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.event-description li {
+    margin-bottom: 0.5rem;
+}
+
+.event-description .note {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 1rem;
+}
+
+.event-description .synopsis {
+    font-style: italic;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #f5f5f5;
+    border-left: 4px solid var(--accent);
+}
+
+.event-description h3 {
+    color: var(--accent);
+    margin-top: 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.event-description .campaign-info,
+.event-description .terms,
+.event-description .additional-info {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.event-description .additional-info {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.event-description p {
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+.event-description ul li {
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
+}
 
 /* footer */
 footer{background:#111;color:#eee;padding:2rem 0;text-align:center;margin-top:3rem}
