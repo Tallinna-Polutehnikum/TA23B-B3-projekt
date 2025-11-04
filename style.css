@@ -1,5 +1,5 @@
 /* Shared styles for index.html and movie.html */
-:root{--accent:#f97316;--muted:#6b7280;--bg:#fff;--card:#fff}
+:root{--accent:#f5e497;--muted:#6b7280;--bg:#000000;--card:#fff}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{font-family:"Poppins","Arial",sans-serif;margin:0;background:var(--bg);color:#111;-webkit-font-smoothing:antialiased}
@@ -23,26 +23,31 @@ header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
 
 /* hero */
 .hero-banner {
+  /* make the banner fluid and allow full-bleed on small viewports + centered content */
   width: 100%;
-  max-width: 1200px;
+  max-width: none; /* allow expanding beyond previous cap when zooming out */
   margin: 0 auto 2rem;
   overflow: hidden;
-  padding: 0 6%;
+  padding: 0; /* remove fixed side padding so slides can use full width */
 }
 
+/* slideshow: use a responsive, proportional height via aspect-ratio + clamp fallback */
 .slideshow-container {
   position: relative;
   width: 100%;
-  height: 400px;
+  /* prefer aspect-ratio for consistent proportions, fallback to clamp for older browsers */
+  aspect-ratio: 16 / 7;
+  height: clamp(180px, 36vh, 520px); /* fallback and min/max control */
+  max-height: 70vh; /* prevent it from becoming insanely tall on very large screens */
   border-radius: 10px;
   overflow: hidden;
-  pointer-events: none; /* Disable container events by default */
+  pointer-events: auto; /* enable interactions */
 }
 
+/* make slide positioning more robust across sizes */
 .slide {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0; */
   opacity: 0;
   transition: opacity 1s ease-in-out;
 }
@@ -55,81 +60,50 @@ header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   border-radius: 10px;
-}
-
-.slide a {
   display: block;
-  width: 100%;
-  height: 100%;
-  text-decoration: none;
-  color: white;
-  position: relative;
-  z-index: 10;
 }
 
-.slide:not(.active) a {
-  pointer-events: none;
-}
+/* keep links interactive only on the active slide */
+.slide:not(.active) a { pointer-events: none; }
+.slide.active a { pointer-events: auto; }
 
-.slide.active a {
-  pointer-events: auto;
-}
-
-.slide a:hover .slide-text {
-  background: linear-gradient(transparent, rgba(0,0,0,0.9));
-}
-
-.slide a:hover h3 {
-  text-decoration: underline;
-}
-
+/* keep the text and dots inside the visible area on all sizes */
 .slide-text {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  padding: 18px;
   background: linear-gradient(transparent, rgba(0,0,0,0.8));
   color: white;
 }
 
-.slide-text h3 {
-  margin: 0 0 10px 0;
-  font-size: 24px;
-}
-
-.slide-text p {
-  margin: 0;
-  font-size: 16px;
-}
-
+/* dots placement adjusts on very small screens */
 .slide-dots {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 18px;
+  right: 18px;
   display: flex;
   gap: 8px;
   z-index: 20;
   pointer-events: auto;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  background: rgba(255,255,255,0.5);
-  border-radius: 50%;
-  cursor: pointer;
-  pointer-events: auto;
-  transition: background-color 0.3s ease;
+/* small-screen tweaks */
+@media (max-width: 680px) {
+  .slideshow-container { aspect-ratio: 14/7; height: clamp(140px, 30vh, 360px); }
+  .slide-text { padding: 12px; }
+  .slide-text h3 { font-size: 18px; }
+  .slide-text p { font-size: 13px; }
+  .slide-dots { bottom: 12px; right: 12px; gap: 6px; }
 }
-
-.dot:hover {
-  background: rgba(255,255,255,0.8);
-}
-
-.dot.active {
-  background: white;
+  
+/* large-screen tweak: let banner breathe on very wide viewports */
+@media (min-width: 1400px) {
+  .hero-banner { padding: 0 4%; }
+  .slideshow-container { max-width: 1400px; margin: 0 auto; }
 }
 
 /* main / grid */
