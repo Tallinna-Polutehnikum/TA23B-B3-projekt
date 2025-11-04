@@ -8,7 +8,7 @@ body{font-family:"Poppins","Arial",sans-serif;margin:0;background:var(--bg);colo
 .container{max-width:1100px;margin:0 auto;padding:0 6%}
 
 /* header/banner */
-header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
+header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0}
 .banner{display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
 .banner-text{flex:1;min-width:280px;padding-right:1.5rem}
 .banner-text p{color:#666;font-size:1.05rem}
@@ -76,11 +76,10 @@ header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
   left: 0;
   right: 0;
   padding: 18px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  background: linear-gradient(transparent, rgba(88, 88, 88, 0.664));
   color: white;
 }
 
-/* dots placement adjusts on very small screens */
 .slide-dots {
   position: absolute;
   bottom: 18px;
@@ -89,6 +88,16 @@ header{background:linear-gradient(90deg,#fbfbfb,#fff);padding:3.25rem 0}
   gap: 8px;
   z-index: 20;
   pointer-events: auto;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background-color 0.3s ease;
 }
 
 /* small-screen tweaks */
