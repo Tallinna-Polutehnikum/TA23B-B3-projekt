@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Showtime • Cinema</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="top-actions">
+      <a class="auth-btn" href="#">Log in / Register</a>
+    </div>
+    <div class="banner-text">
+      <h1>Showtime</h1>
+      <p class="sub">Daily sessions, halls and seat availability (mockup)</p>
+    </div>
+  </header>
+
+  <main class="container schedule-page">
+    <section class="schedule-controls">
+      <div class="loc-select">Cinema: <select><option>All Apollo Cinemas</option></select></div>
+      <div class="date-select">Date: <input type="date" value="2025-11-17"></div>
+    </section>
+
+    <section class="session-list">
+
+      <!-- Session row (repeat for each movie) -->
+      <article class="session-row">
+        <img class="session-poster" src="assets/poster-1.svg" alt="Poster">
+        <div class="session-meta">
+          <div class="session-time">15:40</div>
+          <div class="session-title">Kiskja: Ohutsoon</div>
+          <div class="session-hall">Apollo Kino Mustamäe — Hall 4</div>
+          <div class="session-tags">Action • Horror • Thriller</div>
+        </div>
+        <div class="session-right">
+          <div class="availability">
+            <div class="avail-count">Available seats</div>
+            <div class="avail-badge">74</div>
+          </div>
+          <div class="session-actions">
+            <a class="buy" href="#">Buy tickets</a>
+            <a class="view" href="#">View details</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="session-row">
+        <img class="session-poster" src="assets/poster-2.svg" alt="Poster">
+        <div class="session-meta">
+          <div class="session-time">15:40</div>
+          <div class="session-title">Now You See Me: Now You Don't</div>
+          <div class="session-hall">Apollo Kino Plaza — Hall 1</div>
+          <div class="session-tags">Thriller • Crime</div>
+        </div>
+        <div class="session-right">
+          <div class="availability">
+            <div class="avail-count">Available seats</div>
+            <div class="avail-badge low">25</div>
+          </div>
+          <div class="session-actions">
+            <a class="buy" href="#">Buy tickets</a>
+            <a class="view" href="#">View details</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="session-row">
+        <img class="session-poster" src="assets/poster-3.svg" alt="Poster">
+        <div class="session-meta">
+          <div class="session-time">20:00</div>
+          <div class="session-title">Sofja</div>
+          <div class="session-hall">Apollo Kino Viru — Hall 5</div>
+          <div class="session-tags">Horror</div>
+        </div>
+        <div class="session-right">
+          <div class="availability">
+            <div class="avail-count">Available seats</div>
+            <div class="avail-badge soldout">0</div>
+          </div>
+          <div class="session-actions">
+            <a class="buy disabled" href="#">Sold out</a>
+            <a class="view" href="#">View details</a>
+          </div>
+        </div>
+      </article>
+
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Our Kino • All rights reserved</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
