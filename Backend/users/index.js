@@ -92,10 +92,12 @@ router.post('/me/settings', authRequired, (req, res) => {
   const users = readJson(USERS_FILE, []);
   const idx = users.findIndex(u=>u.id===req.user.id);
   if(idx===-1) return res.status(404).json({ error: 'user not found' });
-  // allow updating nested fields: settings, avatarUrl, membership
+  // allow updating nested fields: settings, avatarUrl, membership, name
   if(settings.theme) users[idx].settings = Object.assign({}, users[idx].settings || {}, { theme: settings.theme });
+  if(settings.lang) users[idx].settings = Object.assign({}, users[idx].settings || {}, { lang: settings.lang });
   if(typeof settings.avatarUrl !== 'undefined') users[idx].avatarUrl = settings.avatarUrl;
   if(typeof settings.membership !== 'undefined') users[idx].membership = settings.membership;
+  if(typeof settings.name !== 'undefined') users[idx].name = settings.name;
   writeJson(USERS_FILE, users);
   const safe = { id: users[idx].id, name: users[idx].name, email: users[idx].email, settings: users[idx].settings, avatarUrl: users[idx].avatarUrl, membership: users[idx].membership };
   res.json(safe);

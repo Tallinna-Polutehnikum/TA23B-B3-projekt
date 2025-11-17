@@ -1,4 +1,148 @@
 // Shared script: films data and page initializers
+
+// Translation system
+const translations = {
+  ru: {
+    loginRegister: 'Войти / Регистрация',
+    allGenres: 'Все жанры',
+    comedy: 'Комедия',
+    documentary: 'Документальный',
+    music: 'Музыка',
+    horror: 'Ужасы',
+    action: 'Боевик',
+    scifi: 'Научная фантастика',
+    viewShowtime: 'Расписание сеансов',
+    comingSoon: 'Скоро в кино',
+    topFilms: 'Лучшие фильмы',
+    login: 'Войти',
+    register: 'Создать аккаунт',
+    noAccount: 'Нет аккаунта?',
+    createAccount: 'Создать аккаунт',
+    haveAccount: 'Уже есть аккаунт?',
+    profile: 'Профиль',
+    myTickets: 'Мои билеты',
+    logout: 'Выйти',
+    emailUsername: 'Email или имя пользователя',
+    password: 'Пароль',
+    name: 'Имя',
+    email: 'Email'
+  },
+  en: {
+    loginRegister: 'Log in / Register',
+    allGenres: 'All genres',
+    comedy: 'Comedy',
+    documentary: 'Documentary',
+    music: 'Music',
+    horror: 'Horror',
+    action: 'Action',
+    scifi: 'Sci-Fi',
+    viewShowtime: 'View Showtime',
+    comingSoon: 'Coming soon',
+    topFilms: 'Top films',
+    login: 'Log in',
+    register: 'Create account',
+    noAccount: 'No account?',
+    createAccount: 'Create an account',
+    haveAccount: 'Already have an account?',
+    profile: 'Profile',
+    myTickets: 'My Tickets',
+    logout: 'Logout',
+    emailUsername: 'Email or username',
+    password: 'Password',
+    name: 'Name',
+    email: 'Email'
+  },
+  et: {
+    loginRegister: 'Logi sisse / Registreeri',
+    allGenres: 'Kõik žanrid',
+    comedy: 'Komöödia',
+    documentary: 'Dokumentaal',
+    music: 'Muusika',
+    horror: 'Õudus',
+    action: 'Märul',
+    scifi: 'Ulme',
+    viewShowtime: 'Vaata seanssi',
+    comingSoon: 'Peagi',
+    topFilms: 'Parimad filmid',
+    login: 'Logi sisse',
+    register: 'Loo konto',
+    noAccount: 'Pole kontot?',
+    createAccount: 'Loo konto',
+    haveAccount: 'Juba on konto?',
+    profile: 'Profiil',
+    myTickets: 'Minu piletid',
+    logout: 'Logi välja',
+    emailUsername: 'E-post või kasutajanimi',
+    password: 'Parool',
+    name: 'Nimi',
+    email: 'E-post'
+  }
+};
+
+let currentLang = localStorage.getItem('lang') || 'ru';
+const t = (key) => translations[currentLang][key] || key;
+
+function setLanguage(lang){
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  updatePageTranslations();
+}
+
+function updatePageTranslations(){
+  // Update translatable elements on current page
+  const openAuth = document.getElementById('openAuth');
+  if(openAuth) openAuth.textContent = t('loginRegister');
+  
+  const genreFilter = document.getElementById('genreFilter');
+  if(genreFilter){
+    const options = genreFilter.querySelectorAll('option');
+    if(options[0]) options[0].textContent = t('allGenres');
+    if(options[1]) options[1].textContent = t('comedy');
+    if(options[2]) options[2].textContent = t('documentary');
+    if(options[3]) options[3].textContent = t('music');
+    if(options[4]) options[4].textContent = t('horror');
+    if(options[5]) options[5].textContent = t('action');
+    if(options[6]) options[6].textContent = t('scifi');
+  }
+  
+  const viewScheduleBtn = document.querySelector('.view-schedule-btn');
+  if(viewScheduleBtn) viewScheduleBtn.textContent = t('viewShowtime');
+  
+  const upcomingTitle = document.querySelector('#upcomingSection h2');
+  if(upcomingTitle) upcomingTitle.textContent = t('comingSoon');
+  
+  const topFilmsTitle = document.querySelector('#nowShowing h2');
+  if(topFilmsTitle) topFilmsTitle.textContent = t('topFilms');
+  
+  // Auth modal
+  const authTitle = document.getElementById('authTitle');
+  if(authTitle && authTitle.textContent.includes('Log') || authTitle && authTitle.textContent.includes('Вой') || authTitle && authTitle.textContent.includes('Logi')){
+    authTitle.textContent = t('login');
+  }
+  
+  const loginSubmit = document.querySelector('#loginForm .auth-submit');
+  if(loginSubmit) loginSubmit.textContent = t('login');
+  
+  const registerSubmit = document.querySelector('#registerForm .auth-submit');
+  if(registerSubmit) registerSubmit.textContent = t('register');
+  
+  const noAccountText = document.querySelector('#loginForm .auth-switch');
+  if(noAccountText) noAccountText.innerHTML = t('noAccount') + ' <a href="#" id="showRegister">' + t('createAccount') + '</a>';
+  
+  const haveAccountText = document.querySelector('#registerForm .auth-switch');
+  if(haveAccountText) haveAccountText.innerHTML = t('haveAccount') + ' <a href="#" id="showLogin">' + t('login') + '</a>';
+  
+  // Dropdown menu
+  const dropdownLinks = document.querySelectorAll('#userDropdown a');
+  if(dropdownLinks[0]) dropdownLinks[0].textContent = t('profile');
+  if(dropdownLinks[1]) dropdownLinks[1].textContent = t('myTickets');
+  if(dropdownLinks[2]) dropdownLinks[2].textContent = t('logout');
+  
+  // Update lang switcher
+  const langSwitcher = document.getElementById('langSwitcher');
+  if(langSwitcher) langSwitcher.value = currentLang;
+}
+
 const films = [
   {id:1,title:'Elnar Monkey',poster:'assets/poster-1.svg',gallery:['assets/poster-1.svg','assets/poster-2.svg'],director:'E. Director',cast:['Elnar A.','Katrin B.','M. Tamm'],genre:'comedy',genreLabel:'Comedy',country:'USA',runtime:'1h 45m',rating:'7.2',description:'A short description of Elnar Monkey. A funny and light-hearted story.',synopsis:'Elnar Monkey is a warm and funny tale about friendship and unexpected fortune. Suitable for the whole family.',showtimes:['12:30','15:00','18:45'],upcoming:false},
   {id:2,title:'Artur Monkey',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg','assets/poster-3.svg'],director:'A. Director',cast:['Artur K.','L. Levin'],genre:'documentary,music',genreLabel:'Documentary • Music',country:'UK',runtime:'1h 30m',rating:'8.1',description:'A concert documentary and artistic portrait.',synopsis:'A deep and visual documentary about the band’s journey and creative process.',showtimes:['13:15','17:00'],upcoming:false},
@@ -270,6 +414,23 @@ function initSlideshow() {
 
 // auto-init depending on page
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize language
+  const savedLang = localStorage.getItem('lang') || 'ru';
+  setLanguage(savedLang);
+  
+  // Language switcher handler
+  const langSwitcher = document.getElementById('langSwitcher');
+  if(langSwitcher){
+    langSwitcher.addEventListener('change', (e)=>{
+      setLanguage(e.target.value);
+      // Re-bind auth modal handlers after language change
+      const showRegister = document.getElementById('showRegister');
+      const showLogin = document.getElementById('showLogin');
+      if(showRegister) showRegister.addEventListener('click', (e)=>{ e.preventDefault(); document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('authTitle').textContent=t('register'); });
+      if(showLogin) showLogin.addEventListener('click', (e)=>{ e.preventDefault(); document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('authTitle').textContent=t('login'); });
+    });
+  }
+  
   // Check if we're on the main page (index.html)
   if (location.pathname.endsWith('index.html') || location.pathname === '/' || location.pathname.endsWith('/')) {
     initIndex();
