@@ -8,7 +8,7 @@ body{font-family:"Poppins","Arial",sans-serif;margin:0;background:var(--bg);colo
 .container{max-width:1100px;margin:0 auto;padding:0 6%}
 
 /* header/banner */
-header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0}
+header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0;position:relative}
 .banner{display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
 .banner-text{flex:1;min-width:280px;padding-right:1.5rem}
 .banner-text p{color:#666;font-size:1.05rem}
@@ -100,6 +100,32 @@ header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0}
   pointer-events: auto;
 }
 
+/* top-right auth button in header */
+.top-actions{
+  position: absolute;
+  top: 18px;
+  right: 6%;
+  z-index: 60;
+}
+
+.auth-btn{
+  display:inline-block;
+  background:var(--accent);
+  color:#111;
+  padding:0.5rem 0.85rem;
+  border-radius:8px;
+  font-weight:600;
+  text-decoration:none;
+  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+}
+
+.auth-btn:hover{opacity:0.95;transform:translateY(-1px)}
+
+@media(max-width:680px){
+  .top-actions{right:4%;top:12px}
+  .auth-btn{padding:0.45rem 0.7rem;font-size:0.95rem}
+}
+
 .dot {
   width: 10px;
   height: 10px;
@@ -124,6 +150,25 @@ header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0}
   .hero-banner { padding: 0 4%; }
   .slideshow-container { max-width: 1400px; margin: 0 auto; }
 }
+
+/* Auth modal styles */
+.auth-modal{display:none;position:fixed;inset:0;z-index:2000;font-family:inherit}
+.auth-modal[aria-hidden="false"]{display:block}
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5)}
+.auth-dialog{position:relative;max-width:420px;margin:6vh auto;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.auth-close{position:absolute;right:12px;top:10px;background:transparent;border:0;font-size:18px;cursor:pointer}
+.auth-body{padding:28px}
+.auth-body h2{margin:0 0 12px;font-size:22px}
+.auth-form{display:block}
+.auth-form.hidden{display:none}
+.auth-form label{display:block;font-size:14px;color:#222;margin-bottom:12px}
+.auth-form input{display:block;width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;margin-top:6px}
+.auth-submit{display:inline-block;background:var(--accent);color:#111;border:0;padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer;margin-top:8px}
+.auth-switch{margin-top:12px;font-size:14px;color:#444}
+.auth-switch a{color:var(--accent);text-decoration:none;font-weight:600}
+.auth-switch a:hover{text-decoration:underline}
+
+@media(max-width:480px){.auth-dialog{margin:4vh 12px} .auth-body{padding:18px}}
 
 /* main / grid */
 main{padding:2.5rem 0}

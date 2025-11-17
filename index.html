@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="et">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cinema</title>
-
   <link rel="stylesheet" href="style.css">
+</head>
 <body>
 
   <!-- HEADER / BANNER -->
   <header>
+    <div class="top-actions">
+      <a class="auth-btn" href="#">Log in / Register</a>
+    </div>
     <div class="banner-image">
       <img src="banner-image.jpg" alt="Poster">
     </div>
@@ -17,16 +20,16 @@
 
   <!-- FILTER BAR -->
   <section class="filter-bar">
-    <select id="genreFilter" aria-label="Filtreeri žanri järgi">
-      <option value="all">Kõik žanrid</option>
-      <option value="comedy">Komöödia</option>
-      <option value="documentary">Dokumentaal</option>
-      <option value="music">Muusika</option>
-      <option value="horror">Õudus</option>
-      <option value="action">Märul</option>
-      <option value="scifi">Ulme</option>
+    <select id="genreFilter" aria-label="Filter by genre">
+      <option value="all">All genres</option>
+      <option value="comedy">Comedy</option>
+      <option value="documentary">Documentary</option>
+      <option value="music">Music</option>
+      <option value="horror">Horror</option>
+      <option value="action">Action</option>
+      <option value="scifi">Sci‑Fi</option>
     </select>
-    <button type="button">Vaata kinokava</button>
+    <button type="button">View schedule</button>
 
   </section>
 
@@ -85,17 +88,17 @@
     </div>
 
     <div class="slide-dots">
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
+      <span class="dot" aria-label="Slide 1"></span>
+      <span class="dot" aria-label="Slide 2"></span>
+      <span class="dot" aria-label="Slide 3"></span>
+      <span class="dot" aria-label="Slide 4"></span>
+      <span class="dot" aria-label="Slide 5"></span>
     </div>
   </div>
 </section>
 
     <section id="upcomingSection">
-      <h2>Tulekul kinodes</h2>
+      <h2>Coming soon</h2>
       <div class="film-grid upcoming-grid" id="upcomingGrid">
         <!-- upcoming movies injected here -->
       </div>
@@ -111,10 +114,45 @@
 
   <!-- FOOTER -->
   <footer>
-    <p>© 2025 Our Kino • Kõik õigused kaitstud</p>
+    <p>© 2025 Our Kino • All rights reserved</p>
   </footer>
 
   <script src="script.js"></script>
 
+  <!-- Auth modal (login/register) -->
+  <div id="authModal" class="auth-modal" aria-hidden="true">
+  <div class="auth-overlay" data-close></div>
+  <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button class="auth-close" aria-label="Close" data-close>✕</button>
+    <div class="auth-body">
+      <h2 id="authTitle">Log in</h2>
+
+      <form id="loginForm" class="auth-form">
+        <label>Email or username
+          <input type="text" name="login" required>
+        </label>
+        <label>Password
+          <input type="password" name="password" required>
+        </label>
+        <button type="submit" class="auth-submit">Log in</button>
+        <p class="auth-switch">No account? <a href="#" id="showRegister">Create an account</a></p>
+      </form>
+
+      <form id="registerForm" class="auth-form hidden">
+        <label>Name
+          <input type="text" name="name" required>
+        </label>
+        <label>Email
+          <input type="email" name="email" required>
+        </label>
+        <label>Password
+          <input type="password" name="password" required>
+        </label>
+        <button type="submit" class="auth-submit">Create account</button>
+        <p class="auth-switch">Already have an account? <a href="#" id="showLogin">Log in</a></p>
+      </form>
+    </div>
+  </div>
+</div>
 </body>
 </html>

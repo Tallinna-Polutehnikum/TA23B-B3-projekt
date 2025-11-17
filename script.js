@@ -1,11 +1,11 @@
 // Shared script: films data and page initializers
 const films = [
-  {id:1,title:'Elnar Monkey',poster:'assets/poster-1.svg',gallery:['assets/poster-1.svg','assets/poster-2.svg'],director:'E. Director',cast:['Elnar A.','Katrin B.','M. Tamm'],genre:'comedy',genreLabel:'Komöödia',country:'USA',runtime:'1h 45m',rating:'7.2',description:'Lühikirjeldus Elnar Monkeyst. Naljakas ja kerge süžee.',synopsis:'Elnar Monkey on soe ja naljakas lugu sõprusest ja ootamatust rikkusest. Sobib kogu perele.',showtimes:['12:30','15:00','18:45'],upcoming:false},
-  {id:2,title:'Artur Monkey',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg','assets/poster-3.svg'],director:'A. Director',cast:['Artur K.','L. Levin'],genre:'documentary,music',genreLabel:'Dokumentaal • Muusika',country:'UK',runtime:'1h 30m',rating:'8.1',description:'Kontsertdokumentaal ja kunstiline portree.',synopsis:'Sügav ja visuaalne dokumentaal bändi teekonnast ja loomeprotsessist.',showtimes:['13:15','17:00'],upcoming:false},
-  {id:3,title:'Sofja',poster:'assets/poster-3.svg',gallery:['assets/poster-3.svg','assets/poster-4.svg'],director:'S. Director',cast:['Sofja P.','D. Grey'],genre:'horror',genreLabel:'Õudus',country:'USA',runtime:'1h 50m',rating:'6.8',description:'Õudusfilm, mis hoiab sind pinges.',synopsis:'Õuduslik draama, mis uurib hirmu ja mälestusi.',showtimes:['20:00','22:30'],upcoming:false},
-  {id:4,title:'Venom 3: The Last Dance',poster:'assets/poster-4.svg',gallery:['assets/poster-4.svg','assets/poster-1.svg'],director:'V. Director',cast:['Ven','Tom R.'],genre:'action,scifi',genreLabel:'Märul • Ulme',country:'USA',runtime:'2h 10m',rating:'7.5',description:'Järjekordne epiline võitlus Venomiga.',synopsis:'Suure eelarvega ulmefilm täis kihutust ja pööraseid hetki.',showtimes:['14:00','19:00'],upcoming:true},
+  {id:1,title:'Elnar Monkey',poster:'assets/poster-1.svg',gallery:['assets/poster-1.svg','assets/poster-2.svg'],director:'E. Director',cast:['Elnar A.','Katrin B.','M. Tamm'],genre:'comedy',genreLabel:'Comedy',country:'USA',runtime:'1h 45m',rating:'7.2',description:'A short description of Elnar Monkey. A funny and light-hearted story.',synopsis:'Elnar Monkey is a warm and funny tale about friendship and unexpected fortune. Suitable for the whole family.',showtimes:['12:30','15:00','18:45'],upcoming:false},
+  {id:2,title:'Artur Monkey',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg','assets/poster-3.svg'],director:'A. Director',cast:['Artur K.','L. Levin'],genre:'documentary,music',genreLabel:'Documentary • Music',country:'UK',runtime:'1h 30m',rating:'8.1',description:'A concert documentary and artistic portrait.',synopsis:'A deep and visual documentary about the band’s journey and creative process.',showtimes:['13:15','17:00'],upcoming:false},
+  {id:3,title:'Sofja',poster:'assets/poster-3.svg',gallery:['assets/poster-3.svg','assets/poster-4.svg'],director:'S. Director',cast:['Sofja P.','D. Grey'],genre:'horror',genreLabel:'Horror',country:'USA',runtime:'1h 50m',rating:'6.8',description:'A tense horror film that keeps you on edge.',synopsis:'A chilling drama that explores fear and memories.',showtimes:['20:00','22:30'],upcoming:false},
+  {id:4,title:'Venom 3: The Last Dance',poster:'assets/poster-4.svg',gallery:['assets/poster-4.svg','assets/poster-1.svg'],director:'V. Director',cast:['Ven','Tom R.'],genre:'action,scifi',genreLabel:'Action • Sci‑Fi',country:'USA',runtime:'2h 10m',rating:'7.5',description:'Another epic showdown with Venom.',synopsis:'A big-budget sci‑fi action film full of thrills and spectacular moments.',showtimes:['14:00','19:00'],upcoming:true},
   // upcoming example
-  {id:5,title:'Aurora: Coming Soon',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg'],director:'A. Nova',cast:['L. Star'],genre:'scifi',genreLabel:'Ulme',country:'EE',runtime:'1h 50m',rating:'-',description:'Tulekul suur ulmefilm.',synopsis:'Lühikirjeldus tulevasest filmist. Püsige lainel.',showtimes:[],upcoming:true}
+  {id:5,title:'Aurora: Coming Soon',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg'],director:'A. Nova',cast:['L. Star'],genre:'scifi',genreLabel:'Sci‑Fi',country:'EE',runtime:'1h 50m',rating:'-',description:'Upcoming major sci‑fi film.',synopsis:'A brief description of the upcoming film. Stay tuned.',showtimes:[],upcoming:true}
 ];
 
 function renderFilmCard(f){
@@ -75,10 +75,10 @@ function initMovie(){
   const id = parseInt(getQueryParam('id'),10);
   const app = document.getElementById('app');
   if (!app) return;
-  if (!id) return app.innerHTML = '<div class="notfound"><h2>Filmi ei leitud</h2><p>Proovi tagasi minna ja valida teine film.</p></div>';
+  if (!id) return app.innerHTML = '<div class="notfound"><h2>Movie not found</h2><p>Please go back and select another movie.</p></div>';
 
   const film = films.find(f=>f.id===id);
-  if (!film) return app.innerHTML = '<div class="notfound"><h2>Filmi ei leitud</h2><p>Proovi tagasi minna ja valida teine film.</p></div>';
+  if (!film) return app.innerHTML = '<div class="notfound"><h2>Movie not found</h2><p>Please go back and select another movie.</p></div>';
 
   app.innerHTML = `
     <div class="detail-wrap">
@@ -190,9 +190,51 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('.slideshow-container')) {
       initSlideshow();
     }
+    // initialize auth modal handlers
+    initAuthModal();
   }
   // Movie detail page initialization
   if (document.getElementById('app') && location.pathname.endsWith('movie.html')) {
     initMovie();
   }
 });
+
+// Auth modal logic
+function initAuthModal(){
+  const modal = document.getElementById('authModal');
+  if(!modal) return;
+  const overlay = modal.querySelector('.auth-overlay');
+  const closeBtns = modal.querySelectorAll('[data-close]');
+  const authBtn = document.querySelector('.auth-btn');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const showRegister = document.getElementById('showRegister');
+  const showLogin = document.getElementById('showLogin');
+
+  function openModal(){ modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function closeModal(){ modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+  if(authBtn) authBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+  if(overlay) overlay.addEventListener('click', closeModal);
+  closeBtns.forEach(b=>b.addEventListener('click', closeModal));
+
+  // toggle forms
+  if(showRegister) showRegister.addEventListener('click', (e)=>{ e.preventDefault(); loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); modal.querySelector('#authTitle').textContent='Register'; });
+  if(showLogin) showLogin.addEventListener('click', (e)=>{ e.preventDefault(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); modal.querySelector('#authTitle').textContent='Log in'; });
+
+  // handle submit (demo only)
+  loginForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const data = new FormData(loginForm);
+    // simple demo feedback
+    alert('Logged in as: ' + data.get('login'));
+    closeModal();
+  });
+
+  registerForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const data = new FormData(registerForm);
+    alert('Account created for: ' + data.get('email'));
+    closeModal();
+  });
+}
