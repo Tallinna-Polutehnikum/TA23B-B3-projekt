@@ -65,9 +65,19 @@ header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0}
   display: block;
 }
 
-/* keep links interactive only on the active slide */
-.slide:not(.active) a { pointer-events: none; }
-.slide.active a { pointer-events: auto; }
+/* stacking so only the active slide sits on top and receives clicks */
+.slide { z-index: 1; }
+.slide.active { z-index: 5; }
+
+/* ensure anchors inside slides fill the slide and are clickable when the slide is on top */
+.slide a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
 
 /* keep the text and dots inside the visible area on all sizes */
 .slide-text {
