@@ -8,6 +8,47 @@ const films = [
   {id:5,title:'Aurora: Coming Soon',poster:'assets/poster-2.svg',gallery:['assets/poster-2.svg'],director:'A. Nova',cast:['L. Star'],genre:'scifi',genreLabel:'Ulme',country:'EE',runtime:'1h 50m',rating:'-',description:'Tulekul suur ulmefilm.',synopsis:'Lühikirjeldus tulevasest filmist. Püsige lainel.',showtimes:[],upcoming:true}
 ];
 
+// --- TMDB enrichment (uses backend proxy at /tmdb/search)
+async function searchTMDB(title){
+  try{
+    const res = await fetch(`/tmdb/search?q=${encodeURIComponent(title)}`);
+    if(!res.ok) return null;
+    const data = await res.json();
+    if(data && Array.isArray(data.results) && data.results.length>0) return data.results[0];
+    return null;
+  }catch(e){
+    console.warn('TMDB search failed', e && e.message);
+    return null;
+  }
+}
+
+// Try to replace placeholder posters with TMDB posters where available
+async function enrichPosters(){
+  for(const f of films){
+    // only attempt if poster looks like a local placeholder (assets/)
+    if(!f.poster || !f.poster.startsWith('assets/')) continue;
+    const hit = await searchTMDB(f.title);
+    if(hit && hit.poster){
+      f.poster = hit.poster; // update data model
+      // update any rendered img if present
+      const link = document.querySelector(`.film-link[href="movie.html?id=${f.id}"]`);
+      if(link){
+        const img = link.querySelector('img');
+        if(img){
+          img.src = f.poster;
+        }
+      }
+      // also update movie detail poster if currently viewing that page
+      const mainPoster = document.getElementById('mainPoster');
+      if(mainPoster && location.pathname.endsWith('movie.html')){
+        // verify we are on same film
+        const id = parseInt(getQueryParam('id'),10);
+        if(id===f.id) mainPoster.src = f.poster;
+      }
+    }
+  }
+}
+
 function renderFilmCard(f){
   // create anchor wrapper
   const a = document.createElement('a');
@@ -64,6 +105,8 @@ function initIndex(){
 
   genreSelect.addEventListener('change', applyFilter);
   applyFilter();
+  // try to enrich posters from TMDB in background
+  enrichPosters();
 }
 
 function getQueryParam(name){

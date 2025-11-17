@@ -4,7 +4,8 @@
   "description": "",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-backend": "node Backend/server.js"
   },
   "repository": {
     "type": "git",
@@ -18,4 +19,10 @@
     "url": "https://github.com/Tallinna-Polutehnikum/TA23B-B3-projekt/issues"
   },
   "homepage": "https://github.com/Tallinna-Polutehnikum/TA23B-B3-projekt#readme"
+  ,
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.4.0",
+    "dotenv": "^16.0.3"
+  }
 }
