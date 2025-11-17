@@ -119,6 +119,12 @@ header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0;position
   box-shadow:0 6px 18px rgba(0,0,0,0.12);
 }
 
+/* user icon/button in header */
+#userBtn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;padding:0}
+#userInitials{font-weight:700}
+#userArea{position:relative}
+#userDropdown a{background:#fff}
+
 .auth-btn:hover{opacity:0.95;transform:translateY(-1px)}
 
 @media(max-width:680px){

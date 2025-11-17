@@ -240,7 +240,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('app') && location.pathname.endsWith('movie.html')) {
     initMovie();
   }
+  // update header UI on all pages if header exists
+  updateHeaderFromToken();
 });
+
+// Update header UI based on stored token (works across pages)
+async function updateHeaderFromToken(){
+  const tok = localStorage.getItem('token');
+  const openAuthBtn = document.getElementById('openAuth');
+  const userBtn = document.getElementById('userBtn');
+  const elInitials = document.getElementById('userInitials');
+  if(!openAuthBtn && !userBtn) return; // no header on this page
+  if(!tok){ if(openAuthBtn) openAuthBtn.style.display=''; if(userBtn) userBtn.style.display='none'; return; }
+  try{
+    const res = await fetch('/api/users/me', { headers: { 'Authorization': 'Bearer '+ tok } });
+    if(!res.ok){ localStorage.removeItem('token'); if(openAuthBtn) openAuthBtn.style.display=''; if(userBtn) userBtn.style.display='none'; return; }
+    const me = await res.json();
+    if(openAuthBtn) openAuthBtn.style.display='none';
+    if(userBtn){ userBtn.style.display=''; if(elInitials){ const initials = (me.name && me.name.split(' ').map(s=>s[0]).slice(0,2).join('')) || (me.email && me.email[0].toUpperCase()) || 'U'; elInitials.textContent = initials; } }
+  }catch(e){ console.warn('header auth check failed', e && e.message); }
+}
 
 // Auth modal logic
 function initAuthModal(){
@@ -248,7 +267,10 @@ function initAuthModal(){
   if(!modal) return;
   const overlay = modal.querySelector('.auth-overlay');
   const closeBtns = modal.querySelectorAll('[data-close]');
-  const authBtn = document.querySelector('.auth-btn');
+  const openAuthBtn = document.getElementById('openAuth');
+  const userBtn = document.getElementById('userBtn');
+  const userDropdown = document.getElementById('userDropdown');
+  const headerLogout = document.getElementById('headerLogout');
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
   const showRegister = document.getElementById('showRegister');
@@ -257,7 +279,7 @@ function initAuthModal(){
   function openModal(){ modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
   function closeModal(){ modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
 
-  if(authBtn) authBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+  if(openAuthBtn) openAuthBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
   if(overlay) overlay.addEventListener('click', closeModal);
   closeBtns.forEach(b=>b.addEventListener('click', closeModal));
 
@@ -265,19 +287,80 @@ function initAuthModal(){
   if(showRegister) showRegister.addEventListener('click', (e)=>{ e.preventDefault(); loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); modal.querySelector('#authTitle').textContent='Register'; });
   if(showLogin) showLogin.addEventListener('click', (e)=>{ e.preventDefault(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); modal.querySelector('#authTitle').textContent='Log in'; });
 
-  // handle submit (demo only)
-  loginForm.addEventListener('submit', (e)=>{
+  // helper: set UI when logged in
+  function setUserUI(user){
+    if(!user){
+      // show login button
+      if(openAuthBtn) openAuthBtn.style.display = '';
+      if(userBtn) userBtn.style.display = 'none';
+      if(userDropdown) userDropdown.style.display = 'none';
+      return;
+    }
+    // show user button with initials
+    if(openAuthBtn) openAuthBtn.style.display = 'none';
+    if(userBtn) {
+      userBtn.style.display = '';
+      const initials = (user.name && user.name.split(' ').map(s=>s[0]).slice(0,2).join('')) || (user.email && user.email[0].toUpperCase()) || 'U';
+      const elInitials = document.getElementById('userInitials');
+      if(elInitials) elInitials.textContent = initials;
+    }
+  }
+
+  function logout(){
+    localStorage.removeItem('token');
+    setUserUI(null);
+    // hide dropdown
+    if(userDropdown) userDropdown.style.display = 'none';
+  }
+
+  // toggle dropdown
+  if(userBtn) userBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    if(!userDropdown) return;
+    userDropdown.style.display = (userDropdown.style.display === 'block') ? 'none' : 'block';
+  });
+  if(headerLogout) headerLogout.addEventListener('click', (e)=>{ e.preventDefault(); logout(); });
+
+  // handle submit with real API
+  loginForm.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const data = new FormData(loginForm);
-    // simple demo feedback
-    alert('Logged in as: ' + data.get('login'));
-    closeModal();
+    const body = { email: data.get('login'), password: data.get('password') };
+    try{
+      const r = await fetch('/api/users/login', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
+      const j = await r.json();
+      if(!r.ok) return alert(j && j.error ? j.error : 'Login failed');
+      localStorage.setItem('token', j.token);
+      closeModal();
+      // fetch profile and update UI
+      const meRes = await fetch('/api/users/me', { headers: { 'Authorization': 'Bearer '+ j.token } });
+      if(meRes.ok){ const me = await meRes.json(); setUserUI(me); }
+    }catch(err){ console.error(err); alert('Login error'); }
   });
 
-  registerForm.addEventListener('submit', (e)=>{
+  registerForm.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const data = new FormData(registerForm);
-    alert('Account created for: ' + data.get('email'));
-    closeModal();
+    const body = { name: data.get('name'), email: data.get('email'), password: data.get('password') };
+    try{
+      const r = await fetch('/api/users/register', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body) });
+      const j = await r.json();
+      if(!r.ok) return alert(j && j.error ? j.error : 'Register failed');
+      localStorage.setItem('token', j.token);
+      closeModal();
+      const meRes = await fetch('/api/users/me', { headers: { 'Authorization': 'Bearer '+ j.token } });
+      if(meRes.ok){ const me = await meRes.json(); setUserUI(me); }
+    }catch(err){ console.error(err); alert('Registration error'); }
   });
+
+  // on init: if token exists, try to fetch profile
+  (async function(){
+    const tok = localStorage.getItem('token');
+    if(!tok) return setUserUI(null);
+    try{
+      const meRes = await fetch('/api/users/me', { headers: { 'Authorization': 'Bearer '+ tok } });
+      if(meRes.ok){ const me = await meRes.json(); setUserUI(me); }
+      else { localStorage.removeItem('token'); setUserUI(null); }
+    }catch(e){ console.warn('profile fetch failed', e && e.message); setUserUI(null); }
+  })();
 }

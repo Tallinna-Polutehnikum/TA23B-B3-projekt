@@ -11,7 +11,17 @@
   <!-- HEADER / BANNER -->
   <header>
     <div class="top-actions">
-      <a class="auth-btn" href="#">Log in / Register</a>
+      <div id="userArea">
+        <a id="openAuth" class="auth-btn" href="#">Log in / Register</a>
+        <button id="userBtn" class="auth-btn" style="display:none;position:relative">
+          <span id="userInitials">U</span>
+        </button>
+        <div id="userDropdown" style="display:none;position:absolute;right:0;margin-top:8px;background:#fff;color:#111;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);overflow:hidden">
+          <a href="/Frontend/users/index.html" style="display:block;padding:10px 14px;text-decoration:none;color:inherit">Profile</a>
+          <a href="/Frontend/users/index.html" style="display:block;padding:10px 14px;text-decoration:none;color:inherit">My Tickets</a>
+          <a href="#" id="headerLogout" style="display:block;padding:10px 14px;text-decoration:none;color:inherit">Logout</a>
+        </div>
+      </div>
     </div>
     <div class="banner-image">
       <img src="banner-image.jpg" alt="Poster">

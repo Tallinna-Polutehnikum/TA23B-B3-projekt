@@ -26,6 +26,14 @@ try {
   console.warn('Could not mount /tmdb route:', e && e.message);
 }
 
+// Users API
+try {
+  const users = require('./users');
+  app.use('/api/users', users);
+} catch (e) {
+  console.warn('Could not mount /api/users:', e && e.message);
+}
+
 // Serve static site root to make testing simple
 const siteRoot = path.join(__dirname, '..');
 app.use(express.static(siteRoot));

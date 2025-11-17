@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Профиль</title>
+  <link rel="stylesheet" href="/Frontend/users/style.css">
+</head>
+<body class="light">
+  <div class="container profile-grid">
+    <aside class="profile-side card">
+      <div class="profile-head">
+        <div class="avatar" id="profileAvatar">E</div>
+        <div class="meta">
+          <h2 id="profileName">User Name</h2>
+          <div id="profileMember">Член Аполло Клуба</div>
+        </div>
+      </div>
+      <div class="profile-quick">
+        <button id="btnProfile" class="btn">Профиль</button>
+        <button id="btnLogout" class="btn outline">Выйти</button>
+      </div>
+      <nav class="profile-nav">
+        <a href="#" class="nav-item" data-section="offers">Клубные предложения</a>
+        <a href="#" class="nav-item" data-section="cards">Мои подарочные карты</a>
+        <a href="#" class="nav-item" data-section="profile">Мой профиль</a>
+        <a href="#" class="nav-item" data-section="tickets">Мои билеты</a>
+        <a href="#" class="nav-item" data-section="transactions">Мои транзакции</a>
+        <a href="#" class="nav-item" data-section="addresses">Мои адреса</a>
+      </nav>
+    </aside>
+
+    <main class="profile-main">
+      <section class="profile-overview card">
+        <h3>Моя Клуб Аполло</h3>
+        <p id="clubMsg">Здесь вы можете увидеть прогресс ваших бонусов</p>
+      </section>
+
+      <section id="tickets" class="card tickets-section" style="display:none">
+        <h3>Мои билеты</h3>
+        <div id="ticketsList">Загрузка...</div>
+      </section>
+
+      <section id="sectionOffers" class="card" style="display:none">
+        <h3>Клубные предложения</h3>
+        <p>Специальные предложения для членов клуба скоро появятся здесь.</p>
+      </section>
+
+      <section id="sectionCards" class="card" style="display:none">
+        <h3>Мои подарочные карты</h3>
+        <p>У вас пока нет подарочных карт.</p>
+      </section>
+
+      <section id="sectionProfile" class="card" style="display:none">
+        <h3>Мой профиль</h3>
+        <div class="form-group">
+          <label>Имя: <input id="inputName" type="text"></label>
+        </div>
+        <div class="form-group">
+          <label>Email: <input id="inputEmail" type="email" disabled></label>
+        </div>
+        <div class="form-group">
+          <label>Членство: <input id="inputMembership" type="text"></label>
+        </div>
+        <div class="form-group">
+          <label>Тема:
+            <select id="themeSelect">
+              <option value="light">Светлая</option>
+              <option value="dark">Тёмная</option>
+            </select>
+          </label>
+        </div>
+        <button id="btnSaveProfile" class="btn">Сохранить</button>
+      </section>
+
+      <section id="sectionTransactions" class="card" style="display:none">
+        <h3>Мои транзакции</h3>
+        <p>История покупок и транзакций будет отображаться здесь.</p>
+      </section>
+
+      <section id="sectionAddresses" class="card" style="display:none">
+        <h3>Мои адреса</h3>
+        <p>Сохранённые адреса для доставки появятся здесь.</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+  // Profile page client
+  let token = localStorage.getItem('token');
+  const el = id => document.getElementById(id);
+
+  function setTheme(t){
+    document.body.classList.remove('light','dark');
+    document.body.classList.add(t||'light');
+    localStorage.setItem('theme', t);
+  }
+
+  async function api(path, opts={}){
+    opts.headers = opts.headers || {};
+    if(token) opts.headers['Authorization'] = 'Bearer '+token;
+    const res = await fetch(path, opts);
+    if(res.status===401){
+      logoutLocal();
+      throw new Error('unauthorized');
+    }
+    return res.json();
+  }
+
+  function logoutLocal(){
+    token = null; localStorage.removeItem('token');
+    document.querySelectorAll('.profile-side, .profile-main').forEach(n=>n.style.display='none');
+  }
+
+  async function refreshProfile(){
+    try{
+      const me = await api('/api/users/me');
+      el('profileName').textContent = me.name || me.email;
+      el('profileMember').textContent = me.membership ? me.membership : 'Член Аполло Клуба';
+      const avatar = el('profileAvatar');
+      if(me.avatarUrl){ avatar.style.backgroundImage = `url(${me.avatarUrl})`; avatar.textContent = ''; }
+      setTheme(me.settings && me.settings.theme ? me.settings.theme : (localStorage.getItem('theme')||'light'));
+      document.querySelectorAll('.profile-side, .profile-main').forEach(n=>n.style.display='block');
+      // populate profile edit form
+      if(el('inputName')) el('inputName').value = me.name || '';
+      if(el('inputEmail')) el('inputEmail').value = me.email || '';
+      if(el('inputMembership')) el('inputMembership').value = me.membership || '';
+      if(el('themeSelect')) el('themeSelect').value = me.settings && me.settings.theme || 'light';
+    }catch(e){
+      logoutLocal();
+    }
+  }
+
+  async function loadTickets(){
+    try{
+      const data = await api('/api/users/me/tickets');
+      if(!Array.isArray(data) || data.length===0){ el('ticketsList').innerText = 'Билеты отсутствуют'; return; }
+      el('ticketsList').innerHTML = data.map(t=>`
+        <div class="ticket-card">
+          <div class="qr">QR</div>
+          <div class="ticket-meta">
+            <div><strong>${t.movieTitle}</strong></div>
+            <div>${new Date(t.session).toLocaleString()}</div>
+            <div>Hall • Seat ${t.seat}</div>
+          </div>
+          <div class="ticket-actions">
+            <div class="price">${t.price}€</div>
+            <button class="btn">View</button>
+          </div>
+        </div>
+      `).join('');
+    }catch(e){ el('ticketsList').innerText = 'Ошибка загрузки'; }
+  }
+
+  // logout button
+  document.addEventListener('click', (e)=>{
+    if(e.target && e.target.id === 'btnLogout'){
+      e.preventDefault();
+      token = null; localStorage.removeItem('token'); location.reload();
+    }
+    // nav items - switch sections
+    if(e.target && e.target.classList.contains('nav-item')){
+      e.preventDefault();
+      const section = e.target.dataset.section;
+      // hide all sections
+      document.querySelectorAll('#tickets, #sectionOffers, #sectionCards, #sectionProfile, #sectionTransactions, #sectionAddresses').forEach(s=>s.style.display='none');
+      // show selected section
+      if(section === 'offers') el('sectionOffers').style.display='block';
+      else if(section === 'cards') el('sectionCards').style.display='block';
+      else if(section === 'profile') el('sectionProfile').style.display='block';
+      else if(section === 'tickets'){ el('tickets').style.display='block'; loadTickets(); }
+      else if(section === 'transactions') el('sectionTransactions').style.display='block';
+      else if(section === 'addresses') el('sectionAddresses').style.display='block';
+      // highlight active
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      e.target.classList.add('active');
+    }
+    // profile button - show profile section
+    if(e.target && e.target.id === 'btnProfile'){
+      e.preventDefault();
+      document.querySelectorAll('#tickets, #sectionOffers, #sectionCards, #sectionProfile, #sectionTransactions, #sectionAddresses').forEach(s=>s.style.display='none');
+      el('sectionProfile').style.display='block';
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    }
+    // save profile button
+    if(e.target && e.target.id === 'btnSaveProfile'){
+      e.preventDefault();
+      saveProfile();
+    }
+  });
+
+  async function saveProfile(){
+    const name = el('inputName').value;
+    const membership = el('inputMembership').value;
+    const theme = el('themeSelect').value;
+    try{
+      const res = await fetch('/api/users/me/settings', {
+        method:'POST',
+        headers:{'content-type':'application/json','Authorization':'Bearer '+token},
+        body: JSON.stringify({settings:{theme, membership}})
+      });
+      const data = await res.json();
+      if(!res.ok) return alert(data && data.error ? data.error : 'Ошибка сохранения');
+      // also update name via a separate endpoint if needed (or extend settings) - for now just alert
+      alert('Настройки сохранены');
+      setTheme(theme);
+      refreshProfile();
+    }catch(e){ alert('Ошибка сохранения'); }
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const t = localStorage.getItem('theme') || 'light';
+    setTheme(t);
+    token = localStorage.getItem('token');
+    if(token) refreshProfile();
+    else { document.querySelectorAll('.profile-side, .profile-main').forEach(n=>n.style.display='none'); }
+  });
+  </script>
+</body>
+</html>

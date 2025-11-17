@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "movieTitle": "Elnar Monkey",
+    "session": "2025-11-20T18:45:00",
+    "seat": "C5",
+    "price": 7.5
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "movieTitle": "Artur Monkey",
+    "session": "2025-11-22T17:00:00",
+    "seat": "A1",
+    "price": 7.5
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "name": "elnar",
+    "email": "elnartal2007@gmail.com",
+    "passwordHash": "$2a$10$55CKrDyzyPvRIYR8/H8EQu0BR.HTTJ96R5u9ogGQv4zl9J5AUFCq2",
+    "settings": {
+      "theme": "dark"
+    },
+    "membership": ""
+  }
+]
