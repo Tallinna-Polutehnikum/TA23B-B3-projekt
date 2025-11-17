@@ -1,16 +1,34 @@
-# React + Vite
+# Cinema Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Description
 
-Currently, two official plugins are available:
+This project is a Cinema Management Platform built as a collaboration between Elnar Käst, Sofja Portnova, and Artur Genno. The application is being developed using the following tools and technologies:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Vite** – Fast build tool and development server for modern web projects  
+- **React** – JavaScript library for building user interfaces  
+- **JavaScript, HTML, and CSS** – Core front-end technologies  
+- **SQLite** – Lightweight relational database, managed with  
+- **DataGrip** – Database IDE for working with SQLite  
+- **Figma** – UI/UX design and prototyping  
+- **Jira** – Agile project management and tracking tool
 
-## React Compiler
+## Project Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The project consists of three main parts:
+1. **Main Site:** Public-facing cinema site (film browsing, banners, authentication)
+2. **Profile Site:** User profile and ticket management
+3. **Admin/Worker Site:** Dashboard for managing films, users, and showtimes (CRUD)
 
-## Expanding the ESLint configuration
+Each site is a separate React application, with shared code and a centralized SQLite database.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Documentation
+
+- We have completed an interactive prototype, available on the `portotype` branch.
+- Main development is ongoing on the main branch, using **Vite** and **React** to build out the core applications and their interactions.
+
+---
+
+**Group Members:**  
+- Elnar Käst  
+- Sofja Portnova  
+- Artur Genno  
