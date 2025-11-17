@@ -8,7 +8,7 @@ body.dark { --card-bg: #fff; --text-color: #111; background:#0f1113; }
 /* profile grid */
 .profile-grid{display:grid;grid-template-columns:270px 1fr;gap:1rem;align-items:start;padding:2rem}
 .profile-side .profile-head{display:flex;gap:12px;align-items:center}
-.avatar{width:86px;height:86px;border-radius:50%;background:#e9e9e9;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700}
+.avatar{width:86px;height:86px;border-radius:50%;background:#e9e9e9;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700;background-size:cover;background-position:center}
 .profile-side .meta h2{margin:0;font-size:1.1rem}
 .profile-quick{display:flex;gap:.5rem;margin-top:1rem}
 .btn{background:#ff8a00;color:#fff;padding:.5rem .8rem;border-radius:8px;border:0;cursor:pointer}

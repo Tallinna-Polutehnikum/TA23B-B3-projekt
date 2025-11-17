@@ -21,38 +21,47 @@
         <button id="btnLogout" class="btn outline">Выйти</button>
       </div>
       <nav class="profile-nav">
-        <a href="#" class="nav-item" data-section="offers">Клубные предложения</a>
-        <a href="#" class="nav-item" data-section="cards">Мои подарочные карты</a>
-        <a href="#" class="nav-item" data-section="profile">Мой профиль</a>
-        <a href="#" class="nav-item" data-section="tickets">Мои билеты</a>
-        <a href="#" class="nav-item" data-section="transactions">Мои транзакции</a>
-        <a href="#" class="nav-item" data-section="addresses">Мои адреса</a>
+        <a href="#" id="navOffers" class="nav-item" data-section="offers">Клубные предложения</a>
+        <a href="#" id="navCards" class="nav-item" data-section="cards">Мои подарочные карты</a>
+        <a href="#" id="navProfile" class="nav-item" data-section="profile">Мой профиль</a>
+        <a href="#" id="navTickets" class="nav-item" data-section="tickets">Мои билеты</a>
+        <a href="#" id="navTransactions" class="nav-item" data-section="transactions">Мои транзакции</a>
+        <a href="#" id="navAddresses" class="nav-item" data-section="addresses">Мои адреса</a>
       </nav>
     </aside>
 
     <main class="profile-main">
       <section class="profile-overview card">
-        <h3>Моя Клуб Аполло</h3>
-        <p id="clubMsg">Здесь вы можете увидеть прогресс ваших бонусов</p>
+        <h3 id="profileOverviewH3">Добро пожаловать!</h3>
+        <p id="clubMsg">Управляйте своим профилем и просматривайте историю покупок</p>
       </section>
 
       <section id="tickets" class="card tickets-section" style="display:none">
-        <h3>Мои билеты</h3>
+        <h3 id="ticketsH3">Мои билеты</h3>
         <div id="ticketsList">Загрузка...</div>
       </section>
 
       <section id="sectionOffers" class="card" style="display:none">
-        <h3>Клубные предложения</h3>
-        <p>Специальные предложения для членов клуба скоро появятся здесь.</p>
+        <h3 id="sectionOffersH3">Клубные предложения</h3>
+        <p id="sectionOffersP">Специальные предложения для членов клуба скоро появятся здесь.</p>
       </section>
 
       <section id="sectionCards" class="card" style="display:none">
-        <h3>Мои подарочные карты</h3>
-        <p>У вас пока нет подарочных карт.</p>
+        <h3 id="sectionCardsH3">Мои подарочные карты</h3>
+        <p id="sectionCardsP">У вас пока нет подарочных карт.</p>
       </section>
 
       <section id="sectionProfile" class="card" style="display:none">
-        <h3>Мой профиль</h3>
+        <h3 id="sectionProfileH3">Мой профиль</h3>
+        <div class="form-group">
+          <label>Аватар:</label>
+          <div style="display:flex;gap:1rem;align-items:center">
+            <div class="avatar" id="previewAvatar" style="width:64px;height:64px;font-size:24px">E</div>
+            <input id="inputAvatar" type="file" accept="image/*" style="flex:1">
+          </div>
+          <small style="color:#666">Или введите URL изображения:</small>
+          <input id="inputAvatarUrl" type="text" placeholder="https://example.com/avatar.jpg">
+        </div>
         <div class="form-group">
           <label>Имя: <input id="inputName" type="text"></label>
         </div>
@@ -70,22 +79,189 @@
             </select>
           </label>
         </div>
+        <div class="form-group">
+          <label>Язык / Language / Keel:
+            <select id="langSelect">
+              <option value="ru">Русский</option>
+              <option value="en">English</option>
+              <option value="et">Eesti</option>
+            </select>
+          </label>
+        </div>
         <button id="btnSaveProfile" class="btn">Сохранить</button>
       </section>
 
       <section id="sectionTransactions" class="card" style="display:none">
-        <h3>Мои транзакции</h3>
-        <p>История покупок и транзакций будет отображаться здесь.</p>
+        <h3 id="sectionTransactionsH3">Мои транзакции</h3>
+        <p id="sectionTransactionsP">История покупок и транзакций будет отображаться здесь.</p>
       </section>
 
       <section id="sectionAddresses" class="card" style="display:none">
-        <h3>Мои адреса</h3>
-        <p>Сохранённые адреса для доставки появятся здесь.</p>
+        <h3 id="sectionAddressesH3">Мои адреса</h3>
+        <p id="sectionAddressesP">Сохранённые адреса для доставки появятся здесь.</p>
       </section>
     </main>
   </div>
 
   <script>
+  // Translation dictionaries
+  const translations = {
+    ru: {
+      welcome: 'Добро пожаловать!',
+      welcomeMsg: 'Управляйте своим профилем и просматривайте историю покупок',
+      profile: 'Профиль',
+      logout: 'Выйти',
+      clubOffers: 'Клубные предложения',
+      giftCards: 'Мои подарочные карты',
+      myProfile: 'Мой профиль',
+      myTickets: 'Мои билеты',
+      myTransactions: 'Мои транзакции',
+      myAddresses: 'Мои адреса',
+      avatar: 'Аватар:',
+      avatarUrlHint: 'Или введите URL изображения:',
+      name: 'Имя:',
+      email: 'Email:',
+      membership: 'Членство:',
+      theme: 'Тема:',
+      language: 'Язык / Language / Keel:',
+      themeLight: 'Светлая',
+      themeDark: 'Тёмная',
+      save: 'Сохранить',
+      ticketsTitle: 'Мои билеты',
+      noTickets: 'Билеты отсутствуют',
+      ticketsLoading: 'Загрузка...',
+      ticketsError: 'Ошибка загрузки',
+      offersTitle: 'Клубные предложения',
+      offersMsg: 'Специальные предложения для членов клуба скоро появятся здесь.',
+      cardsTitle: 'Мои подарочные карты',
+      cardsMsg: 'У вас пока нет подарочных карт.',
+      transactionsTitle: 'Мои транзакции',
+      transactionsMsg: 'История покупок и транзакций будет отображаться здесь.',
+      addressesTitle: 'Мои адреса',
+      addressesMsg: 'Сохранённые адреса для доставки появятся здесь.',
+      settingsSaved: 'Настройки сохранены',
+      saveError: 'Ошибка сохранения',
+      memberDefault: 'Участник кинотеатра',
+      view: 'View'
+    },
+    en: {
+      welcome: 'Welcome!',
+      welcomeMsg: 'Manage your profile and view purchase history',
+      profile: 'Profile',
+      logout: 'Logout',
+      clubOffers: 'Club Offers',
+      giftCards: 'My Gift Cards',
+      myProfile: 'My Profile',
+      myTickets: 'My Tickets',
+      myTransactions: 'My Transactions',
+      myAddresses: 'My Addresses',
+      avatar: 'Avatar:',
+      avatarUrlHint: 'Or enter image URL:',
+      name: 'Name:',
+      email: 'Email:',
+      membership: 'Membership:',
+      theme: 'Theme:',
+      language: 'Язык / Language / Keel:',
+      themeLight: 'Light',
+      themeDark: 'Dark',
+      save: 'Save',
+      ticketsTitle: 'My Tickets',
+      noTickets: 'No tickets',
+      ticketsLoading: 'Loading...',
+      ticketsError: 'Loading error',
+      offersTitle: 'Club Offers',
+      offersMsg: 'Special offers for club members coming soon.',
+      cardsTitle: 'My Gift Cards',
+      cardsMsg: 'You have no gift cards yet.',
+      transactionsTitle: 'My Transactions',
+      transactionsMsg: 'Purchase history and transactions will be displayed here.',
+      addressesTitle: 'My Addresses',
+      addressesMsg: 'Saved delivery addresses will appear here.',
+      settingsSaved: 'Settings saved',
+      saveError: 'Save error',
+      memberDefault: 'Cinema Member',
+      view: 'View'
+    },
+    et: {
+      welcome: 'Tere tulemast!',
+      welcomeMsg: 'Halda oma profiili ja vaata ostude ajalugu',
+      profile: 'Profiil',
+      logout: 'Logi välja',
+      clubOffers: 'Klubi pakkumised',
+      giftCards: 'Minu kinkekaardid',
+      myProfile: 'Minu profiil',
+      myTickets: 'Minu piletid',
+      myTransactions: 'Minu tehingud',
+      myAddresses: 'Minu aadressid',
+      avatar: 'Avatar:',
+      avatarUrlHint: 'Või sisesta pildi URL:',
+      name: 'Nimi:',
+      email: 'E-post:',
+      membership: 'Liikmelisus:',
+      theme: 'Teema:',
+      language: 'Язык / Language / Keel:',
+      themeLight: 'Hele',
+      themeDark: 'Tume',
+      save: 'Salvesta',
+      ticketsTitle: 'Minu piletid',
+      noTickets: 'Piletid puuduvad',
+      ticketsLoading: 'Laadimine...',
+      ticketsError: 'Laadimise viga',
+      offersTitle: 'Klubi pakkumised',
+      offersMsg: 'Eripakkumised klubi liikmetele tulevad varsti.',
+      cardsTitle: 'Minu kinkekaardid',
+      cardsMsg: 'Teil pole veel kinkekaarte.',
+      transactionsTitle: 'Minu tehingud',
+      transactionsMsg: 'Ostude ajalugu ja tehingud kuvatakse siin.',
+      addressesTitle: 'Minu aadressid',
+      addressesMsg: 'Salvestatud tarneaadressid ilmuvad siia.',
+      settingsSaved: 'Seaded salvestatud',
+      saveError: 'Salvestamise viga',
+      memberDefault: 'Kino liige',
+      view: 'Vaata'
+    }
+  };
+
+  let currentLang = localStorage.getItem('lang') || 'ru';
+  const t = (key) => translations[currentLang][key] || key;
+
+  function setLanguage(lang){
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    updateUI();
+  }
+
+  function updateUI(){
+    // Update all translatable elements
+    const els = {
+      'profileOverviewH3': t('welcome'),
+      'clubMsg': t('welcomeMsg'),
+      'btnProfile': t('profile'),
+      'btnLogout': t('logout'),
+      'navOffers': t('clubOffers'),
+      'navCards': t('giftCards'),
+      'navProfile': t('myProfile'),
+      'navTickets': t('myTickets'),
+      'navTransactions': t('myTransactions'),
+      'navAddresses': t('myAddresses'),
+      'sectionOffersH3': t('offersTitle'),
+      'sectionOffersP': t('offersMsg'),
+      'sectionCardsH3': t('cardsTitle'),
+      'sectionCardsP': t('cardsMsg'),
+      'sectionProfileH3': t('myProfile'),
+      'sectionTransactionsH3': t('transactionsTitle'),
+      'sectionTransactionsP': t('transactionsMsg'),
+      'sectionAddressesH3': t('addressesTitle'),
+      'sectionAddressesP': t('addressesMsg'),
+      'ticketsH3': t('ticketsTitle'),
+      'btnSaveProfile': t('save')
+    };
+    Object.keys(els).forEach(id => {
+      const elem = document.getElementById(id);
+      if(elem) elem.textContent = els[id];
+    });
+  }
+
   // Profile page client
   let token = localStorage.getItem('token');
   const el = id => document.getElementById(id);
@@ -116,7 +292,7 @@
     try{
       const me = await api('/api/users/me');
       el('profileName').textContent = me.name || me.email;
-      el('profileMember').textContent = me.membership ? me.membership : 'Член Аполло Клуба';
+      el('profileMember').textContent = me.membership ? me.membership : 'Участник кинотеатра';
       const avatar = el('profileAvatar');
       if(me.avatarUrl){ avatar.style.backgroundImage = `url(${me.avatarUrl})`; avatar.textContent = ''; }
       setTheme(me.settings && me.settings.theme ? me.settings.theme : (localStorage.getItem('theme')||'light'));
@@ -126,6 +302,11 @@
       if(el('inputEmail')) el('inputEmail').value = me.email || '';
       if(el('inputMembership')) el('inputMembership').value = me.membership || '';
       if(el('themeSelect')) el('themeSelect').value = me.settings && me.settings.theme || 'light';
+      if(el('langSelect')) el('langSelect').value = me.settings && me.settings.lang || 'ru';
+      if(me.settings && me.settings.lang) setLanguage(me.settings.lang);
+      if(el('inputAvatarUrl')) el('inputAvatarUrl').value = me.avatarUrl || '';
+      if(el('previewAvatar') && me.avatarUrl){ el('previewAvatar').style.backgroundImage = `url(${me.avatarUrl})`; el('previewAvatar').textContent = ''; }
+      updateUI();
     }catch(e){
       logoutLocal();
     }
@@ -193,24 +374,63 @@
     const name = el('inputName').value;
     const membership = el('inputMembership').value;
     const theme = el('themeSelect').value;
+    const lang = el('langSelect').value;
+    let avatarUrl = el('inputAvatarUrl').value;
+    
+    // Handle file upload if selected
+    const fileInput = el('inputAvatar');
+    if(fileInput && fileInput.files && fileInput.files[0]){
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      await new Promise((resolve, reject) => {
+        reader.onload = (e) => { avatarUrl = e.target.result; resolve(); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    
     try{
       const res = await fetch('/api/users/me/settings', {
         method:'POST',
         headers:{'content-type':'application/json','Authorization':'Bearer '+token},
-        body: JSON.stringify({settings:{theme, membership}})
+        body: JSON.stringify({settings:{theme, membership, avatarUrl, name, lang}})
       });
       const data = await res.json();
-      if(!res.ok) return alert(data && data.error ? data.error : 'Ошибка сохранения');
-      // also update name via a separate endpoint if needed (or extend settings) - for now just alert
-      alert('Настройки сохранены');
+      if(!res.ok) return alert(data && data.error ? data.error : t('saveError'));
+      alert(t('settingsSaved'));
       setTheme(theme);
+      setLanguage(lang);
       refreshProfile();
-    }catch(e){ alert('Ошибка сохранения'); }
+    }catch(e){ alert(t('saveError')); }
   }
 
+  // Avatar preview on change
+  document.addEventListener('change', (e)=>{
+    if(e.target && e.target.id === 'inputAvatar' && e.target.files && e.target.files[0]){
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const preview = el('previewAvatar');
+        if(preview){ preview.style.backgroundImage = `url(${ev.target.result})`; preview.style.backgroundSize='cover'; preview.textContent = ''; }
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  document.addEventListener('input', (e)=>{
+    if(e.target && e.target.id === 'inputAvatarUrl'){
+      const url = e.target.value;
+      const preview = el('previewAvatar');
+      if(preview && url){ preview.style.backgroundImage = `url(${url})`; preview.style.backgroundSize='cover'; preview.textContent = ''; }
+      else if(preview && !url){ preview.style.backgroundImage = ''; preview.textContent = 'E'; }
+    }
+  });
+  
   document.addEventListener('DOMContentLoaded', ()=>{
     const t = localStorage.getItem('theme') || 'light';
     setTheme(t);
+    const lang = localStorage.getItem('lang') || 'ru';
+    setLanguage(lang);
     token = localStorage.getItem('token');
     if(token) refreshProfile();
     else { document.querySelectorAll('.profile-side, .profile-main').forEach(n=>n.style.display='none'); }

@@ -106,6 +106,18 @@ header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0;position
   top: 18px;
   right: 6%;
   z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lang-switcher{
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .auth-btn{
@@ -122,7 +134,7 @@ header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0;position
 /* user icon/button in header */
 #userBtn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;padding:0}
 #userInitials{font-weight:700}
-#userArea{position:relative}
+#userArea{position:relative;display:flex;align-items:center;gap:0.5rem}
 #userDropdown a{background:#fff}
 
 .auth-btn:hover{opacity:0.95;transform:translateY(-1px)}
