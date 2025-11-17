@@ -94,6 +94,12 @@ function initIndex(){
   const filmLinks = Array.from(document.querySelectorAll('.film-link'));
   if (!genreSelect) return;
 
+  // Get section elements and their headings
+  const upcomingSection = document.getElementById('upcomingSection');
+  const nowShowingSection = document.getElementById('nowShowing');
+  const upcomingHeading = upcomingSection ? upcomingSection.querySelector('h2') : null;
+  const nowShowingHeading = nowShowingSection ? nowShowingSection.querySelector('h2') : null;
+
   function applyFilter(){
     const val = genreSelect.value;
     filmLinks.forEach(link=>{
@@ -101,6 +107,44 @@ function initIndex(){
       if (val === 'all' || genres.includes(val)) link.style.display = '';
       else link.style.display = 'none';
     });
+
+    // Update section visibility and headings based on filter
+    if (val === 'all') {
+      // Show both sections with original headings
+      if (upcomingSection) upcomingSection.style.display = '';
+      if (nowShowingSection) nowShowingSection.style.display = '';
+      if (upcomingHeading) upcomingHeading.textContent = 'Coming soon';
+      if (nowShowingHeading) nowShowingHeading.textContent = 'Top films';
+    } else {
+      // Find genre label from films array for display
+      let genreLabel = val.charAt(0).toUpperCase() + val.slice(1);
+      const matchingFilm = films.find(f => (f.genre || '').split(',').map(s => s.trim()).includes(val));
+      if (matchingFilm) {
+        // Map selected genre value to its display label
+        const genreMap = {
+          'comedy': 'Comedy',
+          'documentary': 'Documentary',
+          'music': 'Music',
+          'horror': 'Horror',
+          'action': 'Action',
+          'scifi': 'Sci‑Fi'
+        };
+        genreLabel = genreMap[val] || (val.charAt(0).toUpperCase() + val.slice(1));
+      }
+      
+      // Check if there are films in upcoming section with this genre
+      const upcomingHasFilms = films.filter(f => f.upcoming && (f.genre || '').split(',').map(s => s.trim()).includes(val)).length > 0;
+      // Check if there are films in now showing section with this genre
+      const nowShowingHasFilms = films.filter(f => !f.upcoming && (f.genre || '').split(',').map(s => s.trim()).includes(val)).length > 0;
+      
+      // Show/hide sections based on whether they have films of this genre
+      if (upcomingSection) upcomingSection.style.display = upcomingHasFilms ? '' : 'none';
+      if (nowShowingSection) nowShowingSection.style.display = nowShowingHasFilms ? '' : 'none';
+      
+      // Update headings only in visible sections
+      if (upcomingHasFilms && upcomingHeading) upcomingHeading.textContent = genreLabel;
+      if (nowShowingHasFilms && nowShowingHeading) nowShowingHeading.textContent = genreLabel;
+    }
   }
 
   genreSelect.addEventListener('change', applyFilter);

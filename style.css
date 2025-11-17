@@ -175,7 +175,7 @@ header{background:linear-gradient(90deg,#ffffff,#fff);padding:3.25rem 0;position
 
 /* main / grid */
 main{padding:2.5rem 0}
-h2{font-size:2rem;margin:0 0 1rem}
+h2{font-size:2rem;margin:0 0 1rem;color:white}
 .film-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;margin-top:1rem}
 .film{background:#f9f9f9;border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.06);transition:transform .2s}
 .film:hover{transform:translateY(-6px)}
