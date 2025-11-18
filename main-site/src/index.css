@@ -29,7 +29,7 @@ body {
   margin: 0;
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   background: #ffffff;
-  color: #222;
+  color: #1a1919;
   -webkit-font-smoothing:antialiased;
 }
 
@@ -54,7 +54,7 @@ body {
 /* Header */
 .site-header {
   background: #111;
-  color: #fff;
+  color: #ffffff;
   padding: 14px 18px;
   display:flex;
   align-items:center;
@@ -102,7 +102,7 @@ body {
 /* Hero / banner placeholder */
 .hero {
   margin-top:18px;
-  background: #e9ecef;
+  background: #ffffff;
   height:160px;
   border-radius:10px;
   display:flex;
@@ -124,7 +124,7 @@ body {
 
 /* Cards grid - use flexible basis to let cards grow on wide screens */
 .card {
-  background:#fff;
+  background:#ffffff;
   border-radius:12px;
   overflow:hidden;
   box-shadow: 0 6px 12px rgba(0,0,0,0.06);
