@@ -1,7 +1,7 @@
 .genre-card { border: none; padding: 0; background: transparent; cursor: pointer; text-align: left; }
 .genre-card:focus { outline: 2px solid #646cff; outline-offset: 3px; border-radius: 12px; }
 .genre-card .visual { height:88px; background: linear-gradient(180deg,#bdbdbd,#9e9e9e); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-.genre-card .meta { padding:8px; text-align:center; font-size:13px; background: #f6f6f6; }
+.genre-card .meta { padding:8px; text-align:center; font-size:13px; background: #f6f6f6; color: #000; }
 .genre-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
 .genre-card .meta { border-top: 1px solid rgba(0,0,0,0.04); }
 
