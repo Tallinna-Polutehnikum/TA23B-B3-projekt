@@ -1,7 +1,15 @@
 .genre-card { border: none; padding: 0; background: transparent; cursor: pointer; text-align: left; }
 .genre-card:focus { outline: 2px solid #646cff; outline-offset: 3px; border-radius: 12px; }
-.genre-card .visual { height:88px; background: linear-gradient(180deg,#bdbdbd,#9e9e9e); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-.genre-card .meta { padding:8px; text-align:center; font-size:13px; background: #f6f6f6; color: #000; }
+.genre-card .visual {
+	height: 150px;
+	background: linear-gradient(180deg,#bdbdbd,#9e9e9e);
+	border-top-left-radius: 18px;
+	border-top-right-radius: 18px;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.genre-card .meta { padding:10px; text-align:center; font-size:14px; background: #f6f6f6; color: #000; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; }
 .genre-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
 .genre-card .meta { border-top: 1px solid rgba(0,0,0,0.04); }
 
@@ -9,7 +17,7 @@
 .card.small { display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; }
 
 /* Carousel-specific styles for Genres */
-.genres-carousel .scroll-outer { position:relative; }
+.genres-carousel .scroll-outer { position:relative; padding: 0 72px; }
 
 /* wrap the scroll-row in a rounded white panel so edges look smooth */
 .genres-carousel .scroll-panel {
@@ -20,9 +28,9 @@
 	overflow: visible;
 }
 
-.genres-carousel .cards.scroll-row, .genres-carousel .scroll-row { display:flex; gap:18px; overflow-x:auto; scroll-behavior:smooth; padding:6px 48px; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; align-items:flex-start; }
-.genres-carousel .scroll-row::-webkit-scrollbar { height:10px; }
-.genres-carousel .scroll-row .card { flex: 0 0 180px; min-width: 160px; }
+.genres-carousel .cards.scroll-row, .genres-carousel .scroll-row { display:flex; gap:18px; overflow:hidden; scroll-behavior:smooth; padding:6px 0; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; align-items:flex-start; scrollbar-width: none; }
+.genres-carousel .scroll-row::-webkit-scrollbar { display: none; }
+.genres-carousel .scroll-row .card { flex: 0 0 180px; min-width: 180px; }
 
 /* soft masks at left/right to avoid abrupt cut-off of the panel */
 .full-bleed::before,
@@ -38,14 +46,12 @@
 .full-bleed::before { left: 0; background: linear-gradient(to right, #ffffff 0%, rgba(255,255,255,0) 100%); }
 .full-bleed::after { right: 0; background: linear-gradient(to left, #ffffff 0%, rgba(255,255,255,0) 100%); }
 
-.genres-carousel .nav-button { position:absolute; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:8px; border:none; background: rgba(255,255,255,0.95); box-shadow: 0 6px 14px rgba(0,0,0,0.12); cursor:pointer; z-index:50; display:flex; align-items:center; justify-content:center; font-weight:700; }
-.genres-carousel .nav-button[disabled] { opacity:0.45; cursor:default; }
-.genres-carousel .nav-button.prev { left:20px; }
-.genres-carousel .nav-button.next { right:20px; }
+.genres-carousel .nav-button { position:absolute; top:50%; transform:translateY(-50%); width:42px; height:42px; border-radius:50%; border:none; background: #fff; box-shadow: 0 8px 18px rgba(0,0,0,.18); cursor:pointer; z-index:50; display:flex; align-items:center; justify-content:center; font-size:22px; }
+.genres-carousel .nav-button[disabled] { opacity:0.4; cursor:default; }
+.genres-carousel .nav-button.prev { left:16px; }
+.genres-carousel .nav-button.next { right:16px; }
 
 @media (max-width: 720px) {
-	.genres-carousel .nav-button.prev { left:6px; }
-	.genres-carousel .nav-button.next { right:6px; }
-	.genres-carousel .scroll-row .card { flex: 0 0 150px; min-width:140px; }
-	.genres-carousel .cards.scroll-row { padding:8px 28px; }
+	.genres-carousel .scroll-outer { padding: 0 60px; }
+	.genres-carousel .scroll-row .card { flex: 0 0 150px; min-width:150px; }
 }

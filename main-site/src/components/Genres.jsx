@@ -1,10 +1,44 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './Genres.css';
 
+import horrorImg from '../assets/genres/genre-horror.jpg';
+import comedyImg from '../assets/genres/genre-comedy.jpg';
+import historycalImg from '../assets/genres/genre-historycal.jpg';
+import animationImg from '../assets/genres/genre-animation.jpg';
+import animeImg from '../assets/genres/genre-anime.jpg';
+import documentaryImg from '../assets/genres/genre-documentary.jpg';
+import dramaImg from '../assets/genres/genre-drama.jpg';
+import fantasyImg from '../assets/genres/genre-fantasy.jpg';
+import familyImg from '../assets/genres/genre-family.jpg';
+import actionImg from '../assets/genres/genre-action.jpg';
+import musicImg from '../assets/genres/genre-music.jpg';
+import sciFiImg from '../assets/genres/genre-scifi.jpg';
+import warImg from '../assets/genres/genre-war.jpg';
+import sportImg from '../assets/genres/genre-sport.jpg';
+import adventureImg from '../assets/genres/genre-adventure.jpg';
+
 const DEFAULT_GENRES = [
   'Horror','Comedy','Historycal','Animation','Anime','Documentary','Drama','Fantasy',
   'Family','Action','Music','SCI-FI','War','Sport','Adventure'
 ];
+
+const GENRE_IMAGES = {
+  Horror: horrorImg,
+  Comedy: comedyImg,
+  Historycal: historycalImg,
+  Animation: animationImg,
+  Anime: animeImg,
+  Documentary: documentaryImg,
+  Drama: dramaImg,
+  Fantasy: fantasyImg,
+  Family: familyImg,
+  Action: actionImg,
+  Music: musicImg,
+  'SCI-FI': sciFiImg,
+  War: warImg,
+  Sport: sportImg,
+  Adventure: adventureImg,
+};
 
 export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
   const rowRef = useRef(null);
@@ -61,7 +95,11 @@ export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
               onClick={() => handleSelect(g)}
               aria-label={`View ${g} movies`}
             >
-              <div className="visual" aria-hidden="true" />
+              <div
+                className="visual"
+                aria-hidden="true"
+                style={GENRE_IMAGES[g] ? { backgroundImage: `url(${GENRE_IMAGES[g]})` } : undefined}
+              />
               <div className="meta">{g}</div>
             </button>
           ))}
