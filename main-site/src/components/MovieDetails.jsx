@@ -17,7 +17,8 @@ export default function MovieDetails() {
   if (!movie) return null;
 
   return (
-    <div className="movie-page">
+    <section className="movie-page">
+      <a className="back-arrow" href="/">&#8592;</a>
       <div className="movie-content">
         <div className="hero">
           <div className="media">
@@ -25,17 +26,19 @@ export default function MovieDetails() {
           </div>
 
           <div className="info">
-            <p className="subtitle">{movie.original_title}</p>
-            <h1>{movie.title}</h1>
-            <span className="badge">{movie.rating ?? 'MS-12'}</span>
-            <ul className="meta-list">
-              <li><strong>Genre</strong>{movie.genres}</li>
-              <li><strong>Director</strong>{movie.director}</li>
-              <li><strong>Duration</strong>{movie.runtime ?? '1h 53min'}</li>
-            </ul>
-            <div className="cast">
-              <strong>Cast</strong>
-              <p>{movie.cast}</p>
+            <div className="info-meta">
+              <p className="subtitle">{movie.original_title}</p>
+              <h1>{movie.title}</h1>
+              <span className="badge">{movie.rating ?? 'MS-12'}</span>
+              <ul className="meta-list">
+                <li><strong>Genre</strong>{movie.genres}</li>
+                <li><strong>Director</strong>{movie.director}</li>
+                <li><strong>Duration</strong>{movie.runtime ?? '1h 53min'}</li>
+              </ul>
+              <div className="cast">
+                <strong>Cast</strong>
+                <p>{movie.cast}</p>
+              </div>
             </div>
 
             <section className="description-card">
@@ -49,6 +52,6 @@ export default function MovieDetails() {
       </div>
 
       <Footer />
-    </div>
+    </section>
   );
 }

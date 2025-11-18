@@ -75,7 +75,7 @@ export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
 
   return (
     <section className="section genres-carousel" aria-labelledby="genres-title">
-      <div id="genres-title" className="title">Žanrid</div>
+      <div id="genres-title" className="title">Genres</div>
 
       <div className="scroll-outer">
         <button
