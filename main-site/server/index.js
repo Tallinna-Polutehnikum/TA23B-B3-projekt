@@ -16,7 +16,20 @@ app.get('/api/movies/top', (_req, res) => {
 });
 
 app.get('/api/movies/:id', (req, res) => {
-  const row = db.prepare(`SELECT * FROM movie WHERE id = ?`).get(req.params.id);
+  const row = db.prepare(`
+    SELECT
+      m.id,
+      m.title,
+      m.overview,
+      m.poster,
+      m.duration,
+      COALESCE(g.type, '—') AS genre,
+      m.directors AS director
+    FROM movie m
+    LEFT JOIN genres g ON g.id = m.genre_id
+    WHERE m.id = ?
+  `).get(req.params.id);
+
   if (!row) return res.status(404).json({ message: 'Not found' });
   res.json(row);
 });

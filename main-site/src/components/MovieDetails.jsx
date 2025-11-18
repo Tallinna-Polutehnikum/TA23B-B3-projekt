@@ -20,6 +20,15 @@ export default function MovieDetails() {
     return `${Number(h)}h ${m}min`;
   };
 
+  const formatGenre = (value) => (value?.trim() ? value : '—');
+
+  const formatDirector = (value) => (value?.trim() ? value : '—');
+
+  const displayGenre = formatGenre(movie?.genre);
+  const displayDirector = formatDirector(movie?.director);
+  const displayDuration = formatDuration(movie?.duration);
+  const displayCast = movie?.cast ?? 'Cast info coming soon.';
+
   if (!movie) return null;
 
   return (
@@ -37,13 +46,13 @@ export default function MovieDetails() {
               <h1>{movie.title}</h1>
               <span className="badge">{movie.rating ?? 'MS-12'}</span>
               <ul className="meta-list">
-                <li><strong>Genre</strong>{movie.genre ?? '—'}</li>
-                <li><strong>Director</strong>{movie.director ?? '—'}</li>
-                <li><strong>Duration</strong>{formatDuration(movie.duration)}</li>
+                <li><strong>Genre</strong>{displayGenre}</li>
+                <li><strong>Director</strong>{displayDirector}</li>
+                <li><strong>Duration</strong>{displayDuration}</li>
               </ul>
               <div className="cast">
                 <strong>Cast</strong>
-                <p>{movie.cast ?? 'Cast info coming soon.'}</p>
+                <p>{displayCast}</p>
               </div>
             </div>
 
