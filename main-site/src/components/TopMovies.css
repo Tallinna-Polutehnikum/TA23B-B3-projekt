@@ -12,6 +12,7 @@
 
 .top-movies .scroll-outer {
     position:relative;
+    padding:0 72px;
 }
 
 .top-movies .scroll-row {
@@ -69,3 +70,28 @@
     font-size:14px;
     line-height:1.4;
 }
+
+.top-movies .nav-button {
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 8px 18px rgba(0,0,0,.18);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.top-movies .nav-button:disabled {
+    opacity:.4;
+    cursor:default;
+}
+
+.top-movies .nav-button.prev { left:16px; }
+.top-movies .nav-button.next { right:16px; }

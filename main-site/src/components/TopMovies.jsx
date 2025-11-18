@@ -22,27 +22,18 @@ export default function TopMovies() {
     <section className="section top-movies">
       <header className="section-header">
         <h2 className="title">Top Movies</h2>
-        <div className="controls">
-          <button
-            className="nav-button prev"
-            onClick={() => scroll(-1)}
-            disabled={!movies.length}
-            aria-label="Scroll left"
-          >
-            ‹
-          </button>
-          <button
-            className="nav-button next"
-            onClick={() => scroll(1)}
-            disabled={!movies.length}
-            aria-label="Scroll right"
-          >
-            ›
-          </button>
-        </div>
       </header>
 
       <div className="scroll-outer">
+        <button
+          className="nav-button prev"
+          onClick={() => scroll(-1)}
+          disabled={!movies.length}
+          aria-label="Scroll left"
+        >
+          ‹
+        </button>
+
         <div className="cards scroll-row" ref={scrollerRef}>
           {movies.map((movie) => (
             <Link key={movie.id} to={`/movie/${movie.id}`} className="card">
@@ -60,6 +51,15 @@ export default function TopMovies() {
             </Link>
           ))}
         </div>
+
+        <button
+          className="nav-button next"
+          onClick={() => scroll(1)}
+          disabled={!movies.length}
+          aria-label="Scroll right"
+        >
+          ›
+        </button>
       </div>
     </section>
   );
