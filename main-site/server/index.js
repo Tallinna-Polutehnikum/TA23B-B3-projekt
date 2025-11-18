@@ -8,7 +8,7 @@ const db = new Database(path.resolve('..', 'database', 'db.sqlite'), { fileMustE
 app.get('/api/movies/top', (_req, res) => {
   const rows = db.prepare(`
     SELECT id, title, overview, poster
-    FROM movies
+    FROM movie
     ORDER BY updated_at DESC
     LIMIT 20
   `).all();
@@ -16,7 +16,7 @@ app.get('/api/movies/top', (_req, res) => {
 });
 
 app.get('/api/movies/:id', (req, res) => {
-  const row = db.prepare(`SELECT * FROM movies WHERE id = ?`).get(req.params.id);
+  const row = db.prepare(`SELECT * FROM movie WHERE id = ?`).get(req.params.id);
   if (!row) return res.status(404).json({ message: 'Not found' });
   res.json(row);
 });
