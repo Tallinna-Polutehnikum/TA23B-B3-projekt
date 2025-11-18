@@ -2,8 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import './Genres.css';
 
 const DEFAULT_GENRES = [
-  'Action','Adventure','Animation','Comedy','Crime','Documentary','Drama','Family',
-  'Fantasy','History','Horror','Music','Mystery','Romance','Sci-Fi','Thriller','War','Western'
+  'Horror','Comedy','Historycal','Animation','Anime','Documentary','Drama','Fantasy',
+  'Family','Action','Music','SCI-FI','War','Sport','Adventure'
 ];
 
 export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
