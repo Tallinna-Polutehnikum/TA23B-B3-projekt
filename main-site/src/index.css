@@ -80,7 +80,38 @@ body {
   align-items:center;
   flex:1;
 }
-.site-nav a { color:inherit; text-decoration:none; font-size:14px; opacity:0.95; }
+.site-nav a {
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+  opacity: 0.95;
+  position: relative;
+  padding: 6px 10px 10px 10px;
+  border-radius: 6px 6px 0 0;
+  transition: color 0.18s, background 0.18s;
+}
+
+.site-nav a.showtimes-active,
+.site-nav a:hover,
+.site-nav a:focus {
+  color: #fff;
+  background: none;
+  opacity: 1;
+}
+
+.site-nav a.showtimes-active::after,
+.site-nav a:hover::after,
+.site-nav a:focus::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 5px;
+  border-radius: 3px 3px 0 0;
+  background: #a020f0;
+}
 .search-wrap {
   display:flex;
   align-items:center;
@@ -165,4 +196,81 @@ body {
   .site-container { padding:14px; }
   .card.large, .card.medium { flex: 0 0 100%; min-width:0; }
   .card.small { width:80px; height:120px; }
+}
+
+/* Showtimes page */
+.showtimes-section {
+  margin-top: 32px;
+}
+
+.showtimes-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  background: #111;
+  color: #fff;
+}
+
+.showtimes-location {
+  display: flex;
+  flex-direction: column;
+}
+.showtimes-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.showtimes-location select {
+  margin-top: 4px;
+  border-radius: 20px;
+  border: none;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.showtimes-days {
+  display: flex;
+  gap: 8px;
+}
+.showtimes-day {
+  border: none;
+  border-radius: 10px;
+  padding: 6px 14px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.showtimes-day-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.showtimes-day-date {
+  font-size: 11px;
+  opacity: 0.8;
+}
+.showtimes-day.active {
+  background: #a020f0;
+}
+
+.showtimes-filters {
+  display: flex;
+  gap: 8px;
+}
+.showtimes-filter {
+  border-radius: 20px;
+  border: none;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.showtimes-list {
+  margin-top: 18px;
 }
