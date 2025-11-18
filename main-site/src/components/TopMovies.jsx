@@ -1,16 +1,65 @@
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import './Genres.css';
+import './TopMovies.css';
+
 export default function TopMovies() {
-  // Replace with real data / map over props later
-  const items = [1,2,3];
+  const [movies, setMovies] = useState([]);
+  const scrollerRef = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/movies/top')
+      .then((res) => res.json())
+      .then(setMovies)
+      .catch((err) => console.error('Failed to load movies', err));
+  }, []);
+
+  const scroll = (dir) => {
+    scrollerRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' });
+  };
+
   return (
-    <section className="section">
-      <div className="title">Top Movies</div>
-      <div className="cards">
-        {items.map((i) => (
-          <article key={i} className="card large" aria-label={`Top movie ${i}`}>
-            <div className="visual" />
-            <div className="meta">Movie title</div>
-          </article>
-        ))}
+    <section className="section top-movies">
+      <header className="section-header">
+        <h2 className="title">Top Movies</h2>
+        <div className="controls">
+          <button
+            className="nav-button prev"
+            onClick={() => scroll(-1)}
+            disabled={!movies.length}
+            aria-label="Scroll left"
+          >
+            ‹
+          </button>
+          <button
+            className="nav-button next"
+            onClick={() => scroll(1)}
+            disabled={!movies.length}
+            aria-label="Scroll right"
+          >
+            ›
+          </button>
+        </div>
+      </header>
+
+      <div className="scroll-outer">
+        <div className="cards scroll-row" ref={scrollerRef}>
+          {movies.map((movie) => (
+            <Link key={movie.id} to={`/movie/${movie.id}`} className="card">
+              {movie.poster && (
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${movie.poster}`}
+                  alt={movie.title}
+                  loading="lazy"
+                />
+              )}
+              <div className="meta">
+                <h3>{movie.title}</h3>
+                <p>{movie.overview?.slice(0, 70) ?? ''}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
