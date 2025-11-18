@@ -9,15 +9,15 @@ This project is a Cinema Management Platform built as a collaboration between El
 - **JavaScript, HTML, and CSS** – Core front-end technologies  
 - **SQLite** – Lightweight relational database, managed with  
 - **DataGrip** – Database IDE for working with SQLite  
-- **Figma** – UI/UX design and prototyping  
 - **Jira** – Agile project management and tracking tool
 
-## Project Structure
+## Project set-up
 
-The project consists of three main parts:
-1. **Main Site:** Public-facing cinema site (film browsing, banners, authentication)
-2. **Profile Site:** User profile and ticket management
-3. **Admin/Worker Site:** Dashboard for managing films, users, and showtimes (CRUD)
+To run this project you need to write manually into terminal:
+1. **GitBash**:
+2. **Node.js**:
+3. **GitClone**:
+
 
 Each site is a separate React application, with shared code and a centralized SQLite database.
 
@@ -25,6 +25,7 @@ Each site is a separate React application, with shared code and a centralized SQ
 
 - We have completed an interactive prototype, available on the `portotype` branch.
 - Main development is ongoing on the main branch, using **Vite** and **React** to build out the core applications and their interactions.
+
 
 ---
 
