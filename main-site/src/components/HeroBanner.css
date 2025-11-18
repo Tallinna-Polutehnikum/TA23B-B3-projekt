@@ -1,0 +1,184 @@
+.hero-banner {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 28px 0 0 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-banner__viewport {
+  width: 92%;
+  max-width: 1280px;
+  background: #e9e9e9;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06) inset;
+  /* keep the same proportions as the provided mockup: very wide and short */
+  aspect-ratio: 16 / 3; /* ~5.33:1; adjusts height automatically with width */
+}
+
+.hero-banner__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 600ms ease-in-out;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 4vw 48px 4vw;
+}
+
+.hero-banner__slide.active {
+  opacity: 1;
+  position: relative;
+}
+
+.hero-banner__mini-info {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(120px, 18%, 260px);
+  color: #111;
+  background: rgba(255,255,255,0.97);
+  padding: 12px 18px 12px 14px;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+  box-sizing: border-box;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+}
+.hero-banner__mini-info h2 {
+  font-size: 1.25rem;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* small promo banner placed tightly inside the hero (top-right) */
+.hero-banner__mini {
+  position: absolute;
+  right: 12px; /* keep inside the viewport */
+  top: 12px;
+  /* responsive clamped width so it never overflows the hero */
+  width: clamp(120px, 14%, 220px);
+  z-index: 8;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.hero-banner__mini img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+@media (max-width: 900px) {
+  .hero-banner__mini {
+    width: 22%;
+    min-width: 110px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-banner__mini {
+    /* hide the mini banner on small phones to save space */
+    display: none;
+  }
+}
+
+.hero-banner__info h2 {
+  margin: 0 0 6px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.hero-banner__info p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.hero-banner__dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+  margin-bottom: 0;
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  padding-left: 0;
+}
+
+.hero-banner__dot {
+  width: 10px;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  min-height: 10px;
+  max-height: 10px;
+  border-radius: 50%;
+  background: #e6e6e6;
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms linear;
+  display: inline-block;
+}
+
+.hero-banner__dot.active {
+  background: #333;
+  transform: scale(1.1);
+}
+
+@media (max-width: 900px) {
+  .hero-banner__viewport {
+    width: 96%;
+  }
+  .hero-banner__slide {
+    /* keep the aspect-ratio behavior; adjust internal padding for tablet */
+    padding-bottom: 28px;
+  }
+  .hero-banner__info {
+    /* make the info box a bit wider on tablet */
+    width: 32%;
+    min-width: 160px;
+    padding: 14px 16px;
+  }
+  .hero-banner__info h2 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-banner__viewport {
+    width: 98%;
+  }
+  .hero-banner__slide {
+    padding-bottom: 12px;
+  }
+  .hero-banner__info {
+    /* on mobile, move box to bottom and make it full-width-ish */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 12px;
+    top: auto;
+    width: 90%;
+    min-width: 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+  }
+  .hero-banner__info h2 {
+    font-size: 1rem;
+  }
+}

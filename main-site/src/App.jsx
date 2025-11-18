@@ -1,6 +1,6 @@
 import "./index.css";
 import "./App.css";
-import Banner from "./components/Banner";
+import HeroBanner from "./components/HeroBanner";
 import TopMovies from "./components/TopMovies";
 import Genres from "./components/Genres";
 import Gifts from "./components/Gifts";
@@ -28,7 +28,7 @@ function App() {
       </header>
 
       <main className="site-container main-content">
-        <Banner />
+        <HeroBanner />
         <TopMovies />
         <Genres />
         <Gifts />
