@@ -1,0 +1,28 @@
+.site-footer {
+  width: 100%;
+  background: #333;
+  color: #D9D9D9;
+  text-align: center;
+  padding: 24px 0 18px 0;
+  font-size: 1rem;
+  font-family: inherit;
+  position: relative;
+  left: 0;
+  bottom: 0;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1 0 auto;
+}
+
+.site-footer {
+  flex-shrink: 0;
+}
