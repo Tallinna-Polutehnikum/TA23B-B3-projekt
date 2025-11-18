@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./index.css";
+import "./App.css";
+import Banner from "./components/Banner";
+import TopMovies from "./components/TopMovies";
+import Genres from "./components/Genres";
+import Gifts from "./components/Gifts";
+import ComingSoon from "./components/ComingSoon";
+import Footer from "./components/Footer";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app-root">
+      <header className="site-header">
+        <div className="site-container" style={{display:"flex",alignItems:"center",width:"100%",padding:0}}>
+          <div className="site-brand">Absolute Cinema <small style={{fontSize:10, color:"#fff2", marginLeft:6}}>KINO·CINEMA</small></div>
+          <nav className="site-nav">
+            <a href="#">Showtime</a>
+            <a href="#">Cinemas</a>
+            <a href="#">Movies</a>
+            <a href="#">Events</a>
+            <a href="#">Cinema gifts</a>
+          </nav>
+          <div className="search-wrap">
+            <input className="search-input" placeholder="Movie search" />
+            <div className="icon-user" title="Account" />
+          </div>
+        </div>
+      </header>
+
+      <main className="site-container main-content">
+        <Banner />
+        <TopMovies />
+        <Genres />
+        <Gifts />
+        <ComingSoon />
+      </main>
+
+      <Footer />
+    </div>
+  );
 }
 
-export default App
+export default App;

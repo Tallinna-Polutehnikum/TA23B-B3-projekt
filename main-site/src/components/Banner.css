@@ -1,0 +1,47 @@
+.hero {
+  width: 100%;
+  max-width: 1100px;     /* widened for desktop */
+  margin: 18px auto;
+  background: linear-gradient(180deg, #eef0f2 0%, #e6e7e9 100%);
+  border-radius: 10px;
+  height: 200px;         /* slightly taller on desktop */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6e6e6e;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  overflow: hidden;
+  padding: 16px;
+}
+
+/* large-screen tweak */
+@media (min-width: 1200px) {
+  .hero { max-width: 1200px; height: 220px; }
+}
+
+/* smaller hero on small screens */
+@media (max-width: 520px) {
+  .hero { height: 120px; border-radius: 8px; max-width: 100%; margin: 12px; }
+}
+
+/* placeholder text styling */
+.hero > div {
+  font-size: 14px;
+  text-align: center;
+  max-width: 900px;
+}
+
+/* simple pagination dots (optional) */
+.hero .dots {
+  position: absolute;
+  bottom: 10px;
+  display: flex;
+  gap: 6px;
+}
+.hero .dots span {
+  width: 6px;
+  height: 6px;
+  background: rgba(0,0,0,0.12);
+  border-radius: 50%;
+}
+.hero .dots span.active { background: rgba(0,0,0,0.28); }

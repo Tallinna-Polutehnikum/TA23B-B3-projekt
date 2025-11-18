@@ -22,47 +22,142 @@ a:hover {
   color: #535bf2;
 }
 
+/* Base reset & fonts */
+* { box-sizing: border-box; }
+html,body,#root { height:100%; }
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #ffffff;
+  color: #222;
+  -webkit-font-smoothing:antialiased;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Layout container - widen for desktop */
+.site-container {
+  max-width: 1200px;    /* increased so sections & cards can expand on desktop */
+  margin: 0 auto;
+  padding: 20px 18px 80px;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+/* Header */
+.site-header {
+  background: #111;
+  color: #fff;
+  padding: 14px 18px;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
 }
-button:hover {
-  border-color: #646cff;
+.site-brand {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:700;
+  letter-spacing:0.4px;
+  color: hsl(268, 80%, 66%);
+  font-size:20px;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.site-nav {
+  display:flex;
+  gap:18px;
+  margin-left: 12px;
+  color:#dedede;
+  align-items:center;
+  flex:1;
+}
+.site-nav a { color:inherit; text-decoration:none; font-size:14px; opacity:0.95; }
+.search-wrap {
+  display:flex;
+  align-items:center;
+  margin-left:auto;
+}
+.search-input {
+  background:#fff;
+  border-radius:24px;
+  padding:8px 12px;
+  border: none;
+  width:300px;
+  max-width:48vw;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.icon-user {
+  width:36px; height:36px; border-radius:50%; background:#222; margin-left:12px; border:2px solid #fff2;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Hero / banner placeholder */
+.hero {
+  margin-top:18px;
+  background: #e9ecef;
+  height:160px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8a8a8a;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* Section layout */
+.section {
+  margin-top: 28px;
+}
+.section .title {
+  font-weight:600;
+  margin-bottom:12px;
+  font-size:16px;
+}
+
+/* Cards grid - use flexible basis to let cards grow on wide screens */
+.cards {
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.card {
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+}
+.card .visual {
+  height:120px;
+  background:#9e9e9e;
+}
+.card .meta {
+  padding:12px;
+  background:#efefef;
+  min-height:48px;
+}
+
+/* Large movie cards: 3-up on desktop, 2-up on tablet, 1-up on mobile */
+.card.large {
+  flex: 0 0 calc((100% - 36px) / 3);
+  min-width: 280px;     /* increased min width for a wider look */
+}
+
+/* Medium cards (gifts / coming soon) same sizing */
+.card.medium {
+  flex: 0 0 calc((100% - 36px) / 3);
+  min-width: 280px;
+}
+
+/* Small genre cards - slightly larger on desktop */
+.card.small {
+  width: 120px;
+  height:150px;
+}
+
+/* Breakpoints: adjust column counts */
+@media (max-width: 1100px) {
+  .card.large, .card.medium { flex: 0 0 calc((100% - 18px) / 2); min-width:220px; }
+}
+@media (max-width: 520px) {
+  .site-container { padding:14px; }
+  .card.large, .card.medium { flex: 0 0 100%; min-width:0; }
+  .card.small { width:80px; height:120px; }
 }
