@@ -1,0 +1,32 @@
+.coming-soon .scroll-outer { position:relative; }
+
+/* Horizontal scroll row - override global .cards wrap behaviour */
+.cards.scroll-row, .scroll-row { display:flex; gap:18px; overflow-x:auto; scroll-behavior:smooth; padding:12px 48px; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; align-items:flex-start; }
+.scroll-row::-webkit-scrollbar { height:10px; }
+
+/* ensure cards have a consistent width for the carousel */
+.scroll-row .card { flex: 0 0 320px; min-width: 280px; }
+
+.nav-button {
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:40px; height:40px;
+  border-radius:8px;
+  border:none;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+  cursor:pointer;
+  z-index:40;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
+}
+.nav-button[disabled] { opacity:0.45; cursor:default; }
+.nav-button.prev { left:8px; }
+.nav-button.next { right:8px; }
+
+@media (max-width: 720px) {
+  .nav-button.prev { left:6px; }
+  .nav-button.next { right:6px; }
+  .scroll-row .card { flex: 0 0 260px; min-width:220px; }
+  .cards.scroll-row { padding:8px 28px; }
+}
