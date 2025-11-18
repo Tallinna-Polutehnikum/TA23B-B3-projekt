@@ -21,4 +21,13 @@ app.get('/api/movies/:id', (req, res) => {
   res.json(row);
 });
 
+app.get('/api/gifts', (_req, res) => {
+  const rows = db.prepare(`
+    SELECT id, name, type, price
+    FROM gifts
+    ORDER BY price
+  `).all();
+  res.json(rows);
+});
+
 app.listen(4000, () => console.log('API on http://localhost:4000'));
