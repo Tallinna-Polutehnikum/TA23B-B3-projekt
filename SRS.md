@@ -89,7 +89,3 @@ Below are test cases that map to the implemented functional requirements for the
 Notes on coverage and execution
 - These tests exercise functionality implemented in the repository. If your formal SRS uses different FR numbering, map these TC IDs to the official FR IDs.
 - For automation: API tests can be implemented with Jest + Supertest and a temporary test DB fixture. Frontend end-to-end tests can use Cypress or Playwright.
-
-Next steps (optional)
-- I can add these cases into `Documentation.md` as `Section 7.1` if you prefer the SRS to live there instead of a separate `SRS.md`.
-- I can create automated API tests (Jest + Supertest) and add `npm test` to `main-site`.
