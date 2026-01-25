@@ -1,44 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SessionCard from "./SessionCard";
-
-const mockSessions = [
-  {
-    poster: "https://via.placeholder.com/340x200?text=Movie+1",
-    time: "8:50 PM",
-    cinema: "Apollo Kino Ülemiste",
-    hall: "3. Apollo restaurant",
-    title: "Now You See Me: Now You Don't",
-    originalTitle: "Now You See Me: Now You Don't",
-    genres: "Thriller, Crime",
-    seats: 10,
-    language: "English",
-    subtitles: "Estonian, Russian",
-    format: "2D"
-  },
-  {
-    poster: "https://via.placeholder.com/340x200?text=Movie+2",
-    time: "9:00 PM",
-    cinema: "Apollo Kino Ülemiste",
-    hall: "1. Apollo Theatre screen",
-    title: "The Running Man",
-    originalTitle: "The Running Man",
-    genres: "Action, Science Fiction, Thriller",
-    seats: 441,
-    language: "English",
-    subtitles: "Estonian, Russian",
-    format: "2D"
-  }
-];
-
-const days = [
-  { key: "today", label: "Today", date: "18. Nov" },
-  { key: "tomorrow", label: "Wed", date: "19. Nov" },
-  { key: "thu", label: "Thu", date: "20. Nov" },
-];
 
 export default function Showtimes() {
   const [activeDay, setActiveDay] = useState("today");
   const [location, setLocation] = useState("Tallinn - All Cinemas");
+  const [sessions, setSessions] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/sessions')
+      .then((res) => res.json())
+      .then(setSessions)
+      .catch((err) => console.error('Failed to load sessions', err));
+  }, []);
+
+  const days = [
+    { key: "today", label: "Today", date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) },
+    { key: "tomorrow", label: new Date(Date.now() + 86400000).toLocaleDateString('en-GB', { weekday: 'short' }), date: new Date(Date.now() + 86400000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) },
+    { key: "dayafter", label: new Date(Date.now() + 172800000).toLocaleDateString('en-GB', { weekday: 'short' }), date: new Date(Date.now() + 172800000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) },
+  ];
 
   return (
     <section className="section showtimes-section">
@@ -76,9 +55,15 @@ export default function Showtimes() {
       </div>
 
       <div className="showtimes-list">
-        {mockSessions.map((session, idx) => (
-          <SessionCard key={idx} session={session} />
-        ))}
+        {sessions.length > 0 ? (
+          sessions.map((session) => (
+            <SessionCard key={session.id} session={session} />
+          ))
+        ) : (
+          <div style={{ padding: '60px 20px', color: '#999', textAlign: 'center' }}>
+            Загрузка сеансов...
+          </div>
+        )}
       </div>
     </section>
   );
