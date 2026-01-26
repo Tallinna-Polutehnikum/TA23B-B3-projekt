@@ -1,9 +1,11 @@
 {
   "dependencies": {
+    "better": "^0.1.0",
     "better-sqlite3": "^12.4.1",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "node-fetch": "^3.3.2",
-    "react-router-dom": "^7.9.6"
+    "react-router-dom": "^7.13.0",
+    "sqlite3": "^5.1.7"
   }
 }
