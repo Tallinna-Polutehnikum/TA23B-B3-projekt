@@ -8,6 +8,7 @@ import Genres from "./components/Genres";
 import Gifts from "./components/Gifts";
 import ComingSoon from "./components/ComingSoon";
 import Footer from "./components/Footer";
+import SearchBar from "./components/SearchBar";
 
 function App() {
   const location = useLocation();
@@ -31,7 +32,7 @@ function App() {
             <a href="#">Cinema gifts</a>
           </nav>
           <div className="search-wrap">
-            <input className="search-input" placeholder="Movie search" />
+            <SearchBar />
             <div className="icon-user" title="Account" />
           </div>
         </div>

@@ -43,4 +43,25 @@ app.get('/api/gifts', (_req, res) => {
   res.json(rows);
 });
 
+app.get('/api/sessions', (_req, res) => {
+  const rows = db.prepare(`
+    SELECT 
+      s.id,
+      m.id as movie_id,
+      m.title,
+      s.cinema_name as cinema,
+      s.hall,
+      s.time,
+      s.date,
+      s.seats_available,
+      s.language,
+      s.subtitles,
+      s.format
+    FROM sessions s
+    LEFT JOIN movie m ON s.movie_id = m.id
+    ORDER BY s.date, s.time
+  `).all();
+  res.json(rows);
+});
+
 app.listen(4000, () => console.log('API on http://localhost:4000'));
