@@ -1,3 +1,36 @@
 .app-root { min-height:100vh; display:flex; flex-direction:column; gap:8px; }
 .main-content { flex:1; padding-bottom:40px; }
 .section .cards { align-items:flex-start; }
+
+.page-with-sides {
+	display: grid;
+	grid-template-columns: minmax(140px, 1fr) minmax(0, 1200px) minmax(140px, 1fr);
+	gap: 24px;
+	align-items: start;
+	width: 100%;
+	padding: 0 12px;
+}
+
+.side-image {
+	border-radius: 18px;
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	min-height: 620px;
+	box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+	position: sticky;
+	top: 96px;
+}
+
+.side-left {
+	background-image: url("./assets/elnar/photo_2026-01-31_19-17-22.jpg");
+}
+
+.side-right {
+	background-image: url("./assets/elnar/photo_2026-01-31_19-17-17.jpg");
+}
+
+@media (max-width: 1200px) {
+	.page-with-sides { grid-template-columns: 1fr; padding: 0; }
+	.side-image { display: none; }
+}
