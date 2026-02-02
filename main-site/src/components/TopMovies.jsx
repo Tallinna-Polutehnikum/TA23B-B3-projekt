@@ -15,7 +15,11 @@ export default function TopMovies() {
   }, []);
 
   const scroll = (dir) => {
-    scrollerRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' });
+    // ширина одной карточки + gap
+    const cardWidth = scrollerRef.current?.querySelector('.card')?.offsetWidth || 440;
+    const gap = 24;
+    const scrollAmount = dir * ((cardWidth + gap) * 5);
+    scrollerRef.current?.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   };
 
   return (
@@ -34,7 +38,7 @@ export default function TopMovies() {
           ‹
         </button>
 
-        <div className="cards scroll-row" ref={scrollerRef}>
+        <div className="scroll-row" ref={scrollerRef}>
           {movies.map((movie) => (
             <Link key={movie.id} to={`/movie/${movie.id}`} className="card">
               {movie.poster && (

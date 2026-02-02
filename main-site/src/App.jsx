@@ -43,17 +43,13 @@ function App() {
           <Showtimes />
         </main>
       ) : (
-        <div className="page-with-sides">
-          <aside className="side-image side-left" aria-hidden="true" />
-          <main className="site-container main-content">
-            <HeroBanner />
-            <TopMovies />
-            <Genres />
-            <Gifts />
-            <ComingSoon />
-          </main>
-          <aside className="side-image side-right" aria-hidden="true" />
-        </div>
+        <main className="site-container main-content">
+          <HeroBanner />
+          <TopMovies />
+          <Genres />
+          <Gifts />
+          <ComingSoon />
+        </main>
       )}
 
       <Footer />

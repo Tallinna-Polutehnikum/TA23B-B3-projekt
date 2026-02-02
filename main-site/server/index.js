@@ -93,22 +93,4 @@ app.get('/api/sessions', (_req, res) => {
   res.json(rows);
 });
 
-// bind to all interfaces to avoid firewall/IPv6 issues
-const server = app.listen(4000, '0.0.0.0', () => {
-  console.log('✓ API listening on http://localhost:4000');
-  console.log('Server object:', server.listening);
-  setInterval(() => {
-    console.log('Server still alive at', new Date().toISOString());
-  }, 5000);
-});
-
-// graceful error handling
-server.on('error', (err) => {
-  console.error('✗ Server error:', err.message);
-  process.exit(1);
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('✗ Uncaught exception:', err);
-  process.exit(1);
-});
+app.listen(4000, () => console.log('API on http://localhost:4000'));
