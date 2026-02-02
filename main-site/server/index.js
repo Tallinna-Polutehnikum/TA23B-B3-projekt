@@ -1,9 +1,28 @@
 import express from 'express';
 import Database from 'better-sqlite3';
+import cors from 'cors';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-const db = new Database(path.resolve('..', 'database', 'db.sqlite'), { fileMustExist: true });
+app.use(cors());
+// simple request logger to help debug connectivity
+app.use((req, res, next) => {
+  console.log(new Date().toISOString(), req.method, req.url);
+  next();
+});
+
+let db;
+try {
+  const dbPath = path.resolve(__dirname, '..', '..', 'database', 'db.sqlite');
+  console.log('Opening database at:', dbPath);
+  db = new Database(dbPath);
+  console.log('✓ Database opened successfully');
+} catch (err) {
+  console.error('✗ Failed to open database:', err.message);
+  process.exit(1);
+}
 
 app.get('/api/movies/top', (_req, res) => {
   const rows = db.prepare(`
@@ -11,6 +30,16 @@ app.get('/api/movies/top', (_req, res) => {
     FROM movie
     ORDER BY updated_at DESC
     LIMIT 20
+  `).all();
+  res.json(rows);
+});
+
+app.get('/api/movies/coming-soon', (_req, res) => {
+  const rows = db.prepare(`
+    SELECT id, title, overview, poster, genre_id
+    FROM comingsoon_movies
+    ORDER BY id ASC
+    LIMIT 10
   `).all();
   res.json(rows);
 });
@@ -64,4 +93,22 @@ app.get('/api/sessions', (_req, res) => {
   res.json(rows);
 });
 
-app.listen(4000, () => console.log('API on http://localhost:4000'));
+// bind to all interfaces to avoid firewall/IPv6 issues
+const server = app.listen(4000, '0.0.0.0', () => {
+  console.log('✓ API listening on http://localhost:4000');
+  console.log('Server object:', server.listening);
+  setInterval(() => {
+    console.log('Server still alive at', new Date().toISOString());
+  }, 5000);
+});
+
+// graceful error handling
+server.on('error', (err) => {
+  console.error('✗ Server error:', err.message);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('✗ Uncaught exception:', err);
+  process.exit(1);
+});

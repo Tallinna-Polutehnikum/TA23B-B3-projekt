@@ -38,19 +38,23 @@ function App() {
         </div>
       </header>
 
-      <main className="site-container main-content">
-        {isShowtime ? (
+      {isShowtime ? (
+        <main className="site-container main-content">
           <Showtimes />
-        ) : (
-          <>
+        </main>
+      ) : (
+        <div className="page-with-sides">
+          <aside className="side-image side-left" aria-hidden="true" />
+          <main className="site-container main-content">
             <HeroBanner />
             <TopMovies />
             <Genres />
             <Gifts />
             <ComingSoon />
-          </>
-        )}
-      </main>
+          </main>
+          <aside className="side-image side-right" aria-hidden="true" />
+        </div>
+      )}
 
       <Footer />
     </div>
