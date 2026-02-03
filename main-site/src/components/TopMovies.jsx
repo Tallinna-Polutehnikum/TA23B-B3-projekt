@@ -18,7 +18,7 @@ export default function TopMovies() {
     // ширина одной карточки + gap
     const cardWidth = scrollerRef.current?.querySelector('.card')?.offsetWidth || 440;
     const gap = 24;
-    const scrollAmount = dir * ((cardWidth + gap) * 5);
+    const scrollAmount = dir * ((cardWidth + gap) * 4);
     scrollerRef.current?.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   };
 

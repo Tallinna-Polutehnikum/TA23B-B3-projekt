@@ -65,8 +65,8 @@ app.get('/api/movies/:id', (req, res) => {
 
 app.get('/api/gifts', (_req, res) => {
   const rows = db.prepare(`
-    SELECT id, name, type, price
-    FROM gifts
+    SELECT id, name, type, price, description
+    FROM Gifts
     ORDER BY price
   `).all();
   res.json(rows);
