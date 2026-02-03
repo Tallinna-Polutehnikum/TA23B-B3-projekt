@@ -214,34 +214,72 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 12px 18px;
-  border-radius: 10px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  gap: 20px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.22);
   background: #111;
   color: #fff;
+  flex-wrap: wrap;
 }
 
 .showtimes-location {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
 }
 .showtimes-label {
   font-size: 11px;
   text-transform: uppercase;
   opacity: 0.7;
 }
+
+.showtimes-location-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.showtimes-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+}
+
+.showtimes-icon--pin {
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  position: relative;
+}
+.showtimes-icon--pin::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  top: 4px;
+  left: 4px;
+}
+
 .showtimes-location select {
-  margin-top: 4px;
-  border-radius: 20px;
-  border: none;
+  margin-top: 0;
+  border-radius: 16px;
+  border: 1px solid #333;
   padding: 6px 10px;
   font-size: 13px;
+  background: #1b1b1b;
+  color: #fff;
 }
 
 .showtimes-days {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  flex: 1 1 auto;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .showtimes-day {
   border: none;
@@ -253,6 +291,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  min-width: 64px;
 }
 .showtimes-day-label {
   font-size: 13px;
@@ -263,19 +302,50 @@ body {
   opacity: 0.8;
 }
 .showtimes-day.active {
-  background: #a020f0;
+  background: #ff9800;
+  color: #111;
 }
 
 .showtimes-filters {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  align-items: center;
 }
 .showtimes-filter {
-  border-radius: 20px;
-  border: none;
+  border-radius: 12px;
+  border: 1px solid #333;
   padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
+  background: #1b1b1b;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 90px;
+  position: relative;
+}
+
+.showtimes-filter::after {
+  content: "▾";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.showtimes-filter-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.showtimes-filter-value {
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .showtimes-list {
