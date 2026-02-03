@@ -69,7 +69,19 @@ function App() {
             <a href="#">Cinemas</a>
             <a href="#">Movies</a>
             <a href="#">Events</a>
-            <a href="#">Cinema gifts</a>
+            <a 
+              href="#gifts" 
+              onClick={(e) => {
+                e.preventDefault();
+                if (location.pathname !== '/') {
+                  window.location.href = '/#gifts';
+                } else {
+                  document.querySelector('.gifts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+            >
+              Cinema gifts
+            </a>
           </nav>
           <div className="search-wrap">
             <SearchBar />

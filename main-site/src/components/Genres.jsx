@@ -83,7 +83,7 @@ export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
           onClick={() => scrollByWidth(-1)}
           aria-label="Previous genres"
           disabled={!canPrev}
-        >&lt;</button>
+        >‹</button>
 
         <div className="cards scroll-row" ref={rowRef} role="list">
           {genres.map((g) => (
@@ -110,7 +110,7 @@ export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
           onClick={() => scrollByWidth(1)}
           aria-label="Next genres"
           disabled={!canNext}
-        >&gt;</button>
+        >›</button>
       </div>
     </section>
   );
