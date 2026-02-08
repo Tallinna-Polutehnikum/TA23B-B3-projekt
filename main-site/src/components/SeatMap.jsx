@@ -23,12 +23,12 @@ export default function SeatMap({ sessionId, onClose }) {
   }, [sessionId]);
 
   const generateSeatsGrid = () => {
-    // 10 рядов, 15 мест в каждом
+    // 10 rows, 15 seats per row
     const grid = [];
     for (let row = 0; row < 10; row++) {
       for (let col = 0; col < 15; col++) {
         const seatNumber = row * 15 + col + 1;
-        const isOccupied = Math.random() < 0.3; // 30% занято
+        const isOccupied = Math.random() < 0.3; // 30% occupied
         grid.push({
           id: `seat-${row}-${col}`,
           row: String.fromCharCode(65 + row), // A, B, C, ...

@@ -20,7 +20,7 @@ export default function Showtimes() {
       .then((res) => res.json())
       .then((data) => {
         setSessions(data);
-        // Извлечение уникальных жанров
+        // Extract unique genres
         const genres = new Set();
         data.forEach((session) => {
           if (session.genres) {
@@ -57,12 +57,12 @@ export default function Showtimes() {
     const matchesDay = session.date === activeDay;
     if (!matchesDay) return false;
 
-    // Фильтр по городу
+    // Filter by city
     const sessionCity = session.cinema ? session.cinema.split('-')[0].trim() : '';
     const matchesCity = location === "All" || sessionCity === location;
     if (!matchesCity) return false;
 
-    // Фильтр по жанру
+    // Filter by genre
     if (selectedGenre !== "All" && session.genres) {
       const genreList = session.genres.split(',').map((g) => g.trim());
       return genreList.includes(selectedGenre);

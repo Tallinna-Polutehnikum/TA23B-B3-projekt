@@ -11,7 +11,7 @@ export default function SearchBar() {
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
 
-  // Загружаем данные фильмов и сеансов из API
+  // Load movies and sessions data from API
   useEffect(() => {
     fetch('/api/movies/top')
       .then((res) => res.json())
@@ -24,7 +24,7 @@ export default function SearchBar() {
       .catch((err) => console.error('Failed to load sessions', err));
   }, []);
 
-  // Закрываем при клике вне компонента
+  // Close when clicking outside the component
   useEffect(() => {
     function handleClickOutside(event) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -35,7 +35,7 @@ export default function SearchBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Фильтруем подсказки при изменении запроса
+  // Filter suggestions when query changes
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -46,7 +46,7 @@ export default function SearchBar() {
     const lowerQuery = query.toLowerCase();
     const results = [];
 
-    // Ищем в фильмах
+    // Search in movies
     movies.forEach(movie => {
       if (movie.title?.toLowerCase().includes(lowerQuery)) {
         results.push({
@@ -59,7 +59,7 @@ export default function SearchBar() {
       }
     });
 
-    // Ищем в сеансах
+    // Search in sessions
     sessions.forEach(session => {
       if (
         session.title?.toLowerCase().includes(lowerQuery) ||
@@ -74,7 +74,7 @@ export default function SearchBar() {
       }
     });
 
-    setSuggestions(results.slice(0, 8)); // Максимум 8 подсказок
+    setSuggestions(results.slice(0, 8)); // Maximum 8 suggestions
     setIsOpen(results.length > 0);
   }, [query, movies, sessions]);
 
@@ -82,7 +82,7 @@ export default function SearchBar() {
     setQuery(suggestion.title);
     setIsOpen(false);
     
-    // Переходим на нужную страницу
+    // Navigate to the appropriate page
     if (suggestion.type === "movie") {
       navigate(`/movie/${suggestion.id}`);
     } else if (suggestion.type === "session") {
