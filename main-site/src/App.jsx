@@ -10,10 +10,12 @@ import Gifts from "./components/Gifts";
 import ComingSoon from "./components/ComingSoon";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   const location = useLocation();
   const isShowtime = location.pathname === "/showtime";
+  const isAdmin = location.pathname === "/admin";
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
 
@@ -54,98 +56,110 @@ function App() {
     return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
+  let content = null;
+  if (isAdmin) {
+    content = <AdminDashboard />;
+  } else if (isShowtime) {
+    content = (
+      <main className="site-container main-content">
+        <Showtimes />
+      </main>
+    );
+  } else {
+    content = (
+      <main className="site-container main-content">
+        <HeroBanner />
+        <TopMovies />
+        <Genres />
+        <Gifts addToCart={addToCart} />
+        <ComingSoon />
+      </main>
+    );
+  }
+
   return (
     <div className="app-root">
-      <header className="site-header">
-        <div className="site-container" style={{display:"flex",alignItems:"center",width:"100%",padding:0}}>
-          <div className="site-brand">
-            <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
-              Absolute Cinema
-              <small style={{fontSize:10, color:"#fff2", marginLeft:6}}>KINO·CINEMA</small>
-            </Link>
-          </div>
-          <nav className="site-nav">
-            <Link to="/showtime">Showtime</Link>
-            <a href="#">Cinemas</a>
-            <a href="#">Movies</a>
-            <a href="#">Events</a>
-            <a 
-              href="#gifts" 
-              onClick={(e) => {
-                e.preventDefault();
-                if (location.pathname !== '/') {
-                  window.location.href = '/#gifts';
-                } else {
-                  document.querySelector('.gifts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-            >
-              Cinema gifts
-            </a>
-          </nav>
-          <div className="search-wrap">
-            <SearchBar />
-            <div
-              className="icon-cart"
-              onClick={() => setShowCart(true)}
-              style={{
-                position: 'relative',
-                width: 28,
-                height: 28,
-                cursor: 'pointer',
-                marginLeft: 20,
-                marginRight: 12,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              title="Cart"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="9" cy="21" r="1"/>
-                <circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-              </svg>
-              {getTotalItems() > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: -4,
-                  right: -4,
-                  background: '#a020f0',
-                  color: '#fff',
-                  borderRadius: '50%',
-                  width: 18,
-                  height: 18,
-                  fontSize: 11,
-                  fontWeight: 'bold',
+      {!isAdmin && (
+        <header className="site-header">
+          <div className="site-container" style={{ display: "flex", alignItems: "center", width: "100%", padding: 0 }}>
+            <div className="site-brand">
+              <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+                Absolute Cinema
+                <small style={{ fontSize: 10, color: "#fff2", marginLeft: 6 }}>KINO·CINEMA</small>
+              </Link>
+            </div>
+            <nav className="site-nav">
+              <Link to="/showtime">Showtime</Link>
+              <a href="#">Cinemas</a>
+              <a href="#">Movies</a>
+              <a href="#">Events</a>
+              <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
+              <a
+                href="#gifts"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (location.pathname !== '/') {
+                    window.location.href = '/#gifts';
+                  } else {
+                    document.querySelector('.gifts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                Cinema gifts
+              </a>
+            </nav>
+            <div className="search-wrap">
+              <SearchBar />
+              <div
+                className="icon-cart"
+                onClick={() => setShowCart(true)}
+                style={{
+                  position: 'relative',
+                  width: 28,
+                  height: 28,
+                  cursor: 'pointer',
+                  marginLeft: 20,
+                  marginRight: 12,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
-                }}>
-                  {getTotalItems()}
-                </span>
-              )}
+                }}
+                title="Cart"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                {getTotalItems() > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -4,
+                    background: '#a020f0',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: 18,
+                    height: 18,
+                    fontSize: 11,
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {getTotalItems()}
+                  </span>
+                )}
+              </div>
+              <div className="icon-user" title="Account" />
             </div>
-            <div className="icon-user" title="Account" />
           </div>
-        </div>
-      </header>
-
-      {isShowtime ? (
-        <main className="site-container main-content">
-          <Showtimes />
-        </main>
-      ) : (
-        <main className="site-container main-content">
-          <HeroBanner />
-          <TopMovies />
-          <Genres />
-          <Gifts addToCart={addToCart} />
-          <ComingSoon />
-        </main>
+        </header>
       )}
 
-      <Footer />
+      {content}
+
+      {!isAdmin && <Footer />}
 
       {showCart && (
         <div

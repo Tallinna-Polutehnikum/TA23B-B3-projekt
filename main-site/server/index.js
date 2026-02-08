@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(cors());
+app.use(express.json());
+
 // simple request logger to help debug connectivity
 app.use((req, res, next) => {
   console.log(new Date().toISOString(), req.method, req.url);
@@ -23,6 +25,8 @@ try {
   console.error('✗ Failed to open database:', err.message);
   process.exit(1);
 }
+
+// ============= GET ENDPOINTS =============
 
 app.get('/api/movies/top', (_req, res) => {
   const rows = db.prepare(`
@@ -82,15 +86,151 @@ app.get('/api/sessions', (_req, res) => {
       s.hall,
       s.time,
       s.date,
-      s.seats_available,
+      s.seats_available as seats,
       s.language,
       s.subtitles,
-      s.format
+      s.format,
+      m.genres
     FROM sessions s
     LEFT JOIN movie m ON s.movie_id = m.id
     ORDER BY s.date, s.time
   `).all();
   res.json(rows);
+});
+
+app.get('/api/sessions/:id/seats', (req, res) => {
+  // Fetch session info
+  const sessionInfo = db.prepare(`
+    SELECT 
+      s.id,
+      m.title,
+      s.cinema_name as cinema,
+      s.time
+    FROM sessions s
+    LEFT JOIN movie m ON s.movie_id = m.id
+    WHERE s.id = ?
+  `).get(req.params.id);
+
+  if (!sessionInfo) {
+    return res.status(404).json({ message: 'Session not found' });
+  }
+
+  // Generate seat map (can be customized based on actual DB schema)
+  const seats = [];
+  for (let row = 0; row < 10; row++) {
+    for (let col = 0; col < 15; col++) {
+      const seatNumber = row * 15 + col + 1;
+      seats.push({
+        id: `seat-${row}-${col}`,
+        row: String.fromCharCode(65 + row),
+        number: col + 1,
+        occupied: Math.random() < 0.3, // 30% occupied
+        seatNumber
+      });
+    }
+  }
+
+  res.json({
+    sessionInfo,
+    seats
+  });
+});
+
+// ============= POST ENDPOINTS =============
+
+app.post('/api/movies', (req, res) => {
+  const { title, originalTitle, overview, poster, duration, genre, directors, releaseDate, rating } = req.body;
+
+  // Validate required fields
+  if (!title || !overview || !poster || !duration) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    // Find or create genre
+    let genreId = 1;
+    if (genre) {
+      const existingGenre = db.prepare(`SELECT id FROM genres WHERE type = ?`).get(genre);
+      if (existingGenre) {
+        genreId = existingGenre.id;
+      } else {
+        const result = db.prepare(`INSERT INTO genres (type) VALUES (?)`).run(genre);
+        genreId = result.lastInsertRowid;
+      }
+    }
+
+    // Insert movie
+    const result = db.prepare(`
+      INSERT INTO movie (title, overview, poster, duration, genre_id, directors, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+    `).run(title, overview, poster, duration, genreId, directors || null);
+
+    res.status(201).json({
+      id: result.lastInsertRowid,
+      title,
+      overview,
+      poster,
+      duration,
+      genre,
+      directors,
+      rating
+    });
+  } catch (err) {
+    console.error('Error creating movie:', err);
+    res.status(500).json({ message: 'Failed to create movie' });
+  }
+});
+
+app.post('/api/sessions', (req, res) => {
+  const { movieId, cinema, date, time, hall, seatsAvailable, language, subtitles, format } = req.body;
+
+  // Validate required fields
+  if (!movieId || !cinema || !date || !time || !seatsAvailable) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    // Insert session
+    const result = db.prepare(`
+      INSERT INTO sessions (
+        movie_id, 
+        cinema_name, 
+        date, 
+        time, 
+        hall, 
+        seats_available, 
+        language, 
+        subtitles, 
+        format
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      movieId,
+      cinema,
+      date,
+      time,
+      hall || 1,
+      seatsAvailable,
+      language || 'Estonian',
+      subtitles || 'English',
+      format || '2D'
+    );
+
+    res.status(201).json({
+      id: result.lastInsertRowid,
+      movieId,
+      cinema,
+      date,
+      time,
+      hall,
+      seatsAvailable,
+      language,
+      subtitles,
+      format
+    });
+  } catch (err) {
+    console.error('Error creating session:', err);
+    res.status(500).json({ message: 'Failed to create session' });
+  }
 });
 
 app.listen(4000, () => console.log('API on http://localhost:4000'));

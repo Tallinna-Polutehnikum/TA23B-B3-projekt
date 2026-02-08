@@ -1,0 +1,118 @@
+.movies-list-container {
+  background: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #333;
+  overflow: hidden;
+}
+
+.movies-table-wrapper {
+  overflow-x: auto;
+}
+
+.movies-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.movies-table thead {
+  background: #2a2a2a;
+  border-bottom: 2px solid #333;
+}
+
+.movies-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+}
+
+.movies-table tbody tr {
+  border-bottom: 1px solid #333;
+  transition: background 0.2s;
+}
+
+.movies-table tbody tr:hover {
+  background: #252525;
+}
+
+.movies-table td {
+  padding: 12px 16px;
+  color: #ddd;
+}
+
+.movie-poster-thumb {
+  width: 40px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.movie-title {
+  font-weight: 600;
+  color: #00d084;
+}
+
+.movie-overview {
+  color: #999;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #2a2a2a;
+  color: #fff;
+  font-weight: 500;
+}
+
+.action-btn:hover {
+  background: #333;
+  transform: scale(1.05);
+}
+
+.action-btn.delete:hover {
+  background: #ff4444;
+  color: #000;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  color: #888;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #888;
+}
+
+@media (max-width: 768px) {
+  .movie-overview {
+    display: none;
+  }
+
+  .movies-table th:nth-child(3) {
+    display: none;
+  }
+
+  .movies-table td:nth-child(3) {
+    display: none;
+  }
+}
