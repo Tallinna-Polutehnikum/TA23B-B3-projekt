@@ -67,6 +67,105 @@ app.get('/api/movies/:id', (req, res) => {
   res.json(row);
 });
 
+// Fetch a single movie by genre type (returns latest movie for the genre)
+app.get('/api/movies/by-genre', (req, res) => {
+  const type = req.query.type;
+  if (!type) return res.status(400).json({ message: 'Missing genre type' });
+
+  const row = db.prepare(`
+    SELECT
+      m.id,
+      m.title,
+      m.overview,
+      m.poster,
+      m.duration,
+      COALESCE(g.type, '—') AS genre,
+      m.directors AS director
+    FROM movie m
+    LEFT JOIN genres g ON g.id = m.genre_id
+    WHERE g.type = ?
+    ORDER BY m.updated_at DESC
+    LIMIT 1
+  `).get(type);
+
+  if (!row) return res.status(404).json({ message: 'No movie found for this genre' });
+  res.json(row);
+});
+
+// legacy route kept for backward compatibility (may be shadowed by /api/movies/:id if placed after it)
+app.get('/api/movies/genre', (req, res) => {
+  // forward to by-genre handler logic
+  const type = req.query.type;
+  if (!type) return res.status(400).json({ message: 'Missing genre type' });
+  const row = db.prepare(`
+    SELECT
+      m.id,
+      m.title,
+      m.overview,
+      m.poster,
+      m.duration,
+      COALESCE(g.type, '—') AS genre,
+      m.directors AS director
+    FROM movie m
+    LEFT JOIN genres g ON g.id = m.genre_id
+    WHERE g.type = ?
+    ORDER BY m.updated_at DESC
+    LIMIT 1
+  `).get(type);
+  if (!row) return res.status(404).json({ message: 'No movie found for this genre' });
+  res.json(row);
+});
+
+// Return all genres
+app.get('/api/genres', (_req, res) => {
+  const rows = db.prepare(`SELECT id, type FROM genres ORDER BY id`).all();
+  res.json(rows);
+});
+
+// Get latest movie for a given genre (by genre type)
+app.get('/api/genres/:type/movie', (req, res) => {
+  const type = req.params.type;
+  if (!type) return res.status(400).json({ message: 'Missing genre type' });
+  const row = db.prepare(`
+    SELECT
+      m.id,
+      m.title,
+      m.overview,
+      m.poster,
+      m.duration,
+      COALESCE(g.type, '—') AS genre,
+      m.directors AS director
+    FROM movie m
+    LEFT JOIN genres g ON g.id = m.genre_id
+    WHERE g.type = ?
+    ORDER BY m.updated_at DESC
+    LIMIT 1
+  `).get(type);
+  if (!row) return res.status(404).json({ message: 'No movie found for this genre' });
+  res.json(row);
+});
+
+// Return multiple movies for a given genre (latest first)
+app.get('/api/genres/:type/movies', (req, res) => {
+  const type = req.params.type;
+  if (!type) return res.status(400).json({ message: 'Missing genre type' });
+  const rows = db.prepare(`
+    SELECT
+      m.id,
+      m.title,
+      m.overview,
+      m.poster,
+      COALESCE(g.type, '—') AS genre
+    FROM movie m
+    LEFT JOIN genres g ON g.id = m.genre_id
+    WHERE g.type = ?
+    ORDER BY m.updated_at DESC
+    LIMIT 12
+  `).all(type);
+  if (!rows || rows.length === 0) return res.status(404).json({ message: 'No movies found for this genre' });
+  res.json(rows);
+});
+
 app.get('/api/gifts', (_req, res) => {
   const rows = db.prepare(`
     SELECT id, name, type, price, description

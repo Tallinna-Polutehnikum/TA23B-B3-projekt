@@ -26,6 +26,7 @@ const GENRE_IMAGES = {
   Horror: horrorImg,
   Comedy: comedyImg,
   Historycal: historycalImg,
+  Hystorycal: historycalImg,
   Animation: animationImg,
   Anime: animeImg,
   Documentary: documentaryImg,
@@ -44,6 +45,23 @@ export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
   const rowRef = useRef(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
+  const [items, setItems] = useState(genres);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/genres')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        if (!mounted) return;
+        if (Array.isArray(data) && data.length > 0) {
+          setItems(data.map(d => d.type));
+        }
+      })
+      .catch(() => {
+        /* ignore, keep defaults */
+      });
+    return () => { mounted = false };
+  }, []);
 
   useEffect(() => {
     const el = rowRef.current;
@@ -86,7 +104,7 @@ export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
         >‹</button>
 
         <div className="cards scroll-row" ref={rowRef} role="list">
-          {genres.map((g) => (
+          {items.map((g) => (
             <button
               key={g}
               type="button"
