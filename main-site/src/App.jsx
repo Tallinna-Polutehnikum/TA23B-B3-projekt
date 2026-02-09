@@ -2,7 +2,6 @@ import "./index.css";
 import "./App.css";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useEffect, useState } from "react";
 import HeroBanner from "./components/HeroBanner";
 import Showtimes from "./components/Showtimes";
 import AllMovies from "./components/AllMovies";
@@ -221,7 +220,6 @@ function App() {
               <a href="#">Movies</a>
               <Link to="/events" className={isEvents ? "showtimes-active" : ""}>Events</Link>
               <Link to="/movies">Movies</Link>
-              <a href="#">Events</a>
               <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
               <a
                 href="#gifts"
