@@ -1,9 +1,16 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./SessionCard.css";
 import SeatMap from "./SeatMap";
 
 export default function SessionCard({ session }) {
   const [showSeatMap, setShowSeatMap] = useState(false);
+
+  const posterSrc = session.poster
+    ? (session.poster.startsWith('http')
+        ? session.poster
+        : `https://image.tmdb.org/t/p/w342${session.poster}`)
+    : 'https://via.placeholder.com/200x300?text=No+Image';
 
   const ribbonDate = session.date
     ? new Date(`${session.date}T00:00:00`).toLocaleDateString('en-GB', {
@@ -21,7 +28,7 @@ export default function SessionCard({ session }) {
         )}
         <div className="session-card__body">
           <div className="session-card__poster">
-            <img src={session.poster} alt={session.title} />
+            <img src={posterSrc} alt={session.title} />
           </div>
           <div className="session-card__info">
             <div className="session-card__top">
@@ -31,7 +38,13 @@ export default function SessionCard({ session }) {
                 <div className="session-card__hall">Screen {session.hall}</div>
               </div>
               <div className="session-card__title-group">
-                <a href="#" className="session-card__title">{session.title}</a>
+                <Link
+                  to={`/movie/${session.movie_id}`}
+                  className="session-card__title"
+                  state={{ from: 'showtimes' }}
+                >
+                  {session.title}
+                </Link>
                 <div className="session-card__original">{session.originalTitle}</div>
                 <div className="session-card__genres">{session.genres}</div>
               </div>

@@ -19,35 +19,39 @@
 .session-card__body {
   display: flex;
   align-items: stretch;
+  gap: 16px;
 }
 
 .session-card__poster {
-  flex: 0 0 240px;
-  background: #222;
+  flex: 0 0 180px;
+  max-height: 260px;
+  background: radial-gradient(circle at 30% 30%, #2b0a4a 0%, #140820 50%, #0b0416 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  border-right: 1px solid #f1e6ff;
 }
 .session-card__poster img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 8px;
 }
 
 .session-card__info {
   flex: 1 1 0;
-  padding: 18px 22px 16px 22px;
+  padding: 18px 22px 16px 4px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   color: #111;
 }
 
 .session-card__top {
   display: grid;
-  grid-template-columns: minmax(140px, 180px) minmax(220px, 1fr) auto;
-  gap: 18px;
+  grid-template-columns: minmax(140px, 170px) minmax(220px, 1fr) auto;
+  gap: 14px 18px;
   align-items: start;
 }
 
@@ -58,7 +62,7 @@
 }
 
 .session-card__time {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
 }
 
@@ -80,8 +84,8 @@
 }
 
 .session-card__title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 750;
   color: #111;
   text-decoration: underline;
 }
@@ -101,7 +105,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .session-card__shows {
@@ -120,8 +124,8 @@
 }
 
 .session-card__buy {
-  background: #ff9800;
-  color: #fff;
+  background: #a020f0;
+  color: #fdf8ff;
   border: none;
   border-radius: 8px;
   padding: 8px 14px;
@@ -131,7 +135,7 @@
   transition: background 0.18s;
 }
 .session-card__buy:hover {
-  background: #e67c00;
+  background: #8817d0;
 }
 
 .session-card__meta-row {

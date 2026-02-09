@@ -302,8 +302,8 @@ body {
   opacity: 0.8;
 }
 .showtimes-day.active {
-  background: #ff9800;
-  color: #111;
+  background: #a020f0;
+  color: #fdf8ff;
 }
 
 .showtimes-filters {

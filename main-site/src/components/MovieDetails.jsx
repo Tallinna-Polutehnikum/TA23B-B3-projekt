@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Footer from './Footer';
 import './MovieDetails.css';
 
 export default function MovieDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [movie, setMovie] = useState(null);
 
   useEffect(() => {
@@ -29,11 +31,25 @@ export default function MovieDetails() {
   const displayDuration = formatDuration(movie?.duration);
   const displayCast = movie?.cast ?? 'Cast info coming soon.';
 
+  const goToShowtimes = () => {
+    navigate(`/showtime?movieId=${id}`);
+  };
+
+  const handleBack = () => {
+    if (location.state?.from === 'showtimes') {
+      navigate(`/showtime?movieId=${id}`);
+      return;
+    }
+    navigate(-1);
+  };
+
   if (!movie) return null;
 
   return (
     <section className="movie-page">
-      <a className="back-arrow" href="/">&#8592;</a>
+      <button className="back-arrow" onClick={handleBack} aria-label="Back">
+        &#8592;
+      </button>
       <div className="movie-content">
         <div className="hero">
           <div className="media">
@@ -61,7 +77,7 @@ export default function MovieDetails() {
               <p>{movie.overview}</p>
             </section>
 
-            <button className="primary">Choose a session</button>
+            <button className="primary" onClick={goToShowtimes}>Choose a session</button>
           </div>
         </div>
       </div>

@@ -82,6 +82,7 @@ app.get('/api/sessions', (_req, res) => {
       s.id,
       m.id as movie_id,
       m.title,
+      m.poster,
       s.cinema_name as cinema,
       s.hall,
       s.time,
@@ -90,9 +91,10 @@ app.get('/api/sessions', (_req, res) => {
       s.language,
       s.subtitles,
       s.format,
-      m.genres
+      COALESCE(g.type, '—') AS genres
     FROM sessions s
     LEFT JOIN movie m ON s.movie_id = m.id
+    LEFT JOIN genres g ON m.genre_id = g.id
     ORDER BY s.date, s.time
   `).all();
   res.json(rows);
