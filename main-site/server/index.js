@@ -40,9 +40,15 @@ app.get('/api/movies/top', (_req, res) => {
 
 app.get('/api/movies/coming-soon', (_req, res) => {
   const rows = db.prepare(`
-    SELECT id, title, overview, poster, genre_id
-    FROM comingsoon_movies
-    ORDER BY id ASC
+    SELECT 
+      c.id,
+      c.title,
+      c.overview,
+      c.poster,
+      COALESCE(g.type, '—') AS genre
+    FROM comingsoon_movies c
+    LEFT JOIN genres g ON g.id = c.genre_id
+    ORDER BY c.id ASC
     LIMIT 10
   `).all();
   res.json(rows);

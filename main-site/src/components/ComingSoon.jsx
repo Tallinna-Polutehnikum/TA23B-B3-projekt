@@ -1,99 +1,62 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './ComingSoon.css';
 
 export default function ComingSoon() {
-  const rowRef = useRef(null);
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(false);
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [movies, setMovies] = useState([]);
+  const scrollerRef = useRef(null);
 
   useEffect(() => {
-    // Fetch coming soon movies
     fetch('/api/movies/coming-soon')
-      .then(res => res.json())
-      .then(data => {
-        console.log('✓ Coming soon data loaded:', data.length, 'movies');
-        if (data.length > 0) {
-          console.log('  First:', data[0].title, 'release:', data[0].release_date);
-        }
-        setItems(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to load coming soon movies:', err);
-        setLoading(false);
-      });
+      .then((res) => res.json())
+      .then(setMovies)
+      .catch((err) => console.error('Failed to load movies', err));
   }, []);
 
-  useEffect(() => {
-    const el = rowRef.current;
-    if (!el) return;
-
-    const check = () => {
-      setCanPrev(el.scrollLeft > 8);
-      setCanNext(el.scrollLeft + el.clientWidth + 8 < el.scrollWidth);
-    };
-
-    check();
-    el.addEventListener('scroll', check, { passive: true });
-    window.addEventListener('resize', check);
-    return () => {
-      el.removeEventListener('scroll', check);
-      window.removeEventListener('resize', check);
-    };
-  }, [items]);
-
-  const scrollByWidth = (dir = 1) => {
-    const el = rowRef.current;
-    if (!el) return;
-    const step = Math.round(el.clientWidth * 0.9) * dir;
-    el.scrollBy({ left: step, behavior: 'smooth' });
+  const scroll = (dir) => {
+    const cardWidth = scrollerRef.current?.querySelector('.card')?.offsetWidth || 440;
+    const gap = 24;
+    const scrollAmount = dir * ((cardWidth + gap) * 4);
+    scrollerRef.current?.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   };
 
   return (
     <section className="section coming-soon">
-      <div className="title">Coming Soon</div>
+      <header className="section-header">
+        <h2 className="title">Coming Soon</h2>
+      </header>
+
       <div className="scroll-outer">
         <button
           className="nav-button prev"
-          onClick={() => scrollByWidth(-1)}
-          disabled={!canPrev}
+          onClick={() => scroll(-1)}
+          disabled={!movies.length}
           aria-label="Scroll left"
         >
           ‹
         </button>
-        <div className="cards" ref={rowRef}>
-          {loading ? (
-            [1, 2, 3].map((i) => (
-              <article key={i} className="card large" aria-label={`Coming soon ${i}`}>
-                <div className="visual" />
-                <div className="meta">Coming soon</div>
-              </article>
-            ))
-          ) : items.length > 0 ? (
-            items.map((movie) => (
-              <Link
-                key={movie.id}
-                to={`/movie/${movie.id}`}
-                className="card large"
-                aria-label={movie.title}
-              >
-                <div className="visual" style={{
-                  backgroundImage: movie.poster ? `url(https://image.tmdb.org/t/p/w500${movie.poster})` : 'none'
-                }} />
-                <div className="meta">{movie.title}</div>
-              </Link>
-            ))
-          ) : (
-            <p>No coming soon movies</p>
-          )}
+
+        <div className="scroll-row" ref={scrollerRef}>
+          {movies.map((movie) => (
+            <Link key={movie.id} to={`/movie/${movie.id}`} className="card">
+              {movie.poster && (
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${movie.poster}`}
+                  alt={movie.title}
+                  loading="lazy"
+                />
+              )}
+              <div className="meta">
+                <h3>{movie.title}</h3>
+              </div>
+            </Link>
+          ))}
         </div>
+
         <button
           className="nav-button next"
-          onClick={() => scrollByWidth(1)}
-          disabled={!canNext}
+          onClick={() => scroll(1)}
+          disabled={!movies.length}
           aria-label="Scroll right"
         >
           ›
