@@ -40,11 +40,16 @@ export default function MoviesList({ refresh }) {
             </tr>
           </thead>
           <tbody>
-            {movies.map(movie => (
+            {movies.map(movie => {
+              const posterSrc = movie.poster
+                ? (movie.poster.startsWith('http') ? movie.poster : `https://image.tmdb.org/t/p/w300${movie.poster}`)
+                : 'https://via.placeholder.com/120x180?text=No+Image';
+
+              return (
               <tr key={movie.id}>
                 <td>
                   <img 
-                    src={movie.poster} 
+                    src={posterSrc} 
                     alt={movie.title}
                     className="movie-poster-thumb"
                   />
@@ -57,7 +62,8 @@ export default function MoviesList({ refresh }) {
                   <button className="action-btn delete">🗑️ Delete</button>
                 </td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       </div>

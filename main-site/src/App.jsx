@@ -30,6 +30,11 @@ function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+  const getPosterUrl = (poster, size = 'w500') => {
+    if (!poster) return `https://via.placeholder.com/${size === 'w780' ? '640x360' : '300x450'}?text=No+Image`;
+    if (poster.startsWith('http')) return poster;
+    return `https://image.tmdb.org/t/p/${size}${poster}`;
+  };
 
   const handleGenreSelect = async (genre) => {
     setSelectedGenre(genre);
@@ -485,6 +490,9 @@ function App() {
               maxWidth: 1100,
               width: '90vw',
               padding: 28,
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
               boxShadow: '0 12px 60px rgba(0,0,0,0.7)',
               position: 'relative'
             }}
@@ -510,26 +518,26 @@ function App() {
               <div style={{ padding: 24, opacity: 0.8 }}>Loading movies...</div>
             ) : selectedMovie ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-                  <div style={{ flex: '0 0 auto' }}>
+                <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                    <div style={{ flex: '0 0 auto' }}>
                     <Link
                       to={`/movie/${selectedMovie.id}`}
                       onClick={() => { setSelectedGenre(null); setSelectedMovie(null); setSelectedMovies([]); }}
                       style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
                     >
-                      <img src={selectedMovie.poster} alt={selectedMovie.title} style={{ width: 320, maxWidth: 360, borderRadius: 8, boxShadow: '0 8px 28px rgba(0,0,0,0.6)' }} />
+                        <img src={getPosterUrl(selectedMovie.poster, 'w780')} alt={selectedMovie.title} style={{ flex: '0 0 320px', width: '100%', maxWidth: 360, borderRadius: 8, boxShadow: '0 8px 28px rgba(0,0,0,0.6)' }} />
                     </Link>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: 1, minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word', maxHeight: '70vh', overflowY: 'auto', paddingRight: 6 }}>
                     <Link
                       to={`/movie/${selectedMovie.id}`}
                       onClick={() => { setSelectedGenre(null); setSelectedMovie(null); setSelectedMovies([]); }}
                       style={{ textDecoration: 'none', color: 'inherit' }}
                     >
-                      <h2 style={{ margin: '0 0 8px', fontSize: 30 }}>{selectedMovie.title}</h2>
+                        <h2 style={{ margin: '0 0 8px', fontSize: 'clamp(20px, 4vw, 30px)' }}>{selectedMovie.title}</h2>
                     </Link>
                     <div style={{ opacity: 0.85, fontSize: 14, marginBottom: 12 }}>{selectedMovie.genre}</div>
-                    <p style={{ marginTop: 8, opacity: 0.95, lineHeight: 1.5 }}>{selectedMovie.overview}</p>
+                      <p style={{ marginTop: 8, opacity: 0.95, lineHeight: 1.5, overflowWrap: 'break-word', wordBreak: 'break-word' }}>{selectedMovie.overview}</p>
                   </div>
                 </div>
 
@@ -544,7 +552,7 @@ function App() {
                             onClick={() => { setSelectedGenre(null); setSelectedMovie(null); setSelectedMovies([]); }}
                             style={{ textDecoration: 'none', color: 'inherit' }}
                           >
-                            <img src={m.poster} alt={m.title} style={{ width: '100%', borderRadius: 6, display: 'block', boxShadow: '0 6px 18px rgba(0,0,0,0.5)' }} />
+                            <img src={getPosterUrl(m.poster, 'w342')} alt={m.title} style={{ width: '100%', borderRadius: 6, display: 'block', boxShadow: '0 6px 18px rgba(0,0,0,0.5)' }} />
                             <div style={{ marginTop: 8, fontSize: 14, fontWeight: 600 }}>{m.title.length > 36 ? m.title.substring(0,36)+'…' : m.title}</div>
                           </Link>
                         </div>
