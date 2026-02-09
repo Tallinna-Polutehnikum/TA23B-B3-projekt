@@ -225,7 +225,6 @@ function App() {
             <nav className="site-nav">
               <Link to="/showtime">Showtime</Link>
               <a href="#">Cinemas</a>
-              <a href="#">Movies</a>
               <Link to="/events" className={isEvents ? "showtimes-active" : ""}>Events</Link>
               <Link to="/movies">Movies</Link>
               <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
