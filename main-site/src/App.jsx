@@ -12,6 +12,7 @@ import ComingSoon from "./components/ComingSoon";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import AdminDashboard from "./components/AdminDashboard";
+import Profile from "./components/Profile";
 import FamilyScreeningPage from "./components/FamilyScreeningPage";
 import BirthdayPage from "./components/BirthdayPage";
 import VaartKinoPage from "./components/VaartKinoPage";
@@ -23,6 +24,7 @@ function App() {
   const isShowtime = location.pathname === "/showtime";
   const isMovies = location.pathname === "/movies";
   const isAdmin = location.pathname === "/admin";
+  const isProfile = location.pathname === "/profile";
   const isFamily = location.pathname === "/family";
   const isBirthday = location.pathname === "/birthday";
   const isVaart = location.pathname === "/vaartkino";
@@ -161,6 +163,12 @@ function App() {
         <AllMovies />
       </main>
     );
+  } else if (isProfile) {
+    content = (
+      <main className="site-container main-content">
+        <Profile />
+      </main>
+    );
   } else if (isFamily) {
     content = (
       <main className="main-content">
@@ -217,7 +225,6 @@ function App() {
             <nav className="site-nav">
               <Link to="/showtime">Showtime</Link>
               <a href="#">Cinemas</a>
-              <a href="#">Movies</a>
               <Link to="/events" className={isEvents ? "showtimes-active" : ""}>Events</Link>
               <Link to="/movies">Movies</Link>
               <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
@@ -278,7 +285,13 @@ function App() {
                   </span>
                 )}
               </div>
-              <div className="icon-user" title="Account" />
+              <Link
+                to="/profile"
+                className="icon-user"
+                title="User profile"
+                aria-label="Go to profile"
+                style={{ display: 'inline-flex' }}
+              />
             </div>
           </div>
         </header>

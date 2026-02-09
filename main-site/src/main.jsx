@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import MovieDetails from './components/MovieDetails.jsx';
+import Profile from './components/Profile.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/events" element={<App />} />
           <Route path="/movies" element={<App />} />
         <Route path="/admin" element={<App />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/movie/:id" element={<MovieDetails />} />
       </Routes>
     </BrowserRouter>

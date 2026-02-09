@@ -7,21 +7,15 @@ export default function SearchBar() {
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [movies, setMovies] = useState([]);
-  const [sessions, setSessions] = useState([]);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
 
-  // Load movies and sessions data from API
+  // Load movies data from API
   useEffect(() => {
     fetch('/api/movies/top')
       .then((res) => res.json())
       .then(setMovies)
       .catch((err) => console.error('Failed to load movies', err));
-
-    fetch('/api/sessions')
-      .then((res) => res.json())
-      .then(setSessions)
-      .catch((err) => console.error('Failed to load sessions', err));
   }, []);
 
   // Close when clicking outside the component
@@ -59,35 +53,16 @@ export default function SearchBar() {
       }
     });
 
-    // Search in sessions
-    sessions.forEach(session => {
-      if (
-        session.title?.toLowerCase().includes(lowerQuery) ||
-        session.cinema?.toLowerCase().includes(lowerQuery)
-      ) {
-        results.push({
-          id: session.id,
-          title: session.title,
-          subtitle: session.cinema,
-          type: "session"
-        });
-      }
-    });
-
     setSuggestions(results.slice(0, 8)); // Maximum 8 suggestions
     setIsOpen(results.length > 0);
-  }, [query, movies, sessions]);
+  }, [query, movies]);
 
   const handleSelect = (suggestion) => {
     setQuery(suggestion.title);
     setIsOpen(false);
     
-    // Navigate to the appropriate page
-    if (suggestion.type === "movie") {
-      navigate(`/movie/${suggestion.id}`);
-    } else if (suggestion.type === "session") {
-      navigate("/showtime");
-    }
+    // Navigate to the movie page
+    navigate(`/movie/${suggestion.id}`);
   };
 
   const highlightMatch = (text, query) => {
@@ -133,9 +108,6 @@ export default function SearchBar() {
                 <div className="search-suggestion-subtitle">
                   {suggestion.subtitle}
                 </div>
-              </div>
-              <div className="search-suggestion-type">
-                {suggestion.type === "movie" ? "🎬" : "🎟️"}
               </div>
             </div>
           ))}

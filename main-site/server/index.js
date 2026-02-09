@@ -204,7 +204,7 @@ app.get('/api/sessions', (_req, res) => {
       m.id as movie_id,
       m.title,
       m.poster,
-      s.cinema_name as cinema,
+      COALESCE(c.name, s.cinema_name, 'Cinema') as cinema,
       s.hall,
       s.time,
       s.date,
@@ -215,6 +215,7 @@ app.get('/api/sessions', (_req, res) => {
       COALESCE(g.type, '—') AS genres
     FROM sessions s
     LEFT JOIN movie m ON s.movie_id = m.id
+    LEFT JOIN cinema c ON s.cinema_id = c.id
     LEFT JOIN genres g ON m.genre_id = g.id
     ORDER BY s.date, s.time
   `).all();
@@ -226,11 +227,12 @@ app.get('/api/sessions/:id/seats', (req, res) => {
     SELECT 
       s.id,
       m.title,
-      s.cinema_name as cinema,
+      COALESCE(c.name, s.cinema_name, 'Cinema') as cinema,
       s.time,
       s.seats_available as seatsAvailable
     FROM sessions s
     LEFT JOIN movie m ON s.movie_id = m.id
+    LEFT JOIN cinema c ON s.cinema_id = c.id
     WHERE s.id = ?
   `).get(req.params.id);
 
