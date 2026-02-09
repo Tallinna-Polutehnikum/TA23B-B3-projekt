@@ -6,12 +6,15 @@ export default function SeatMap({ sessionId, onClose }) {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sessionInfo, setSessionInfo] = useState(null);
+  const [remainingSeconds, setRemainingSeconds] = useState(600); // 10 minutes
 
   useEffect(() => {
     fetch(`/api/sessions/${sessionId}/seats`)
       .then((res) => res.json())
       .then((data) => {
-        setSeats(data.seats || generateSeatsGrid());
+        const normalizedSeats = (data.seats || generateSeatsGrid(data.sessionInfo?.seatsAvailable))
+          .map((seat) => ({ ...seat, occupied: false }));
+        setSeats(normalizedSeats);
         setSessionInfo(data.sessionInfo);
         setLoading(false);
       })
@@ -22,18 +25,34 @@ export default function SeatMap({ sessionId, onClose }) {
       });
   }, [sessionId]);
 
-  const generateSeatsGrid = () => {
-    // 10 rows, 15 seats per row
+  useEffect(() => {
+    setRemainingSeconds(600); // reset timer on open or session change
+    const timer = setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [sessionId]);
+
+  const generateSeatsGrid = (seatsAvailable = 150) => {
+    const total = Number(seatsAvailable) || 150;
+    const columns = 15;
+    const rows = Math.max(1, Math.ceil(total / columns));
     const grid = [];
-    for (let row = 0; row < 10; row++) {
-      for (let col = 0; col < 15; col++) {
-        const seatNumber = row * 15 + col + 1;
-        const isOccupied = Math.random() < 0.3; // 30% occupied
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        const seatNumber = row * columns + col + 1;
+        if (seatNumber > total) break;
         grid.push({
           id: `seat-${row}-${col}`,
           row: String.fromCharCode(65 + row), // A, B, C, ...
           number: col + 1,
-          occupied: isOccupied,
+          occupied: false,
           seatNumber
         });
       }
@@ -42,7 +61,7 @@ export default function SeatMap({ sessionId, onClose }) {
   };
 
   const handleSeatClick = (seat) => {
-    if (seat.occupied) return;
+    if (seat.occupied || remainingSeconds === 0) return;
     
     const isSelected = selectedSeats.some(s => s.id === seat.id);
     if (isSelected) {
@@ -62,6 +81,16 @@ export default function SeatMap({ sessionId, onClose }) {
     return selectedSeats.length * 12; // 12€ per seat
   };
 
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60)
+      .toString()
+      .padStart(2, '0');
+    const s = (secs % 60)
+      .toString()
+      .padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   if (loading) {
     return <div className="seat-map-loading">Loading seats...</div>;
   }
@@ -71,6 +100,9 @@ export default function SeatMap({ sessionId, onClose }) {
       <div className="seat-map-modal" onClick={(e) => e.stopPropagation()}>
         <div className="seat-map-header">
           <h2>Select Seats</h2>
+          <div className="seat-map-timer">
+            Time left: {formatTime(remainingSeconds)}
+          </div>
           {sessionInfo && (
             <div className="seat-map-info">
               <span>{sessionInfo.title}</span>
@@ -143,13 +175,13 @@ export default function SeatMap({ sessionId, onClose }) {
             <button className="btn-cancel" onClick={onClose}>Cancel</button>
             <button 
               className="btn-confirm"
-              disabled={selectedSeats.length === 0}
+              disabled={selectedSeats.length === 0 || remainingSeconds === 0}
               onClick={() => {
                 console.log('Booking seats:', selectedSeats);
                 onClose();
               }}
             >
-              Book Seats (€{getTotalPrice()})
+              {remainingSeconds === 0 ? 'Time expired' : `Book Seats (€${getTotalPrice()})`}
             </button>
           </div>
         </div>

@@ -101,13 +101,13 @@ app.get('/api/sessions', (_req, res) => {
 });
 
 app.get('/api/sessions/:id/seats', (req, res) => {
-  // Fetch session info
   const sessionInfo = db.prepare(`
     SELECT 
       s.id,
       m.title,
       s.cinema_name as cinema,
-      s.time
+      s.time,
+      s.seats_available as seatsAvailable
     FROM sessions s
     LEFT JOIN movie m ON s.movie_id = m.id
     WHERE s.id = ?
@@ -117,16 +117,19 @@ app.get('/api/sessions/:id/seats', (req, res) => {
     return res.status(404).json({ message: 'Session not found' });
   }
 
-  // Generate seat map (can be customized based on actual DB schema)
+  const totalSeats = Number(sessionInfo.seatsAvailable) || 150;
+  const columns = 15;
+  const rows = Math.max(1, Math.ceil(totalSeats / columns));
   const seats = [];
-  for (let row = 0; row < 10; row++) {
-    for (let col = 0; col < 15; col++) {
-      const seatNumber = row * 15 + col + 1;
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < columns; col++) {
+      const seatNumber = row * columns + col + 1;
+      if (seatNumber > totalSeats) break;
       seats.push({
         id: `seat-${row}-${col}`,
         row: String.fromCharCode(65 + row),
         number: col + 1,
-        occupied: Math.random() < 0.3, // 30% occupied
+        occupied: false,
         seatNumber
       });
     }
