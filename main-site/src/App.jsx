@@ -12,12 +12,14 @@ import ComingSoon from "./components/ComingSoon";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import AdminDashboard from "./components/AdminDashboard";
+import Profile from "./components/Profile";
 
 function App() {
   const location = useLocation();
   const isShowtime = location.pathname === "/showtime";
   const isMovies = location.pathname === "/movies";
   const isAdmin = location.pathname === "/admin";
+  const isProfile = location.pathname === "/profile";
 
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
@@ -146,6 +148,12 @@ function App() {
         <AllMovies />
       </main>
     );
+  } else if (isProfile) {
+    content = (
+      <main className="site-container main-content">
+        <Profile />
+      </main>
+    );
   } else {
     content = (
       <main className="site-container main-content">
@@ -232,7 +240,13 @@ function App() {
                   </span>
                 )}
               </div>
-              <div className="icon-user" title="Account" />
+              <Link
+                to="/profile"
+                className="icon-user"
+                title="User profile"
+                aria-label="Go to profile"
+                style={{ display: 'inline-flex' }}
+              />
             </div>
           </div>
         </header>
