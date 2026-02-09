@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./SessionCard.css";
 import SeatMap from "./SeatMap";
 
-export default function SessionCard({ session, onViewAllShows }) {
+export default function SessionCard({ session, onViewAllShows, onAddSeats }) {
   const [showSeatMap, setShowSeatMap] = useState(false);
 
   const posterSrc = session.poster
@@ -87,6 +87,8 @@ export default function SessionCard({ session, onViewAllShows }) {
       {showSeatMap && (
         <SeatMap 
           sessionId={session.id}
+          sessionMeta={session}
+          onAddSeatsToCart={onAddSeats}
           onClose={() => setShowSeatMap(false)}
         />
       )}

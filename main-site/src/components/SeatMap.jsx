@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./SeatMap.css";
 
-export default function SeatMap({ sessionId, onClose }) {
+export default function SeatMap({ sessionId, onClose, onAddSeatsToCart, sessionMeta }) {
   const [seats, setSeats] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,15 +15,16 @@ export default function SeatMap({ sessionId, onClose }) {
         const normalizedSeats = (data.seats || generateSeatsGrid(data.sessionInfo?.seatsAvailable))
           .map((seat) => ({ ...seat, occupied: false }));
         setSeats(normalizedSeats);
-        setSessionInfo(data.sessionInfo);
+        setSessionInfo(data.sessionInfo || sessionMeta || null);
         setLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load seats', err);
         setSeats(generateSeatsGrid());
+        setSessionInfo(sessionMeta || null);
         setLoading(false);
       });
-  }, [sessionId]);
+  }, [sessionId, sessionMeta]);
 
   useEffect(() => {
     setRemainingSeconds(600); // reset timer on open or session change
@@ -79,6 +80,13 @@ export default function SeatMap({ sessionId, onClose }) {
 
   const getTotalPrice = () => {
     return selectedSeats.length * 12; // 12€ per seat
+  };
+
+  const handleConfirm = () => {
+    if (selectedSeats.length === 0 || remainingSeconds === 0) return;
+    const info = sessionInfo || sessionMeta || { id: sessionId, title: 'Session' };
+    onAddSeatsToCart?.(info, selectedSeats);
+    onClose();
   };
 
   const formatTime = (secs) => {
@@ -176,10 +184,7 @@ export default function SeatMap({ sessionId, onClose }) {
             <button 
               className="btn-confirm"
               disabled={selectedSeats.length === 0 || remainingSeconds === 0}
-              onClick={() => {
-                console.log('Booking seats:', selectedSeats);
-                onClose();
-              }}
+              onClick={handleConfirm}
             >
               {remainingSeconds === 0 ? 'Time expired' : `Book Seats (€${getTotalPrice()})`}
             </button>

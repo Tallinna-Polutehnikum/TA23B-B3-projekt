@@ -38,11 +38,33 @@ app.get('/api/movies/top', (_req, res) => {
   res.json(rows);
 });
 
+// All movies (full catalog)
+app.get('/api/movies', (_req, res) => {
+  const rows = db.prepare(`
+    SELECT 
+      m.id,
+      m.title,
+      m.overview,
+      m.poster,
+      COALESCE(g.type, '—') AS genre
+    FROM movie m
+    LEFT JOIN genres g ON m.genre_id = g.id
+    ORDER BY m.updated_at DESC
+  `).all();
+  res.json(rows);
+});
+
 app.get('/api/movies/coming-soon', (_req, res) => {
   const rows = db.prepare(`
-    SELECT id, title, overview, poster, genre_id
-    FROM comingsoon_movies
-    ORDER BY id ASC
+    SELECT 
+      c.id,
+      c.title,
+      c.overview,
+      c.poster,
+      COALESCE(g.type, '—') AS genre
+    FROM comingsoon_movies c
+    LEFT JOIN genres g ON g.id = c.genre_id
+    ORDER BY c.id ASC
     LIMIT 10
   `).all();
   res.json(rows);

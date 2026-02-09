@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import SessionCard from "./SessionCard";
 
 const toDateKey = (date) => {
@@ -15,12 +15,22 @@ const toMinutes = (timeStr) => {
   return h * 60 + (m || 0);
 };
 
-export default function Showtimes() {
+export default function Showtimes({ addSeatsToCart }) {
   const routerLocation = useLocation();
   const navigate = useNavigate();
-  const [activeDay, setActiveDay] = useState(toDateKey(new Date()));
-  const [selectedCity, setSelectedCity] = useState("All");
-  const [selectedGenre, setSelectedGenre] = useState("All");
+  const navigationType = useNavigationType();
+  const [activeDay, setActiveDay] = useState(() => {
+    const stored = typeof window !== 'undefined' ? sessionStorage.getItem('activeDay') : null;
+    return stored || toDateKey(new Date());
+  });
+  const [selectedCity, setSelectedCity] = useState(() => {
+    const stored = typeof window !== 'undefined' ? sessionStorage.getItem('selectedCity') : null;
+    return stored || "All";
+  });
+  const [selectedGenre, setSelectedGenre] = useState(() => {
+    const stored = typeof window !== 'undefined' ? sessionStorage.getItem('selectedGenre') : null;
+    return stored || "All";
+  });
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [availableGenres, setAvailableGenres] = useState([]);
@@ -52,10 +62,58 @@ export default function Showtimes() {
   }, []);
 
   useEffect(() => {
+    if (activeDay) {
+      sessionStorage.setItem('activeDay', activeDay);
+    }
+  }, [activeDay]);
+
+  useEffect(() => {
+    sessionStorage.setItem('selectedCity', selectedCity);
+  }, [selectedCity]);
+
+  useEffect(() => {
+    sessionStorage.setItem('selectedGenre', selectedGenre);
+  }, [selectedGenre]);
+
+  useEffect(() => {
     const params = new URLSearchParams(routerLocation.search);
     const movieId = params.get('movieId');
     setSelectedMovieId(movieId);
   }, [routerLocation.search]);
+
+  // If returning via browser back/forward, drop the movie filter query so it doesn't stick
+  useEffect(() => {
+    if (navigationType !== 'POP') return;
+    const params = new URLSearchParams(routerLocation.search);
+    if (!params.has('movieId')) return;
+    params.delete('movieId');
+    navigate({ pathname: routerLocation.pathname, search: params.toString() }, { replace: true });
+    setSelectedMovieId(null);
+  }, [navigationType, routerLocation.pathname, routerLocation.search, navigate]);
+
+  // Keep activeDay on a valid date for current filters (movie + city + genre)
+  useEffect(() => {
+    if (!sessions || sessions.length === 0) return;
+
+    const scoped = sessions.filter((s) => {
+      const matchesMovie = !selectedMovieId || String(s.movie_id) === String(selectedMovieId);
+      const sessionCity = s.cinema ? s.cinema.split('-')[0].trim() : '';
+      const matchesCity = selectedCity === 'All' || sessionCity === selectedCity;
+      const matchesGenre = selectedGenre === 'All'
+        || (s.genres && s.genres.split(',').map((g) => g.trim()).includes(selectedGenre));
+      return matchesMovie && matchesCity && matchesGenre;
+    });
+
+    if (scoped.length === 0) return;
+
+    const dates = Array.from(new Set(scoped.map((s) => s.date))).sort();
+    if (dates.includes(activeDay)) return; // current day still valid
+
+    const todayKey = toDateKey(new Date());
+    const nextAvailable = dates.find((d) => d >= todayKey) || dates[0];
+    setActiveDay(nextAvailable);
+    sessionStorage.setItem('activeDay', nextAvailable);
+  }, [sessions, selectedMovieId, selectedCity, selectedGenre]);
 
   // User can freely switch days; no auto-reset to avoid interfering with manual selection
 
@@ -82,8 +140,8 @@ export default function Showtimes() {
 
   const filteredSessions = sessions.filter((session) => {
     const todayKey = toDateKey(new Date());
-    const isActiveToday = activeDay === todayKey;
-    const nowMinutes = isActiveToday
+    const isSessionToday = session.date === todayKey;
+    const nowMinutes = isSessionToday
       ? new Date().getHours() * 60 + new Date().getMinutes()
       : null;
 
@@ -94,7 +152,7 @@ export default function Showtimes() {
       return false;
     }
 
-    if (isActiveToday) {
+    if (isSessionToday) {
       if (!session.time) return false;
       const sessionMinutes = toMinutes(session.time);
       if (sessionMinutes < nowMinutes) return false;
@@ -227,6 +285,7 @@ export default function Showtimes() {
               key={session.id}
               session={session}
               onViewAllShows={handleViewAllShows}
+              onAddSeats={addSeatsToCart}
             />
           ))
         ) : (

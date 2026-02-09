@@ -10,10 +10,33 @@ export default function MovieDetails() {
   const [movie, setMovie] = useState(null);
 
   useEffect(() => {
-    fetch(`/api/movies/${id}`)
-      .then((res) => res.json())
-      .then(setMovie)
-      .catch(console.error);
+    // Try primary movie endpoint first; if not found, fall back to coming-soon list
+    (async () => {
+      try {
+        const res = await fetch(`/api/movies/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setMovie(data);
+          return;
+        }
+
+        // fallback: fetch coming-soon list and find the item by id
+        const cs = await fetch('/api/movies/coming-soon');
+        if (!cs.ok) {
+          setMovie({ message: 'Not found' });
+          return;
+        }
+        const list = await cs.json();
+        const found = list.find((m) => String(m.id) === String(id));
+        if (found) {
+          setMovie(found);
+        } else {
+          setMovie({ message: 'Not found' });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    })();
   }, [id]);
 
   const formatDuration = (value) => {
@@ -53,7 +76,11 @@ export default function MovieDetails() {
       <div className="movie-content">
         <div className="hero">
           <div className="media">
-            <img src={`https://image.tmdb.org/t/p/w780${movie.poster}`} alt={movie.title} />
+            {movie.poster ? (
+              <img src={`https://image.tmdb.org/t/p/w780${movie.poster}`} alt={movie.title} />
+            ) : (
+              <div className="no-poster">Poster not available</div>
+            )}
           </div>
 
           <div className="info">
