@@ -11,6 +11,11 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/showtime" element={<App />} />
+        <Route path="/family" element={<App />} />
+        <Route path="/birthday" element={<App />} />
+        <Route path="/vaartkino" element={<App />} />
+        <Route path="/pancake-morning" element={<App />} />
+        <Route path="/events" element={<App />} />
         <Route path="/admin" element={<App />} />
         <Route path="/movie/:id" element={<MovieDetails />} />
       </Routes>

@@ -1,7 +1,7 @@
 import "./index.css";
 import "./App.css";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HeroBanner from "./components/HeroBanner";
 import Showtimes from "./components/Showtimes";
 import TopMovies from "./components/TopMovies";
@@ -11,17 +11,32 @@ import ComingSoon from "./components/ComingSoon";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import AdminDashboard from "./components/AdminDashboard";
+import FamilyScreeningPage from "./components/FamilyScreeningPage";
+import BirthdayPage from "./components/BirthdayPage";
+import VaartKinoPage from "./components/VaartKinoPage";
+import PancakeMorningPage from "./components/PancakeMorningPage";
+import EventsPage from "./components/EventsPage";
 
 function App() {
   const location = useLocation();
   const isShowtime = location.pathname === "/showtime";
   const isAdmin = location.pathname === "/admin";
+  const isFamily = location.pathname === "/family";
+  const isBirthday = location.pathname === "/birthday";
+  const isVaart = location.pathname === "/vaartkino";
+  const isPancake = location.pathname === "/pancake-morning";
+  const isEvents = location.pathname === "/events";
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedMovies, setSelectedMovies] = useState([]);
   const [genreLoading, setGenreLoading] = useState(false);
+
+  // Ensure route changes land at the top of the page
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname, location.search]);
 
   const getPosterUrl = (poster, size = 'w500') => {
     if (!poster) return `https://via.placeholder.com/${size === 'w780' ? '640x360' : '300x450'}?text=No+Image`;
@@ -104,6 +119,36 @@ function App() {
         <Showtimes />
       </main>
     );
+  } else if (isFamily) {
+    content = (
+      <main className="main-content">
+        <FamilyScreeningPage />
+      </main>
+    );
+  } else if (isBirthday) {
+    content = (
+      <main className="main-content">
+        <BirthdayPage />
+      </main>
+    );
+  } else if (isVaart) {
+    content = (
+      <main className="main-content">
+        <VaartKinoPage />
+      </main>
+    );
+  } else if (isPancake) {
+    content = (
+      <main className="main-content">
+        <PancakeMorningPage />
+      </main>
+    );
+  } else if (isEvents) {
+    content = (
+      <main className="main-content">
+        <EventsPage />
+      </main>
+    );
   } else {
     content = (
       <main className="site-container main-content">
@@ -131,7 +176,7 @@ function App() {
               <Link to="/showtime">Showtime</Link>
               <a href="#">Cinemas</a>
               <a href="#">Movies</a>
-              <a href="#">Events</a>
+              <Link to="/events" className={isEvents ? "showtimes-active" : ""}>Events</Link>
               <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
               <a
                 href="#gifts"

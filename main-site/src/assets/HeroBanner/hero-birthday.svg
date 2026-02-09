@@ -1,0 +1,33 @@
+<svg width="1680" height="440" viewBox="0 0 1680 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Absolute Cinema sünnipäev">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f9f2e8" />
+      <stop offset="50%" stop-color="#f4e9dc" />
+      <stop offset="100%" stop-color="#f9f2e8" />
+    </linearGradient>
+    <radialGradient id="gold" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#f9d9a8" />
+      <stop offset="50%" stop-color="#e0b980" />
+      <stop offset="100%" stop-color="#c99a5c" />
+    </radialGradient>
+  </defs>
+  <rect width="1680" height="440" fill="url(#bg)" />
+  <g opacity="0.16" fill="#d6b98a">
+    <circle cx="120" cy="120" r="6" />
+    <circle cx="220" cy="60" r="4" />
+    <circle cx="480" cy="110" r="5" />
+    <circle cx="860" cy="60" r="4" />
+    <circle cx="1230" cy="130" r="6" />
+    <circle cx="1480" cy="90" r="5" />
+    <circle cx="300" cy="200" r="4" />
+    <circle cx="960" cy="200" r="6" />
+    <circle cx="1380" cy="230" r="4" />
+  </g>
+  <g opacity="0.9">
+    <ellipse cx="210" cy="330" rx="130" ry="120" fill="url(#gold)" opacity="0.45" />
+    <ellipse cx="1440" cy="140" rx="150" ry="140" fill="url(#gold)" opacity="0.55" />
+    <ellipse cx="1180" cy="260" rx="110" ry="120" fill="url(#gold)" opacity="0.5" />
+  </g>
+  <text x="120" y="150" fill="#111" font-size="74" font-family="'Playfair Display', 'Times New Roman', serif" font-weight="700">Absolute Cinema Mustamäe:</text>
+  <text x="120" y="270" fill="#0f0f0f" font-size="182" font-family="'Playfair Display', 'Times New Roman', serif" font-weight="700">Sünnipäev</text>
+</svg>
