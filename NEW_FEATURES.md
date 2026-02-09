@@ -1,131 +1,131 @@
-# Новые Функции - Фильтрация, Места и Админ-Панель
+# New Features - Filtering, Seats and Admin Panel
 
-## 1. Фильтрация на Главной Странице (Showtimes)
+## 1. Filtering on Main Page (Showtimes)
 
-### Добавлены фильтры:
-- **Город** - автоматически извлекается из названия кинотеатра (Tallinn, Tartu и др.)
-- **Дата** - выбор из 7 дней вперед (уже была)
-- **Жанр** - динамически загружается из БД, фильтрует сеансы по выбранному жанру
+### Added filters:
+- **City** - automatically extracted from cinema name (Tallinn, Tartu, etc.)
+- **Date** - selection from 7 days forward (already existed)
+- **Genre** - dynamically loaded from DB, filters sessions by selected genre
 
-### Как это работает:
+### How it works:
 ```javascript
-// Города автоматически определяются из поля cinema в БД
-// Жанры получаются из поля genres сеансов
-// Фильтрация происходит в реальном времени при изменении фильтров
+// Cities automatically identified from cinema field in DB
+// Genres obtained from genres field in sessions
+// Filtering happens in real time when filters change
 ```
 
-### Компонент: `main-site/src/components/Showtimes.jsx`
+### Component: `main-site/src/components/Showtimes.jsx`
 
 ---
 
-## 2. Система Мест (SeatMap)
+## 2. Seat System (SeatMap)
 
-### Функциональность:
-- **Визуальная схема мест** - 10 рядов × 15 мест
-- **Статусы мест:**
-  - 🟢 Зеленые - свободные (можно выбрать)
-  - 🔴 Красные - занятые (недоступны)
-  - 🟣 Фиолетовые - выбранные (с подсветкой)
+### Functionality:
+- **Visual seat map** - 10 rows × 15 seats
+- **Seat statuses:**
+  - 🟢 Green - available (can select)
+  - 🔴 Red - occupied (unavailable)
+  - 🟣 Purple - selected (highlighted)
 
-- **Информация о ценах** - 12€ за место
-- **Список выбранных мест** - отображает выбранные места (A1, B5 и т.д.)
-- **Легенда** - объясняет значение каждого цвета
+- **Price information** - €12 per seat
+- **List of selected seats** - displays selected seats (A1, B5, etc.)
+- **Legend** - explains meaning of each color
 
-### Как использовать:
+### How to use:
 ```jsx
 import SeatMap from "./SeatMap";
 
-// В компоненте
+// In component
 <SeatMap 
   sessionId={session.id}
   onClose={() => setShowSeatMap(false)}
 />
 ```
 
-### Компонент: 
+### Component: 
 - `main-site/src/components/SeatMap.jsx`
 - `main-site/src/components/SeatMap.css`
 
-### Интеграция:
-- Компонент `SessionCard` теперь открывает SeatMap при клике на "Buy Tickets"
+### Integration:
+- SessionCard component now opens SeatMap when "Buy Tickets" is clicked
 
 ---
 
-## 3. Админ-Панель
+## 3. Admin Panel
 
-### Структура:
+### Structure:
 ```
 Admin Dashboard
-├── Overview (основной экран со статистикой)
-├── Movies Management (список фильмов)
-├── Sessions Management (список сеансов)
-├── Add New Movie (форма добавления фильма)
-├── Add New Session (форма добавления сеанса)
-└── Settings (конфигурация и отчеты)
+├── Overview (main screen with statistics)
+├── Movies Management (movie list)
+├── Sessions Management (session list)
+├── Add New Movie (add movie form)
+├── Add New Session (add session form)
+└── Settings (configuration and reports)
 ```
 
 ### 📊 Dashboard Overview
-Показывает:
-- Количество фильмов в БД
-- Активные сеансы
-- Кинотеатры
-- Доход за сегодня
-- Быстрые действия
+Shows:
+- Number of movies in DB
+- Active sessions
+- Cinemas
+- Revenue for today
+- Quick actions
 
-### 🎬 Управление Фильмами
+### 🎬 Movie Management
 
-#### Форма добавления фильма включает:
-- ✓ Название фильма (обязательное)
-- ✓ Оригинальное название
-- ✓ Описание (обязательное)
-- ✓ Постер URL (обязательное)
-- ✓ Длительность в минутах (обязательное)
-- ✓ Дата релиза (обязательное)
-- ✓ Жанр (обязательное - выбор из списка)
-- ✓ Рейтинг IMDb (опционально)
-- ✓ Режиссеры (опционально)
+#### Add Movie form includes:
+- ✓ Movie title (required)
+- ✓ Original title
+- ✓ Description (required)
+- ✓ Poster URL (required)
+- ✓ Duration in minutes (required)
+- ✓ Release date (required)
+- ✓ Genre (required - select from list)
+- ✓ IMDb rating (optional)
+- ✓ Directors (optional)
 
-#### Список фильмов показывает:
-- Постер фильма
-- Название
-- Описание
-- Жанр
-- Кнопки действий (Edit, Delete)
+#### Movie list shows:
+- Movie poster
+- Title
+- Description
+- Genre
+- Action buttons (Edit, Delete)
 
-### 🎫 Управление Сеансами
+### 🎫 Session Management
 
-#### Форма добавления сеанса включает:
-- ✓ Выбор фильма (обязательное)
-- ✓ Выбор кинотеатра (обязательное)
-- ✓ Дата сеанса (обязательное)
-- ✓ Время сеанса (обязательное)
-- ✓ Номер зала (по умолчанию 1)
-- ✓ Доступные места (обязательное)
-- ✓ Язык (по умолчанию Estonian)
-- ✓ Субтитры (опционально)
-- ✓ Формат (2D, 3D, IMAX, 4DX)
+#### Add Session form includes:
+- ✓ Movie selection (required)
+- ✓ Cinema selection (required)
+- ✓ Session date (required)
+- ✓ Session time (required)
+- ✓ Hall number (default 1)
+- ✓ Available seats (required)
+- ✓ Language (default Estonian)
+- ✓ Subtitles (optional)
+- ✓ Format (2D, 3D, IMAX, 4DX)
 
-#### Список сеансов показывает:
-- Название фильма
-- Кинотеатр
-- Дату и время
-- Номер зала
-- Количество свободных мест (с цветовым кодом)
-- Язык и формат
-- Кнопки действий (Edit, Delete)
+#### Session list shows:
+- Movie title
+- Cinema
+- Date and time
+- Hall number
+- Number of free seats (with color code)
+- Language and format
+- Action buttons (Edit, Delete)
 
-### Компоненты:
+### Components:
 ```
 admin-worker-site/src/components/
-├── AdminDashboard.jsx (главный компонент)
+├── AdminDashboard.jsx (main component)
 ├── AdminDashboard.css
-├── AddMovieForm.jsx (форма добавления фильма)
+├── AddMovieForm.jsx (add movie form)
 ├── AddMovieForm.css
-├── AddSessionForm.jsx (форма добавления сеанса)
+├── AddSessionForm.jsx (add session form)
 ├── AddSessionForm.css
-├── MoviesList.jsx (список фильмов)
+├── MoviesList.jsx (movie list)
 ├── MoviesList.css
-├── SessionsList.jsx (список сеансов)
+├── SessionsList.jsx (session list)
 └── SessionsList.css
 ```
 
@@ -133,13 +133,13 @@ admin-worker-site/src/components/
 
 ## 4. API Endpoints
 
-### GET Endpoints (существовали):
-- `GET /api/movies/top` - топ 20 фильмов
-- `GET /api/sessions` - все сеансы
-- `GET /api/sessions/:id/seats` - **НОВЫЙ** - места для сеанса
+### GET Endpoints (existing):
+- `GET /api/movies/top` - top 20 movies
+- `GET /api/sessions` - all sessions
+- `GET /api/sessions/:id/seats` - **NEW** - seats for session
 
-### POST Endpoints (новые):
-- `POST /api/movies` - добавить новый фильм
+### POST Endpoints (new):
+- `POST /api/movies` - add new movie
   ```json
   {
     "title": "Movie Title",
@@ -154,7 +154,7 @@ admin-worker-site/src/components/
   }
   ```
 
-- `POST /api/sessions` - добавить новый сеанс
+- `POST /api/sessions` - add new session
   ```json
   {
     "movieId": 1,
@@ -171,27 +171,27 @@ admin-worker-site/src/components/
 
 ---
 
-## 5. Дизайн и UI
+## 5. Design and UI
 
-### Цветовая схема:
-- Основной цвет: **#00d084** (зелёный - primary actions)
-- Фон: **#0f0f0f**, **#1a1a1a** (тёмный)
-- Текст: **#fff**, **#ddd**, **#aaa** (разные уровни)
-- Ошибки: **#ff4444** (красный)
-- Предупреждения: **#ff8800** (оранжевый)
+### Color scheme:
+- Main color: **#00d084** (green - primary actions)
+- Background: **#0f0f0f**, **#1a1a1a** (dark)
+- Text: **#fff**, **#ddd**, **#aaa** (different levels)
+- Errors: **#ff4444** (red)
+- Warnings: **#ff8800** (orange)
 
-### Адаптивность:
-- ✓ Полная поддержка мобильных устройств
-- ✓ Адаптивная админ-панель (боковая навигация переходит в горизонтальную на мобильных)
-- ✓ SeatMap оптимизирован для сенсорных экранов
-- ✓ Таблицы скрывают колонки на маленьких экранах
+### Responsiveness:
+- ✓ Full mobile device support
+- ✓ Responsive admin panel (side nav becomes horizontal on mobile)
+- ✓ SeatMap optimized for touch screens
+- ✓ Tables hide columns on small screens
 
 ---
 
-## 6. Примечания
+## 6. Notes
 
-### Для работы SeatMap API:
-Эндпоинт `/api/sessions/:id/seats` возвращает:
+### For SeatMap API:
+Endpoint `/api/sessions/:id/seats` returns:
 ```json
 {
   "sessionInfo": {
@@ -212,26 +212,26 @@ admin-worker-site/src/components/
 }
 ```
 
-### Валидация форм:
-- Все обязательные поля помечены звездочкой (*)
-- Клиент-сторонняя валидация перед отправкой
-- Сервер-сторонняя валидация с обработкой ошибок
+### Form validation:
+- All required fields marked with asterisk (*)
+- Client-side validation before submission
+- Server-side validation with error handling
 
-### Состояния загрузки:
-- Кнопки отключаются при загрузке
-- Текст кнопки меняется на "Loading..."
-- Показывается сообщение об ошибке при неудаче
+### Loading states:
+- Buttons disabled during loading
+- Button text changes to "Loading..."
+- Error message shown on failure
 
 ---
 
-## 7. TODO Функции (для будущих улучшений)
+## 7. TODO Features (for future improvements)
 
-- [ ] Edit фильма/сеанса
-- [ ] Delete фильма/сеанса (с подтверждением)
-- [ ] Поиск по названию
-- [ ] Сортировка в таблицах
-- [ ] Пагинация
-- [ ] Экспорт отчетов
-- [ ] Синхронизация между вкладками (если один админ изменил данные)
-- [ ] Система уведомлений
-- [ ] Архивирование сеансов
+- [ ] Edit movie/session
+- [ ] Delete movie/session (with confirmation)
+- [ ] Search by name
+- [ ] Sorting in tables
+- [ ] Pagination
+- [ ] Export reports
+- [ ] Sync between tabs (if one admin changes data)
+- [ ] Notification system
+- [ ] Archive sessions

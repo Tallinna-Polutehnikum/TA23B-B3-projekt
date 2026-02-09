@@ -1,46 +1,46 @@
-# 📑 Быстрая Справочная Таблица
+# 📑 Quick Reference Table
 
-## Файлы и Что Они Содержат
+## Files and What They Contain
 
-| Файл | Размер | Описание | Для Кого | Время |
+| File | Size | Description | For Whom | Time |
 |------|--------|---------|----------|-------|
-| [CHEATSHEET.md](CHEATSHEET.md) | 📄 | Шпаргалка | Разработчики | 5 мин |
-| [QUICKSTART.md](QUICKSTART.md) | 📄 | Быстрый старт | Все | 10 мин |
-| [NEW_FEATURES.md](NEW_FEATURES.md) | 📖 | Полное описание | Product Managers | 30 мин |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | 📖 | Архитектура | Архитекторы | 45 мин |
-| [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md) | ✅ | Тестирование | QA/Тестировщики | 2 часа |
-| [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) | 📊 | Резюме | Лидеры | 20 мин |
-| [FILES_MANIFEST.md](FILES_MANIFEST.md) | 📋 | Список файлов | Разработчики | 15 мин |
-| [DATABASE_SETUP.sql](DATABASE_SETUP.sql) | 🗄️ | БД миграции | DBA | 10 мин |
-| [UPDATES_README.md](UPDATES_README.md) | 📘 | Обзор | Все | 15 мин |
-| [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) | 🗂️ | Навигатор | Все | 5 мин |
+| [CHEATSHEET.md](CHEATSHEET.md) | 📄 | Cheat sheet | Developers | 5 min |
+| [QUICKSTART.md](QUICKSTART.md) | 📄 | Quick start | Everyone | 10 min |
+| [NEW_FEATURES.md](NEW_FEATURES.md) | 📖 | Full description | Product Managers | 30 min |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | 📖 | Architecture | Architects | 45 min |
+| [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md) | ✅ | Testing | QA/Testers | 2 hours |
+| [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) | 📊 | Summary | Leaders | 20 min |
+| [FILES_MANIFEST.md](FILES_MANIFEST.md) | 📋 | File list | Developers | 15 min |
+| [DATABASE_SETUP.sql](DATABASE_SETUP.sql) | 🗄️ | DB migrations | DBA | 10 min |
+| [UPDATES_README.md](UPDATES_README.md) | 📘 | Overview | Everyone | 15 min |
+| [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) | 🗂️ | Navigator | Everyone | 5 min |
 
 ---
 
-## Функции и Где Их Найти
+## Features and Where to Find Them
 
-| Функция | Файл | Раздел | Статус |
+| Feature | File | Section | Status |
 |---------|------|--------|--------|
-| Фильтрация | NEW_FEATURES.md | #1 | ✅ |
-| Выбор мест | NEW_FEATURES.md | #2 | ✅ |
-| Админ-панель | NEW_FEATURES.md | #3 | ✅ |
+| Filtering | NEW_FEATURES.md | #1 | ✅ |
+| Seat selection | NEW_FEATURES.md | #2 | ✅ |
+| Admin panel | NEW_FEATURES.md | #3 | ✅ |
 | API | NEW_FEATURES.md | #4 | ✅ |
-| Дизайн | IMPLEMENTATION_SUMMARY.md | #🎨 | ✅ |
-| Edit/Delete | IMPLEMENTATION_SUMMARY.md | Планы | 🔮 |
+| Design | IMPLEMENTATION_SUMMARY.md | #🎨 | ✅ |
+| Edit/Delete | IMPLEMENTATION_SUMMARY.md | Plans | 🔮 |
 
 ---
 
-## Компоненты React
+## React Components
 
 ### Main Site
-| Компонент | Файл | Новое | Изменено | Статус |
+| Component | File | New | Changed | Status |
 |-----------|------|-------|----------|--------|
 | Showtimes | main-site/src/components/ | ❌ | ✅ | ✅ |
 | SessionCard | main-site/src/components/ | ❌ | ✅ | ✅ |
 | SeatMap | main-site/src/components/ | ✅ | ❌ | ✅ |
 
 ### Admin Site
-| Компонент | Файл | Новое | Статус |
+| Component | File | New | Status |
 |-----------|------|-------|--------|
 | AdminDashboard | admin-worker-site/src/components/ | ✅ | ✅ |
 | AddMovieForm | admin-worker-site/src/components/ | ✅ | ✅ |
@@ -53,23 +53,23 @@
 ## API Endpoints
 
 ### GET Endpoints
-| Endpoint | URL | Описание | Статус |
+| Endpoint | URL | Description | Status |
 |----------|-----|---------|--------|
-| Sessions | GET /api/sessions | Все сеансы | ✅ обновлено |
-| Seats | GET /api/sessions/:id/seats | Места сеанса | ✅ новое |
-| Movies | GET /api/movies/top | Топ фильмов | ✅ |
+| Sessions | GET /api/sessions | All sessions | ✅ updated |
+| Seats | GET /api/sessions/:id/seats | Session seats | ✅ new |
+| Movies | GET /api/movies/top | Top movies | ✅ |
 
 ### POST Endpoints
-| Endpoint | URL | Описание | Статус |
+| Endpoint | URL | Description | Status |
 |----------|-----|---------|--------|
-| Add Movie | POST /api/movies | Добавить фильм | ✅ новое |
-| Add Session | POST /api/sessions | Добавить сеанс | ✅ новое |
+| Add Movie | POST /api/movies | Add movie | ✅ new |
+| Add Session | POST /api/sessions | Add session | ✅ new |
 
 ---
 
-## Быстрые Команды
+## Quick Commands
 
-### Запуск
+### Start
 ```bash
 # Backend
 cd main-site && npm install && node server/index.js
@@ -81,7 +81,7 @@ cd main-site && npm run dev
 cd admin-worker-site && npm run dev
 ```
 
-### Проверка API
+### Check API
 ```bash
 # Sessions
 curl http://localhost:4000/api/sessions
@@ -97,9 +97,9 @@ curl -X POST http://localhost:4000/api/movies \
 
 ---
 
-## Портативные Ссылки
+## Portable Links
 
-| Сервис | Адрес | Порт |
+| Service | Address | Port |
 |--------|-------|------|
 | Backend API | http://localhost:4000 | 4000 |
 | Main Site | http://localhost:5173/showtime | 5173 |
@@ -109,43 +109,43 @@ curl -X POST http://localhost:4000/api/movies \
 
 ---
 
-## Цвета (HEX)
+## Colors (HEX)
 
-| Название | HEX | RGB | Использование |
-|----------|-----|-----|----------------|
-| Primary Green | #00d084 | (0, 208, 132) | Кнопки, активные |
-| Dark | #0f0f0f | (15, 15, 15) | Основной фон |
-| Dark Secondary | #1a1a1a | (26, 26, 26) | Карточки |
-| Dark Tertiary | #2a2a2a | (42, 42, 42) | Вторичный фон |
-| Border | #333 | (51, 51, 51) | Границы |
-| Text Primary | #fff | (255, 255, 255) | Основной текст |
-| Text Secondary | #ddd | (221, 221, 221) | Вторичный |
-| Text Tertiary | #aaa | (170, 170, 170) | Третичный |
-| Error | #ff4444 | (255, 68, 68) | Ошибки |
-| Warning | #ff8800 | (255, 136, 0) | Предупреждения |
-
----
-
-## Статистика
-
-| Метрика | Значение |
-|---------|----------|
-| Новых файлов | 15 |
-| Обновлено файлов | 5 |
-| Документов | 10 |
-| Новых компонентов | 10 |
-| Строк кода (примерно) | 2000+ |
-| Строк документации | 3000+ |
-| Версия | 1.0.0 |
-| Статус | ✅ Ready |
+| Name | HEX | RGB | Usage |
+|------|-----|-----|-------|
+| Primary Green | #00d084 | (0, 208, 132) | Buttons, active |
+| Dark | #0f0f0f | (15, 15, 15) | Main background |
+| Dark Secondary | #1a1a1a | (26, 26, 26) | Cards |
+| Dark Tertiary | #2a2a2a | (42, 42, 42) | Secondary background |
+| Border | #333 | (51, 51, 51) | Borders |
+| Text Primary | #fff | (255, 255, 255) | Main text |
+| Text Secondary | #ddd | (221, 221, 221) | Secondary |
+| Text Tertiary | #aaa | (170, 170, 170) | Tertiary |
+| Error | #ff4444 | (255, 68, 68) | Errors |
+| Warning | #ff8800 | (255, 136, 0) | Warnings |
 
 ---
 
-## Версии и Требования
+## Statistics
 
-| Требование | Версия | Статус |
+| Metric | Value |
+|--------|-------|
+| New files | 15 |
+| Updated files | 5 |
+| Documentation | 10 |
+| New components | 10 |
+| Lines of code (approx) | 2000+ |
+| Lines of documentation | 3000+ |
+| Version | 1.0.0 |
+| Status | ✅ Ready |
+
+---
+
+## Versions and Requirements
+
+| Requirement | Version | Status |
 |-----------|--------|--------|
-| Node.js | 14+ (рекомендуется 18+) | ✅ |
+| Node.js | 14+ (recommend 18+) | ✅ |
 | npm | 6+ | ✅ |
 | React | ^18.x | ✅ |
 | Vite | latest | ✅ |
@@ -153,37 +153,37 @@ curl -X POST http://localhost:4000/api/movies \
 
 ---
 
-## Чек-лист Запуска
+## Startup Checklist
 
-- [ ] Node.js установлен
-- [ ] npm установлен
-- [ ] БД в `database/db.sqlite`
-- [ ] `npm install` в main-site
-- [ ] `npm install` в admin-worker-site
-- [ ] Запустить backend `node server/index.js`
-- [ ] Запустить main-site `npm run dev`
-- [ ] Запустить admin-site `npm run dev`
-- [ ] Проверить http://localhost:5173/showtime
-- [ ] Проверить http://localhost:5174
-- [ ] Тестировать по TESTING_CHECKLIST.md
-
----
-
-## Решение Проблем
-
-| Проблема | Команда | Результат |
-|----------|---------|-----------|
-| Нет зависимостей | `npm install` | Установка пакетов |
-| Ошибка CSS | Ctrl+Shift+Del | Очистка кэша |
-| Порт занят | Изменить в `server/index.js` | Новый порт |
-| БД не найдена | Проверить path в `server/index.js` | Правильный path |
-| API 404 | Запустить backend | API доступен |
+- [ ] Node.js installed
+- [ ] npm installed
+- [ ] Database at `database/db.sqlite`
+- [ ] `npm install` in main-site
+- [ ] `npm install` in admin-worker-site
+- [ ] Start backend `node server/index.js`
+- [ ] Start main-site `npm run dev`
+- [ ] Start admin-site `npm run dev`
+- [ ] Check http://localhost:5173/showtime
+- [ ] Check http://localhost:5174
+- [ ] Test with TESTING_CHECKLIST.md
 
 ---
 
-## Размеры Компонентов
+## Troubleshooting
 
-| Компонент | JSX | CSS | Всего |
+| Problem | Command | Result |
+|----------|---------|--------|
+| Missing dependencies | `npm install` | Install packages |
+| CSS error | Ctrl+Shift+Del | Clear cache |
+| Port in use | Change in `server/index.js` | New port |
+| DB not found | Check path in `server/index.js` | Correct path |
+| API 404 | Start backend | API available |
+
+---
+
+## Component Sizes
+
+| Component | JSX | CSS | Total |
 |-----------|-----|-----|-------|
 | SeatMap | ~150 | ~300 | ~450 |
 | AdminDashboard | ~200 | ~400 | ~600 |
@@ -191,80 +191,80 @@ curl -X POST http://localhost:4000/api/movies \
 | AddSessionForm | ~130 | ~50 | ~180 |
 | MoviesList | ~40 | ~100 | ~140 |
 | SessionsList | ~50 | ~120 | ~170 |
-| **ВСЕГО** | **~690** | **~1070** | **~1760** |
+| **TOTAL** | **~690** | **~1070** | **~1760** |
 
 ---
 
-## Ответственность по Модулям
+## Module Responsibilities
 
-| Модуль | Ответственный | Файлы |
-|--------|---------------|-------|
-| Фильтрация | Frontend | Showtimes.jsx |
-| Места | Frontend | SeatMap.jsx, SeatMap.css |
-| Админ-панель | Frontend | AdminDashboard.jsx, components |
-| API фильмов | Backend | server/index.js |
-| API сеансов | Backend | server/index.js |
-| БД | Database | database/db.sqlite |
+| Module | Responsible | Files |
+|--------|--------------|-------|
+| Filtering | Frontend | Showtimes.jsx |
+| Seats | Frontend | SeatMap.jsx, SeatMap.css |
+| Admin panel | Frontend | AdminDashboard.jsx, components |
+| Movie API | Backend | server/index.js |
+| Session API | Backend | server/index.js |
+| Database | Database | database/db.sqlite |
 
 ---
 
-## Кроссбраузерная Поддержка
+## Cross-Browser Support
 
-| Браузер | Chrome | Firefox | Safari | Edge |
+| Browser | Chrome | Firefox | Safari | Edge |
 |---------|--------|---------|--------|------|
-| Поддержка | ✅ | ✅ | ✅ | ✅ |
-| Версия | 90+ | 88+ | 14+ | 90+ |
+| Support | ✅ | ✅ | ✅ | ✅ |
+| Version | 90+ | 88+ | 14+ | 90+ |
 
 ---
 
-## Адаптивность
+## Responsiveness
 
-| Размер | Ширина | Поддержка | CSS |
-|--------|--------|-----------|-----|
-| Мобильный | < 768px | ✅ Полная | @media (max-width: 768px) |
-| Планшет | 768-1024px | ✅ Полная | @media (max-width: 1024px) |
-| Десктоп | > 1024px | ✅ Полная | @media (min-width: 1024px) |
+| Size | Width | Support | CSS |
+|--------|--------|----------|-----|
+| Mobile | < 768px | ✅ Full | @media (max-width: 768px) |
+| Tablet | 768-1024px | ✅ Full | @media (max-width: 1024px) |
+| Desktop | > 1024px | ✅ Full | @media (min-width: 1024px) |
 
 ---
 
-## Производительность (Target)
+## Performance (Target)
 
-| Метрика | Target | Статус |
-|---------|--------|--------|
-| API запрос | < 1 сек | ✅ |
+| Metric | Target | Status |
+|--------|--------|--------|
+| API request | < 1 sec | ✅ |
 | Load SeatMap | < 100ms | ✅ |
-| Фильтрация | Real-time | ✅ |
-| Таблица (100 rows) | < 500ms | ✅ |
+| Filtering | Real-time | ✅ |
+| Table (100 rows) | < 500ms | ✅ |
 
 ---
 
-## Безопасность
+## Security
 
-| Аспект | Статус | Примечание |
-|--------|--------|-----------|
-| SQL Injection | ✅ | Используются prepared statements |
-| XSS | ⚠️ | React по умолчанию |
-| CORS | ✅ | Настроена на backend |
-| Валидация | ✅ | На клиенте и сервере |
-| Аутентификация | ❌ | Требуется добавить |
-| Авторизация | ❌ | Требуется добавить |
-| HTTPS | ❌ | Для production |
-
----
-
-## Документация по Частям
-
-| Часть | Файл | Объем | Сложность |
-|-------|------|--------|-----------|
-| Функции | NEW_FEATURES.md | 📖 | Средняя |
-| Архитектура | ARCHITECTURE.md | 📖 | Высокая |
-| Быстрый старт | QUICKSTART.md | 📄 | Низкая |
-| Список файлов | FILES_MANIFEST.md | 📄 | Низкая |
-| Тестирование | TESTING_CHECKLIST.md | ✅ | Средняя |
-| Шпаргалка | CHEATSHEET.md | 📄 | Низкая |
+| Aspect | Status | Note |
+|--------|--------|------|
+| SQL Injection | ✅ | Using prepared statements |
+| XSS | ⚠️ | React by default |
+| CORS | ✅ | Configured on backend |
+| Validation | ✅ | Client and server side |
+| Authentication | ❌ | Need to add |
+| Authorization | ❌ | Need to add |
+| HTTPS | ❌ | For production |
 
 ---
 
-**Версия:** 1.0  
-**Дата:** 5 февраля 2026  
-**Статус:** ✅ Complete & Ready
+## Documentation by Section
+
+| Section | File | Volume | Complexity |
+|---------|------|--------|------------|
+| Features | NEW_FEATURES.md | 📖 | Medium |
+| Architecture | ARCHITECTURE.md | 📖 | High |
+| Quick start | QUICKSTART.md | 📄 | Low |
+| File list | FILES_MANIFEST.md | 📄 | Low |
+| Testing | TESTING_CHECKLIST.md | ✅ | Medium |
+| Cheat sheet | CHEATSHEET.md | 📄 | Low |
+
+---
+
+**Version:** 1.0  
+**Date:** February 5, 2026  
+**Status:** ✅ Complete & Ready

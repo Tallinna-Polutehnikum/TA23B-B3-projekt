@@ -1,10 +1,10 @@
-# Запуск Новых Функций
+# Quick Start for New Features
 
-## Для Главной Страницы (Main Site)
+## For Main Page (Main Site)
 
-### 1. Фильтрация и Места
+### 1. Filtering and Seats
 
-Новые компоненты уже интегрированы! Просто запустите main-site:
+New components are already integrated! Just start the main-site:
 
 ```bash
 cd main-site
@@ -12,30 +12,31 @@ npm install
 npm run dev
 ```
 
-Функции доступны на странице `/showtime`:
-- **Фильтрация по городу** - выпадающий список городов
-- **Фильтрация по жанру** - выпадающий список жанров
-- **Выбор мест** - кнопка "Buy Tickets" на каждом сеансе
+Features available on page `/showtime`:
+- **Filtering by city** - city dropdow
+n list
+- **Filtering by genre** - genre dropdown list
+- **Seat selection** - "Buy Tickets" button on each session
 
-### 2. API для мест
+### 2. API for seats
 
-Эндпоинт уже добавлен в сервер:
+Endpoint already added to server:
 
 ```bash
-# Убедитесь, что запущен сервер main-site
+# Make sure backend is started
 cd main-site
-npm run dev  # или node server/index.js
+npm run dev  # or node server/index.js
 ```
 
-API доступен на:
+API available at:
 - `http://localhost:4000/api/sessions`
 - `http://localhost:4000/api/sessions/{id}/seats`
 
 ---
 
-## Для Админ-Панели (Admin Worker Site)
+## For Admin Panel (Admin Worker Site)
 
-### 1. Запуск админ-панели
+### 1. Start admin panel
 
 ```bash
 cd admin-worker-site
@@ -43,39 +44,39 @@ npm install
 npm run dev
 ```
 
-### 2. Доступные страницы
+### 2. Available pages
 
-- **Dashboard** (`/`) - основной экран со статистикой
-- **Movies** (`/movies`) - управление фильмами
-- **Sessions** (`/sessions`) - управление сеансами
-- **Add Movie** (`/add-movie`) - форма добавления фильма
-- **Add Session** (`/add-session`) - форма добавления сеанса
+- **Dashboard** (`/`) - main screen with statistics
+- **Movies** (`/movies`) - movie management
+- **Sessions** (`/sessions`) - session management
+- **Add Movie** (`/add-movie`) - add movie form
+- **Add Session** (`/add-session`) - add session form
 
-### 3. Используемые API эндпоинты
+### 3. Used API endpoints
 
-Админ-панель отправляет запросы на:
-- `GET /api/movies/top` - получить список фильмов
-- `GET /api/sessions` - получить список сеансов
-- `POST /api/movies` - добавить новый фильм
-- `POST /api/sessions` - добавить новый сеанс
+Admin panel sends requests to:
+- `GET /api/movies/top` - get movie list
+- `GET /api/sessions` - get session list
+- `POST /api/movies` - add new movie
+- `POST /api/sessions` - add new session
 
 ---
 
-## Backend API обновлен
+## Backend API updated
 
-### Запуск сервера
+### Start server
 
 ```bash
 cd main-site
 npm install
 node server/index.js
-# или с контролем ошибок:
+# or with error handling:
 npm run dev
 ```
 
-### Новые POST endpoints:
+### New POST endpoints:
 
-#### Добавить фильм
+#### Add Movie
 ```bash
 curl -X POST http://localhost:4000/api/movies \
   -H "Content-Type: application/json" \
@@ -91,7 +92,7 @@ curl -X POST http://localhost:4000/api/movies \
   }'
 ```
 
-#### Добавить сеанс
+#### Add Session
 ```bash
 curl -X POST http://localhost:4000/api/sessions \
   -H "Content-Type: application/json" \
@@ -110,131 +111,131 @@ curl -X POST http://localhost:4000/api/sessions \
 
 ---
 
-## Проверка интеграции
+## Integration Check
 
-### 1. Проверить фильтры на main-site
+### 1. Check filters on main-site
 ```
-1. Откройте http://localhost:5173/showtime (или ваш порт)
-2. Должны отображаться:
-   - Выпадающий список городов
-   - Выпадающий список жанров
-   - Дни недели (как раньше)
-3. Нажмите на любой "Buy Tickets" - должна открыться схема мест
-```
-
-### 2. Проверить админ-панель
-```
-1. Откройте http://localhost:5174 (или ваш порт)
-2. Вы должны увидеть:
-   - Боковую навигацию с пунктами меню
-   - Overview с статистикой
-   - Кнопки для добавления фильма/сеанса
+1. Open http://localhost:5173/showtime (or your port)
+2. Should display:
+   - City dropdown list
+   - Genre dropdown list
+   - Days of week (as before)
+3. Click any "Buy Tickets" - seat map should open
 ```
 
-### 3. Проверить API
+### 2. Check admin panel
+```
+1. Open http://localhost:5174 (or your port)
+2. You should see:
+   - Sidebar navigation with menu items
+   - Overview with statistics
+   - Buttons to add movie/session
+```
+
+### 3. Check API
 ```bash
-# Получить сеансы
+# Get sessions
 curl http://localhost:4000/api/sessions | jq
 
-# Получить места для сеанса ID 1
+# Get seats for session ID 1
 curl http://localhost:4000/api/sessions/1/seats | jq
 ```
 
 ---
 
-## Решение Проблем
+## Troubleshooting
 
-### Админ-панель не стартует
+### Admin panel doesn't start
 ```bash
-# Проверьте зависимости
+# Check dependencies
 cd admin-worker-site
 rm -rf node_modules package-lock.json
 npm install
 npm run dev
 ```
 
-### API возвращает 404
+### API returns 404
 ```
-- Убедитесь, что main-site сервер запущен на порту 4000
-- Проверьте базу данных db.sqlite в папке database/
-```
-
-### Места не загружаются в SeatMap
-```
-- Проверьте в консоли браузера (F12) ошибки
-- API эндпоинт должен быть доступен на http://localhost:4000/api/sessions/{id}/seats
+- Make sure main-site backend server is running on port 4000
+- Check database db.sqlite exists in database/ folder
 ```
 
-### Таблицы в админ-панели пусты
+### Seats don't load in SeatMap
 ```
-- Убедитесь, что БД содержит записи
-- Проверьте запросы в консоли сервера
-- Попробуйте добавить первый фильм/сеанс вручную
+- Check browser console (F12) for errors
+- API endpoint should be available at http://localhost:4000/api/sessions/{id}/seats
+```
+
+### Tables in admin panel are empty
+```
+- Make sure DB contains records
+- Check server console for requests
+- Try adding first movie/session manually
 ```
 
 ---
 
-## Структура Папок
+## Folder Structure
 
 ```
 project/
 ├── main-site/
 │   ├── src/
 │   │   └── components/
-│   │       ├── Showtimes.jsx ✅ (обновлено с фильтрами)
-│   │       ├── SeatMap.jsx ✅ (новое)
-│   │       ├── SeatMap.css ✅ (новое)
-│   │       └── SessionCard.jsx ✅ (обновлено)
+│   │       ├── Showtimes.jsx ✅ (updated with filters)
+│   │       ├── SeatMap.jsx ✅ (new)
+│   │       ├── SeatMap.css ✅ (new)
+│   │       └── SessionCard.jsx ✅ (updated)
 │   ├── server/
-│   │   └── index.js ✅ (добавлены POST endpoints)
+│   │   └── index.js ✅ (added POST endpoints)
 │   └── package.json
 │
 ├── admin-worker-site/
 │   ├── src/
-│   │   ├── App.jsx ✅ (обновлено)
-│   │   ├── App.css ✅ (обновлено)
+│   │   ├── App.jsx ✅ (updated)
+│   │   ├── App.css ✅ (updated)
 │   │   └── components/
-│   │       ├── AdminDashboard.jsx ✅ (новое)
-│   │       ├── AdminDashboard.css ✅ (новое)
-│   │       ├── AddMovieForm.jsx ✅ (новое)
-│   │       ├── AddMovieForm.css ✅ (новое)
-│   │       ├── AddSessionForm.jsx ✅ (новое)
-│   │       ├── AddSessionForm.css ✅ (новое)
-│   │       ├── MoviesList.jsx ✅ (новое)
-│   │       ├── MoviesList.css ✅ (новое)
-│   │       ├── SessionsList.jsx ✅ (новое)
-│   │       └── SessionsList.css ✅ (новое)
+│   │       ├── AdminDashboard.jsx ✅ (new)
+│   │       ├── AdminDashboard.css ✅ (new)
+│   │       ├── AddMovieForm.jsx ✅ (new)
+│   │       ├── AddMovieForm.css ✅ (new)
+│   │       ├── AddSessionForm.jsx ✅ (new)
+│   │       ├── AddSessionForm.css ✅ (new)
+│   │       ├── MoviesList.jsx ✅ (new)
+│   │       ├── MoviesList.css ✅ (new)
+│   │       ├── SessionsList.jsx ✅ (new)
+│   │       └── SessionsList.css ✅ (new)
 │   └── package.json
 │
 ├── database/
 │   └── db.sqlite
 │
-└── NEW_FEATURES.md ✅ (документация)
+└── NEW_FEATURES.md ✅ (documentation)
 ```
 
 ---
 
-## Контрольный Список
+## Checklist
 
-- ✅ Фильтрация на главной странице (город, дата, жанр)
-- ✅ Компонент SeatMap для выбора мест
-- ✅ Admin Dashboard с меню
-- ✅ Форма добавления фильма
-- ✅ Форма добавления сеанса
-- ✅ Список фильмов в админ-панели
-- ✅ Список сеансов в админ-панели
-- ✅ API endpoints для добавления данных
-- ✅ API endpoint для получения мест
-- ✅ Адаптивный дизайн (mobile-friendly)
-- ✅ Документация
+- ✅ Filtering on main page (city, date, genre)
+- ✅ SeatMap component for seat selection
+- ✅ Admin Dashboard with menu
+- ✅ Add movie form
+- ✅ Add session form
+- ✅ Movie list in admin panel
+- ✅ Session list in admin panel
+- ✅ API endpoints for adding data
+- ✅ API endpoint for getting seats
+- ✅ Responsive design (mobile-friendly)
+- ✅ Documentation
 
 ---
 
-## Дополнительная Информация
+## Additional Information
 
-Все компоненты используют современный React (hooks):
-- `useState` для управления состоянием
-- `useEffect` для загрузки данных
-- Async/await для API запросов
+All components use modern React (hooks):
+- `useState` for state management
+- `useEffect` for data loading
+- Async/await for API requests
 
-Все стили используют CSS Grid/Flexbox и адаптивны для всех размеров экранов.
+All styles use CSS Grid/Flexbox and are responsive for all screen sizes.

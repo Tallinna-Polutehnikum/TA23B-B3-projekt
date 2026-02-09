@@ -1,70 +1,70 @@
-# ✅ Контрольный Список Тестирования
+# ✅ Testing Checklist
 
-## 📋 Main Site - Фильтрация и Места
+## 📋 Main Site - Filtering and Seats
 
-### Фильтрация
-- [ ] Страница `/showtime` загружается без ошибок
-- [ ] Отображаются выпадающие списки:
-  - [ ] Location (город)
-  - [ ] Genre (жанр)
-  - [ ] Days (дни недели)
-- [ ] При выборе города отфильтровываются сеансы
-- [ ] При выборе жанра отфильтровываются сеансы
-- [ ] Несколько фильтров работают синхронно
-- [ ] "All Cities" отображает все сеансы
-- [ ] Список жанров не содержит дубликатов
-- [ ] Сеансы отсортированы по дате и времени
-- [ ] Сообщение "No sessions found" при пустом результате
+### Filtering
+- [ ] Page `/showtime` loads without errors
+- [ ] Dropdowns displayed:
+  - [ ] Location (city)
+  - [ ] Genre (genre)
+  - [ ] Days (days of week)
+- [ ] City selection filters sessions
+- [ ] Genre selection filters sessions
+- [ ] Multiple filters work synchronously
+- [ ] "All Cities" displays all sessions
+- [ ] Genre list has no duplicates
+- [ ] Sessions sorted by date and time
+- [ ] "No sessions found" message when empty
 
-### Места (SeatMap)
-- [ ] Кнопка "Buy Tickets" видна на каждом сеансе
-- [ ] При клике на "Buy Tickets" открывается модальное окно
-- [ ] Модальное окно имеет backdrop blur эффект
-- [ ] Закрытие по клику на X кнопку
-- [ ] Закрытие по клику вне модального окна
-- [ ] Отображается сетка мест (10 рядов × 15 мест)
-- [ ] Ряды подписаны (A, B, C, ... J)
-- [ ] Места пронумерованы (1-15)
-- [ ] Зеленые места можно кликать
-- [ ] Красные места (занятые) отключены
-- [ ] При клике на место оно становится фиолетовым
-- [ ] Выбранное место можно снова кликнуть для отмены
-- [ ] Отображается легенда (Available, Occupied, Selected)
-- [ ] Отображается экран (SCREEN label)
-- [ ] Отображается список выбранных мест (A1, B5, и т.д.)
-- [ ] Показывается цена: Seats × €12 = Total
-- [ ] Кнопка "Book Seats" активна, если выбраны места
-- [ ] Кнопка "Book Seats" отключена, если не выбраны места
-- [ ] Кнопка "Cancel" всегда активна
-- [ ] При клике "Book Seats" консоль логирует выбранные места
-- [ ] Модальное окно закрывается после завершения
+### Seats (SeatMap)
+- [ ] "Buy Tickets" button visible on each session
+- [ ] Click "Buy Tickets" opens modal
+- [ ] Modal has backdrop blur effect
+- [ ] X button closes modal
+- [ ] Click outside modal closes it
+- [ ] Seat grid (10 rows × 15 seats) displayed
+- [ ] Rows labeled (A, B, C, ... J)
+- [ ] Seats numbered (1-15)
+- [ ] Green seats clickable
+- [ ] Red seats (occupied) disabled
+- [ ] Click seat becomes purple
+- [ ] Click again toggles to green
+- [ ] Legend displayed (Available, Occupied, Selected)
+- [ ] Screen label displayed (SCREEN)
+- [ ] List of selected seats displayed (A1, B5, etc.)
+- [ ] Price shown: Seats × €12 = Total
+- [ ] "Book Seats" button active when seats selected
+- [ ] "Book Seats" button disabled with zero seats
+- [ ] "Cancel" button always active
+- [ ] Console logs selected seats on "Book Seats" click
+- [ ] Modal closes after completion
 
-### Адаптивность
-- [ ] На мобильном экране (< 768px):
-  - [ ] SeatMap открывается на весь экран
-  - [ ] Места меньшего размера (28px)
-  - [ ] Кнопки располагаются правильно
-  - [ ] Нет горизонтального скролла
-- [ ] На планшете:
-  - [ ] Места среднего размера
-  - [ ] Интерфейс удобен
-- [ ] На десктопе:
-  - [ ] Места оптимального размера
-  - [ ] Макет красивый
+### Responsiveness
+- [ ] On mobile (< 768px):
+  - [ ] SeatMap opens fullscreen
+  - [ ] Seats smaller size (28px)
+  - [ ] Buttons positioned correctly
+  - [ ] No horizontal scroll
+- [ ] On tablet:
+  - [ ] Seats medium size
+  - [ ] Interface usable
+- [ ] On desktop:
+  - [ ] Seats optimal size
+  - [ ] Layout beautiful
 
 ---
 
-## 📊 Admin Panel - Интерфейс
+## 📊 Admin Panel - Interface
 
-### Загрузка и Навигация
-- [ ] Админ-панель открывается на порту 5174 (или другом)
-- [ ] Загружается без ошибок
-- [ ] Отображается логотип "Absolute Cinema"
-- [ ] Отображается аватар и имя администратора
-- [ ] Боковое меню видно и функционально
+### Loading and Navigation
+- [ ] Admin panel opens on port 5174 (or other)
+- [ ] Loads without errors
+- [ ] "Absolute Cinema" logo displayed
+- [ ] Admin avatar and name displayed
+- [ ] Sidebar menu visible and functional
 
-### Меню и Навигация
-- [ ] Меню содержит разделы:
+### Menu and Navigation
+- [ ] Menu contains sections:
   - [ ] Dashboard
   - [ ] Movies
   - [ ] Sessions
@@ -72,45 +72,45 @@
   - [ ] Add New Session
   - [ ] Configuration
   - [ ] Reports
-- [ ] При клике на пункт меню активируется вкладка
-- [ ] Активный пункт выделен зелёным
-- [ ] Иконки видны и узнаваемы
-- [ ] Меню скролится, если содержимое не влезает
+- [ ] Menu click activates tab
+- [ ] Active item highlighted green
+- [ ] Icons visible and recognizable
+- [ ] Menu scrolls if content doesn't fit
 
-### Overview (Главный Экран)
-- [ ] Отображаются 4 stat cards:
+### Overview (Main Screen)
+- [ ] 4 stat cards displayed:
   - [ ] Movies in Database (24)
   - [ ] Active Sessions (156)
   - [ ] Cinemas (8)
   - [ ] Today Revenue (€3,245)
-- [ ] Stat cards имеют иконки
-- [ ] Stat cards имеют зеленый цвет для чисел
-- [ ] Stat cards при наведении поднимаются (hover effect)
-- [ ] Отображается раздел "Quick Actions" с кнопками:
+- [ ] Stat cards have icons
+- [ ] Numbers shown in green
+- [ ] Stat cards elevate on hover
+- [ ] "Quick Actions" section with buttons:
   - [ ] Add Movie
   - [ ] Add Session
   - [ ] View Reports
-- [ ] Кнопки "Add Movie" и "Add Session" переводят на соответствующие вкладки
+- [ ] Buttons redirect to respective tabs
 
 ### Movies Management
-- [ ] Вкладка "Movies" открывается
-- [ ] Отображается заголовок "Movies Management"
-- [ ] Отображается кнопка "Add New Movie"
-- [ ] Отображается таблица с колонками:
-  - [ ] Poster (миниатюры)
+- [ ] "Movies" tab opens
+- [ ] Title displays "Movies Management"
+- [ ] "Add New Movie" button displayed
+- [ ] Table with columns:
+  - [ ] Poster (thumbnails)
   - [ ] Title
   - [ ] Overview
   - [ ] Genre
   - [ ] Actions
-- [ ] Таблица загружает данные с API
-- [ ] Для каждого фильма отображаются кнопки Edit и Delete
-- [ ] При отсутствии фильмов показывается "No movies found"
+- [ ] Table loads data from API
+- [ ] Edit and Delete buttons for each movie
+- [ ] "No movies found" if empty
 
 ### Sessions Management
-- [ ] Вкладка "Sessions" открывается
-- [ ] Отображается заголовок "Sessions Management"
-- [ ] Отображается кнопка "Add New Session"
-- [ ] Отображается таблица с колонками:
+- [ ] "Sessions" tab opens
+- [ ] Title displays "Sessions Management"
+- [ ] "Add New Session" button displayed
+- [ ] Table with columns:
   - [ ] Movie
   - [ ] Cinema
   - [ ] Date
@@ -120,37 +120,37 @@
   - [ ] Language
   - [ ] Format
   - [ ] Actions
-- [ ] Таблица загружает данные с API
-- [ ] Места отображаются разными цветами:
-  - [ ] Зелёный badge если много мест
-  - [ ] Оранжевый badge если мало мест (< 20)
-- [ ] Для каждого сеанса кнопки Edit и Delete
-- [ ] При отсутствии сеансов показывается "No sessions found"
+- [ ] Table loads data from API
+- [ ] Seats color-coded:
+  - [ ] Green badge if many seats
+  - [ ] Orange badge if few seats (< 20)
+- [ ] Edit and Delete buttons for each session
+- [ ] "No sessions found" if empty
 
 ---
 
-## 🎬 Admin Panel - Форма Добавления Фильма
+## 🎬 Admin Panel - Add Movie Form
 
-### Поля Формы
-- [ ] Появляется заголовок "Add New Movie"
-- [ ] Отображаются поля:
-  - [ ] Movie Title (обязательное, помечено *)
+### Form Fields
+- [ ] Title "Add New Movie" appears
+- [ ] Fields displayed:
+  - [ ] Movie Title (required, marked *)
   - [ ] Original Title
-  - [ ] Duration (обязательное, помечено *)
-  - [ ] Release Date (обязательное, помечено *)
-  - [ ] Genre (обязательное, помечено *)
+  - [ ] Duration (required, marked *)
+  - [ ] Release Date (required, marked *)
+  - [ ] Genre (required, marked *)
   - [ ] IMDb Rating
   - [ ] Directors
-  - [ ] Poster URL (обязательное, помечено *)
-  - [ ] Overview (обязательное, помечено *)
-- [ ] Все поля имеют плейсхолдеры
-- [ ] Поля ввода имеют тёмный фон (#2a2a2a)
-- [ ] При фокусе поле подсвечивается зелёным
+  - [ ] Poster URL (required, marked *)
+  - [ ] Overview (required, marked *)
+- [ ] All fields have placeholders
+- [ ] Input fields have dark background (#2a2a2a)
+- [ ] Field highlights green on focus
 
-### Валидация Формы
-- [ ] Попытка отправить пустую форму показывает ошибку валидации HTML5
-- [ ] Обязательные поля помечены звездочкой
-- [ ] Genre дроп-даун содержит опции:
+### Form Validation
+- [ ] Empty form submission shows HTML5 error
+- [ ] Required fields marked with asterisk
+- [ ] Genre dropdown contains options:
   - [ ] Action
   - [ ] Drama
   - [ ] Comedy
@@ -161,98 +161,98 @@
   - [ ] Animation
   - [ ] Adventure
   - [ ] Documentary
-- [ ] Duration принимает только числа
-- [ ] Rating от 0 до 10 с шагом 0.1
-- [ ] Poster URL требует формат URL
+- [ ] Duration accepts only numbers
+- [ ] Rating 0-10 with 0.1 step
+- [ ] Poster URL requires URL format
 
-### Отправка Формы
-- [ ] Кнопка "✓ Add Movie" видна в конце формы
-- [ ] При отправке кнопка становится "Adding Movie..." и отключается
-- [ ] При успехе:
-  - [ ] Форма очищается
-  - [ ] Показывается сообщение об успехе (будущее)
-  - [ ] Переходит на вкладку Movies
-  - [ ] Новый фильм появляется в таблице
-- [ ] При ошибке:
-  - [ ] Показывается сообщение об ошибке красным
-  - [ ] Форма остается заполненной для редактирования
+### Form Submission
+- [ ] "✓ Add Movie" button visible
+- [ ] On submission button becomes "Adding Movie..." and disables
+- [ ] On success:
+  - [ ] Form clears
+  - [ ] Success message shown (future)
+  - [ ] Redirects to Movies tab
+  - [ ] New movie appears in table
+- [ ] On error:
+  - [ ] Error message shown in red
+  - [ ] Form remains filled for editing
 
 ---
 
-## 🎫 Admin Panel - Форма Добавления Сеанса
+## 🎫 Admin Panel - Add Session Form
 
-### Поля Формы
-- [ ] Появляется заголовок "Add New Session"
-- [ ] Отображаются поля:
-  - [ ] Select Movie (обязательное)
-  - [ ] Cinema (обязательное)
-  - [ ] Date (обязательное)
-  - [ ] Time (обязательное)
+### Form Fields
+- [ ] Title "Add New Session" appears
+- [ ] Fields displayed:
+  - [ ] Select Movie (required)
+  - [ ] Cinema (required)
+  - [ ] Date (required)
+  - [ ] Time (required)
   - [ ] Hall Number
-  - [ ] Available Seats (обязательное)
+  - [ ] Available Seats (required)
   - [ ] Language
   - [ ] Subtitles
   - [ ] Format
-- [ ] Movie дроп-даун загружает фильмы из API
-- [ ] Cinema дроп-даун содержит опции:
+- [ ] Movie dropdown loads from API
+- [ ] Cinema dropdown contains options:
   - [ ] Tallinn - Kino
   - [ ] Tallinn - CinemaX
   - [ ] Tallinn - Forum
   - [ ] Tartu - Cinema
   - [ ] Tartu - Plaza
-- [ ] Hall дроп-даун содержит 1-5
-- [ ] Available Seats принимает только числа (1-500)
-- [ ] Language опции: Estonian, English, Russian, German
-- [ ] Subtitles опции: None, Estonian, English, Russian
-- [ ] Format опции: 2D, 3D, IMAX, 4DX
+- [ ] Hall dropdown contains 1-5
+- [ ] Available Seats accepts only numbers (1-500)
+- [ ] Language options: Estonian, English, Russian, German
+- [ ] Subtitles options: None, Estonian, English, Russian
+- [ ] Format options: 2D, 3D, IMAX, 4DX
 
-### Отправка Формы
-- [ ] Кнопка "✓ Add Session" видна в конце формы
-- [ ] При отправке кнопка становится "Adding Session..." и отключается
-- [ ] При успехе:
-  - [ ] Форма очищается
-  - [ ] Переходит на вкладку Sessions
-  - [ ] Новый сеанс появляется в таблице
-- [ ] При ошибке показывается сообщение об ошибке
+### Form Submission
+- [ ] "✓ Add Session" button visible
+- [ ] On submission button becomes "Adding Session..." and disables
+- [ ] On success:
+  - [ ] Form clears
+  - [ ] Redirects to Sessions tab
+  - [ ] New session appears in table
+- [ ] On error error message shown
 
 ---
 
 ## 🔧 Backend API
 
-### Проверка Endpoints
+### Check Endpoints
 
 #### GET /api/sessions
 ```bash
 curl http://localhost:4000/api/sessions | jq
 ```
-- [ ] Возвращает массив сеансов
-- [ ] Каждый сеанс содержит поле `genres`
-- [ ] HTTP 200 статус
+- [ ] Returns array of sessions
+- [ ] Each session contains `genres` field
+- [ ] HTTP 200 status
 
 #### GET /api/sessions/:id/seats
 ```bash
 curl http://localhost:4000/api/sessions/1/seats | jq
 ```
-- [ ] Возвращает объект с полями:
+- [ ] Returns object with:
   - [ ] sessionInfo (id, title, cinema, time)
-  - [ ] seats (массив)
-- [ ] Каждое место содержит: id, row, number, occupied
-- [ ] 150 мест (10×15)
-- [ ] HTTP 200 статус
-- [ ] При неправильном ID - HTTP 404
+  - [ ] seats (array)
+- [ ] Each seat contains: id, row, number, occupied
+- [ ] 150 seats (10×15)
+- [ ] HTTP 200 status
+- [ ] HTTP 404 for invalid ID
 
 #### POST /api/movies
 ```bash
 curl -X POST http://localhost:4000/api/movies \
   -H "Content-Type: application/json" \
-  -d '{"title":"Test","overview":"Test","poster":"url","duration":100,"genre":"Action","directors":"Test"}'
+  -d '{"title":"Test","overview":"Test","poster":"url","duration":100,"genre":"Action"}'
 ```
-- [ ] Создает новый фильм в БД
-- [ ] Возвращает созданный фильм с ID
-- [ ] HTTP 201 статус
-- [ ] Валидирует обязательные поля
-- [ ] При отсутствии поля - HTTP 400
-- [ ] При ошибке БД - HTTP 500 с сообщением
+- [ ] Creates new movie in DB
+- [ ] Returns created movie with ID
+- [ ] HTTP 201 status
+- [ ] Validates required fields
+- [ ] HTTP 400 for missing field
+- [ ] HTTP 500 with message on DB error
 
 #### POST /api/sessions
 ```bash
@@ -260,44 +260,45 @@ curl -X POST http://localhost:4000/api/sessions \
   -H "Content-Type: application/json" \
   -d '{"movieId":1,"cinema":"Tallinn - Kino","date":"2024-02-10","time":"18:30","seatsAvailable":100}'
 ```
-- [ ] Создает новый сеанс в БД
-- [ ] Возвращает созданный сеанс с ID
-- [ ] HTTP 201 статус
-- [ ] Валидирует обязательные поля
-- [ ] Использует значения по умолчанию для опциональных полей
-- [ ] При ошибке - HTTP 400 или 500
+- [ ] Creates new session in DB
+- [ ] Returns created session with ID
+- [ ] HTTP 201 status
+- [ ] Validates required fields
+- [ ] Uses default values for optional fields
+- [ ] HTTP 400 or 500 on error
 
 ---
 
-## 🎨 Дизайн и Стили
+## 🎨 Design and Styles
 
-### Цветовая Схема
-- [ ] Основной цвет: #00d084 (зелёный)
-  - [ ] На кнопках (Add Movie, Add Session, Book Seats)
-  - [ ] На активных элементах меню
-  - [ ] На выбранных местах
-  - [ ] На ценах
-- [ ] Фон: #0f0f0f (очень тёмный)
-- [ ] Вторичный фон: #1a1a1a, #2a2a2a
-- [ ] Текст: #fff (основной), #ddd (вторичный), #aaa (третичный)
-- [ ] Ошибки: #ff4444 (красный)
-- [ ] Предупреждения: #ff8800 (оранжевый)
+### Color Scheme
+- [ ] Primary: #00d084 (green)
+  - [ ] On buttons (Add Movie, Add Session, Book Seats)
+  - [ ] On active menu items
+  - [ ] On selected seats
+  - [ ] On prices
+- [ ] Background: #0f0f0f (very dark)
+- [ ] Secondary background: #1a1a1a, #2a2a2a
+- [ ] Text: #fff (main), #ddd (secondary), #aaa (tertiary)
+- [ ] Errors: #ff4444 (red)
+- [ ] Warnings: #ff8800 (orange)
 
-### Типография
-- [ ] Заголовки жирные (font-weight: 600-700)
-- [ ] Текст читаемый на тёмном фоне
-- [ ] Размеры пропорциональные
+### Typography
+- [ ] Headers bold (font-weight: 600-700)
+- [ ] Text readable on dark background
+- [ ] Sizes proportional
 
-### Эффекты
-- [ ] Hover эффекты на кнопках (поднимаются, меняют цвет)
-- [ ] Переходы (transition: all 0.2s)
-- [ ] Backdrop blur на модальных окнах
-- [ ] Тени на карточках
-- [ ] Активное состояние элементов
+### Effects
+- [ ] Hover effects on buttons (elevate, color change)
+- [ ] Transitions (transition: all 0.2s)
+- [ ] Backdrop blur on modals
+- [ ] Shadows on cards
+- [ ] Active state for elements
 
 ---
 
-## 📱 Адаптивность
+## 📱 Responsiveness
+
 
 ### Мобильные (< 768px)
 - [ ] Админ-панель:

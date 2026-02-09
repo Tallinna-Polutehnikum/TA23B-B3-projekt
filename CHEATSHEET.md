@@ -1,30 +1,30 @@
-# 🚀 Шпаргалка - Быстрый Старт
+# 🚀 Cheat Sheet - Quick Start
 
-## За 5 Минут
+## In 5 Minutes
 
-### 1️⃣ Запустить Backend
+### 1️⃣ Start Backend
 ```bash
 cd main-site
 npm install
 node server/index.js
-# Порт: http://localhost:4000
+# Port: http://localhost:4000
 ```
 
-### 2️⃣ Запустить Main Site
+### 2️⃣ Start Main Site
 ```bash
 cd main-site
-npm install  # (если не запускали)
+npm install  # (if not already done)
 npm run dev
-# Порт: http://localhost:5173 (обычно)
-# Откройте: http://localhost:5173/showtime
+# Port: http://localhost:5173 (typically)
+# Open: http://localhost:5173/showtime
 ```
 
-### 3️⃣ Запустить Admin Panel
+### 3️⃣ Start Admin Panel
 ```bash
 cd admin-worker-site
 npm install
 npm run dev
-# Порт: http://localhost:5174 (обычно)
+# Port: http://localhost:5174 (typically)
 ```
 
 ---

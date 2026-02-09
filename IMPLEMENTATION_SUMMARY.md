@@ -1,170 +1,170 @@
-# 📋 Резюме Реализованных Функций
+# 📋 Summary of Implemented Features
 
-Дата завершения: 5 февраля 2026
+Completion Date: February 5, 2026
 
-## ✅ Задачи
+## ✅ Tasks
 
-### 1. Фильтрация на Главной Странице ✅
+### 1. Filtering on Main Page ✅
 
-**Файлы:**
+**Files:**
 - [main-site/src/components/Showtimes.jsx](main-site/src/components/Showtimes.jsx)
 
-**Что сделано:**
-- ✅ Фильтр по **городу** (автоматически определяет из названия кинотеатра)
-- ✅ Фильтр по **дате** (7 дней вперед)
-- ✅ Фильтр по **жанру** (динамически загружается из БД)
-- ✅ Все фильтры работают синхронно (изменение одного не сбрасывает другие)
-- ✅ Функциональность "All Cities" для просмотра сеансов всех городов
+**What Was Done:**
+- ✅ Filter by **city** (automatically extracted from cinema names)
+- ✅ Filter by **date** (7 days forward)
+- ✅ Filter by **genre** (dynamically loaded from DB)
+- ✅ All filters work synchronously (changing one doesn't reset others)
+- ✅ "All Cities" functionality to view sessions from all cities
 
-**Как использовать:**
+**How to Use:**
 ```
-1. Откройте страницу /showtime
-2. Используйте выпадающие списки для выбора:
-   - Location (город)
-   - Genre (жанр)
-   - Days (дни - как раньше)
-3. Сеансы автоматически фильтруются
+1. Open page /showtime
+2. Use dropdowns to select:
+   - Location (city)
+   - Genre (genre)
+   - Days (days - as before)
+3. Sessions automatically filter
 ```
 
 ---
 
-### 2. Система Мест (Seats) ✅
+### 2. Seat System (Seats) ✅
 
-**Файлы:**
+**Files:**
 - [main-site/src/components/SeatMap.jsx](main-site/src/components/SeatMap.jsx)
 - [main-site/src/components/SeatMap.css](main-site/src/components/SeatMap.css)
-- [main-site/src/components/SessionCard.jsx](main-site/src/components/SessionCard.jsx) (обновлено)
+- [main-site/src/components/SessionCard.jsx](main-site/src/components/SessionCard.jsx) (updated)
 
-**Что сделано:**
-- ✅ Визуальная сетка мест (10 рядов × 15 мест)
-- ✅ 3 состояния: свободные (зелёные), занятые (красные), выбранные (фиолетовые)
-- ✅ Интерактивный выбор мест (кликом или тапом)
-- ✅ Расчет цены в реальном времени (€12 за место)
-- ✅ Отображение выбранных мест с их номерами (A1, B5, и т.д.)
-- ✅ Легенда для объяснения статусов
-- ✅ Модальное окно с backdrop blur эффектом
-- ✅ Полная адаптивность для мобильных устройств
-- ✅ Закрытие по клику вне окна
+**What Was Done:**
+- ✅ Visual seat grid (10 rows × 15 seats)
+- ✅ 3 states: available (green), occupied (red), selected (purple)
+- ✅ Interactive seat selection (by click or tap)
+- ✅ Real-time price calculation (€12 per seat)
+- ✅ Display selected seats with their numbers (A1, B5, etc.)
+- ✅ Legend for status explanation
+- ✅ Modal window with backdrop blur effect
+- ✅ Full responsiveness for mobile devices
+- ✅ Close by clicking outside window
 
-**Как использовать:**
+**How to Use:**
 ```
-1. На странице /showtime нажмите "Buy Tickets"
-2. Откроется сетка мест
-3. Кликните на зелёные места, чтобы выбрать
-4. Выбранные места будут отмечены фиолетовым
-5. Видно количество и стоимость выбранных мест
-6. Нажмите "Book Seats" для подтверждения
+1. On page /showtime click "Buy Tickets"
+2. Seat grid will open
+3. Click on green seats to select
+4. Selected seats will be marked purple
+5. See quantity and price of selected seats
+6. Click "Book Seats" to confirm
 ```
 
 ---
 
-### 3. Админ-Панель ✅
+### 3. Admin Panel ✅
 
 #### 📊 Dashboard Overview
 
-**Файлы:**
+**Files:**
 - [admin-worker-site/src/components/AdminDashboard.jsx](admin-worker-site/src/components/AdminDashboard.jsx)
 - [admin-worker-site/src/components/AdminDashboard.css](admin-worker-site/src/components/AdminDashboard.css)
-- [admin-worker-site/src/App.jsx](admin-worker-site/src/App.jsx) (обновлено)
+- [admin-worker-site/src/App.jsx](admin-worker-site/src/App.jsx) (updated)
 
-**Что сделано:**
-- ✅ Профессиональный дизайн админ-панели
-- ✅ Боковое меню с категоризацией (Dashboard, Manage Content, Add New, Settings)
-- ✅ Статистика (фильмы, сеансы, кинотеатры, доход)
-- ✅ Быстрые действия (кнопки для добавления фильма/сеанса)
-- ✅ Навигация между разделами
-- ✅ Адаптивное меню на мобильных устройствах
+**What Was Done:**
+- ✅ Professional admin panel design
+- ✅ Sidebar menu with categories (Dashboard, Manage Content, Add New, Settings)
+- ✅ Statistics (movies, sessions, cinemas, revenue)
+- ✅ Quick actions (buttons for adding movie/session)
+- ✅ Navigation between sections
+- ✅ Responsive menu for mobile devices
 
-#### 🎬 Управление Фильмами
+#### 🎬 Movie Management
 
-**Файлы:**
+**Files:**
 - [admin-worker-site/src/components/AddMovieForm.jsx](admin-worker-site/src/components/AddMovieForm.jsx)
 - [admin-worker-site/src/components/AddMovieForm.css](admin-worker-site/src/components/AddMovieForm.css)
 - [admin-worker-site/src/components/MoviesList.jsx](admin-worker-site/src/components/MoviesList.jsx)
 - [admin-worker-site/src/components/MoviesList.css](admin-worker-site/src/components/MoviesList.css)
 
-**Форма добавления фильма включает поля:**
-- ✅ Название фильма (обязательное)
-- ✅ Оригинальное название
-- ✅ Описание (обязательное)
-- ✅ URL постера (обязательное)
-- ✅ Длительность (обязательное)
-- ✅ Дата релиза (обязательное)
-- ✅ Жанр (обязательное, выбор из списка)
-- ✅ Рейтинг IMDb (опционально)
-- ✅ Режиссеры (опционально)
-- ✅ Валидация и обработка ошибок
-- ✅ Сообщения об успехе
+**Add Movie Form includes fields:**
+- ✅ Movie title (required)
+- ✅ Original title
+- ✅ Description (required)
+- ✅ Poster URL (required)
+- ✅ Duration in minutes (required)
+- ✅ Release date (required)
+- ✅ Genre (required, select from list)
+- ✅ IMDb rating (optional)
+- ✅ Directors (optional)
+- ✅ Validation and error handling
+- ✅ Success messages
 
-**Список фильмов отображает:**
-- ✅ Постер фильма (thumbnail)
-- ✅ Название
-- ✅ Описание (обрезано)
-- ✅ Жанр
-- ✅ Кнопки Edit и Delete (интерфейс готов, функция отложена)
+**Movie List displays:**
+- ✅ Movie poster (thumbnail)
+- ✅ Title
+- ✅ Description (truncated)
+- ✅ Genre
+- ✅ Edit and Delete buttons (interface ready, function postponed)
 
-#### 🎫 Управление Сеансами
+#### 🎫 Session Management
 
-**Файлы:**
+**Files:**
 - [admin-worker-site/src/components/AddSessionForm.jsx](admin-worker-site/src/components/AddSessionForm.jsx)
 - [admin-worker-site/src/components/AddSessionForm.css](admin-worker-site/src/components/AddSessionForm.css)
 - [admin-worker-site/src/components/SessionsList.jsx](admin-worker-site/src/components/SessionsList.jsx)
 - [admin-worker-site/src/components/SessionsList.css](admin-worker-site/src/components/SessionsList.css)
 
-**Форма добавления сеанса включает поля:**
-- ✅ Выбор фильма (обязательное, загружает из БД)
-- ✅ Выбор кинотеатра (обязательное)
-- ✅ Дата сеанса (обязательное)
-- ✅ Время сеанса (обязательное)
-- ✅ Номер зала (по умолчанию 1)
-- ✅ Доступные места (обязательное)
-- ✅ Язык (Estonian, English, Russian, German)
-- ✅ Субтитры (None, Estonian, English, Russian)
-- ✅ Формат (2D, 3D, IMAX, 4DX)
-- ✅ Валидация и обработка ошибок
+**Add Session Form includes fields:**
+- ✅ Movie selection (required, loads from DB)
+- ✅ Cinema selection (required)
+- ✅ Session date (required)
+- ✅ Session time (required)
+- ✅ Hall number (default 1)
+- ✅ Available seats (required)
+- ✅ Language (Estonian, English, Russian, German)
+- ✅ Subtitles (None, Estonian, English, Russian)
+- ✅ Format (2D, 3D, IMAX, 4DX)
+- ✅ Validation and error handling
 
-**Список сеансов отображает:**
-- ✅ Название фильма (зеленый текст)
-- ✅ Кинотеатр
-- ✅ Дату и время
-- ✅ Номер зала
-- ✅ Количество мест (с цветовым кодом: зелено если много, оранжево если мало)
-- ✅ Язык и формат
-- ✅ Адаптивное скрытие колонок на маленьких экранах
-- ✅ Кнопки Edit и Delete
+**Session List displays:**
+- ✅ Movie title (green text)
+- ✅ Cinema
+- ✅ Date and time
+- ✅ Hall number
+- ✅ Available seats (with color code: green if many, orange if few)
+- ✅ Language and format
+- ✅ Responsive column hiding on small screens
+- ✅ Edit and Delete buttons
 
 ---
 
 ### 4. API Endpoints ✅
 
-**Файл:**
+**File:**
 - [main-site/server/index.js](main-site/server/index.js)
 
 **POST Endpoints:**
-- ✅ `POST /api/movies` - добавить новый фильм
-  - Валидирует обязательные поля
-  - Создает или использует существующий жанр
-  - Возвращает созданный фильм
+- ✅ `POST /api/movies` - add new movie
+  - Validates required fields
+  - Creates or uses existing genre
+  - Returns created movie
 
-- ✅ `POST /api/sessions` - добавить новый сеанс
-  - Валидирует обязательные поля
-  - Связывает с фильмом
-  - Возвращает созданный сеанс
+- ✅ `POST /api/sessions` - add new session
+  - Validates required fields
+  - Links to movie
+  - Returns created session
 
-**GET Endpoints (обновлены):**
-- ✅ `GET /api/sessions` - возвращает поле `genres` для каждого сеанса
+**GET Endpoints (updated):**
+- ✅ `GET /api/sessions` - returns `genres` field for each session
 
-**GET Endpoints (новые):**
-- ✅ `GET /api/sessions/:id/seats` - получить места для сеанса
-  - Возвращает информацию о сеансе
-  - Возвращает сетку мест (10×15)
-  - Для каждого места: id, row, number, occupied
+**GET Endpoints (new):**
+- ✅ `GET /api/sessions/:id/seats` - get seats for session
+  - Returns session information
+  - Returns seat grid (10×15)
+  - For each seat: id, row, number, occupied
 
 ---
 
-## 📊 Статистика Изменений
+## 📊 Change Statistics
 
-### Новые файлы (10):
+### New files (10):
 1. `main-site/src/components/SeatMap.jsx`
 2. `main-site/src/components/SeatMap.css`
 3. `admin-worker-site/src/components/AdminDashboard.jsx`
@@ -178,26 +178,26 @@
 11. `admin-worker-site/src/components/SessionsList.jsx`
 12. `admin-worker-site/src/components/SessionsList.css`
 
-### Обновленные файлы (5):
-1. `main-site/src/components/Showtimes.jsx` - добавлены фильтры
-2. `main-site/src/components/SessionCard.jsx` - интеграция SeatMap
-3. `main-site/server/index.js` - новые API endpoints
-4. `admin-worker-site/src/App.jsx` - новый главный компонент
-5. `admin-worker-site/src/App.css` - обновленные стили
+### Updated files (5):
+1. `main-site/src/components/Showtimes.jsx` - added filters
+2. `main-site/src/components/SessionCard.jsx` - SeatMap integration
+3. `main-site/server/index.js` - new API endpoints
+4. `admin-worker-site/src/App.jsx` - new main component
+5. `admin-worker-site/src/App.css` - updated styles
 
-### Документация (3):
-1. `NEW_FEATURES.md` - подробное описание функций
-2. `QUICKSTART.md` - быстрый старт
-3. `DATABASE_SETUP.sql` - SQL примеры
+### Documentation (3):
+1. `NEW_FEATURES.md` - detailed feature description
+2. `QUICKSTART.md` - quick start
+3. `DATABASE_SETUP.sql` - SQL examples
 
 ---
 
-## 🎨 Дизайн
+## 🎨 Design
 
-### Цветовая палитра:
-- **Primary**: `#00d084` (зелёный) - основные кнопки, выбранные элементы
-- **Dark bg**: `#0f0f0f`, `#1a1a1a`, `#2a2a2a` - фон
-- **Text**: `#fff`, `#ddd`, `#aaa` - текст разных уровней
+### Color Palette:
+- **Primary**: `#00d084` (green) - main buttons, selected elements
+- **Dark bg**: `#0f0f0f`, `#1a1a1a`, `#2a2a2a` - background
+- **Text**: `#fff`, `#ddd`, `#aaa` - text at different levels
 - **Success**: `#00d084` - успех, выбрано
 - **Error**: `#ff4444` - ошибки
 - **Warning**: `#ff8800` - предупреждения (мало мест)

@@ -1,6 +1,6 @@
-# 🏗️ Архитектура и Структура Компонентов
+# 🏗️ Architecture and Component Structure
 
-## Main Site (Пользовательская часть)
+## Main Site (User-Facing Application)
 
 ```
 App.jsx
@@ -9,15 +9,15 @@ App.jsx
 │   ├── Navigation
 │   └── Cart
 ├── HeroBanner
-├── Showtimes (✅ ОБНОВЛЕНО)
-│   ├── Location Filter (город)
-│   ├── Date Selector (дни)
-│   ├── Genre Filter (новое)
+├── Showtimes (✅ UPDATED)
+│   ├── Location Filter (city)
+│   ├── Date Selector (days)
+│   ├── Genre Filter (new)
 │   └── SessionCard[]
 │       ├── Movie Info
 │       ├── Session Details
 │       └── "Buy Tickets" Button
-│           └── SeatMap Modal (✅ НОВОЕ)
+│           └── SeatMap Modal (✅ NEW)
 │               ├── Screen Label
 │               ├── Seats Grid
 │               │   ├── Row A-J
@@ -31,7 +31,7 @@ App.jsx
 └── Footer
 ```
 
-### Поток Данных:
+### Data Flow:
 
 ```
 Browser
@@ -49,7 +49,7 @@ Database (SQLite)
 
 ---
 
-## Admin Panel (Администраторская часть)
+## Admin Panel (Administrator Section)
 
 ```
 App.jsx
@@ -138,7 +138,7 @@ API Server (Port 4000)
   ↓
 Database (SQLite)
 
-Запросы:
+Requests:
 - GET /api/movies/top → MoviesList, AddSessionForm
 - GET /api/sessions → SessionsList
 - POST /api/movies → Add Movie
@@ -147,11 +147,11 @@ Database (SQLite)
 
 ---
 
-## Компонентная Иерархия
+## Component Hierarchy
 
-### Main Site Компоненты
+### Main Site Components
 
-**Файл: `src/components/Showtimes.jsx`**
+**File: `src/components/Showtimes.jsx`**
 - State: activeDay, location, selectedGenre, sessions, availableGenres
 - Props: (none)
 - Children: SessionCard[]
@@ -160,7 +160,7 @@ Database (SQLite)
   - Real-time genre filtering
   - Multi-filter support
 
-**Файл: `src/components/SessionCard.jsx`**
+**File: `src/components/SessionCard.jsx`**
 - State: showSeatMap
 - Props: session { id, title, poster, cinema, time, date, hall, genres, seats, language, subtitles, format }
 - Children: SeatMap
@@ -168,7 +168,7 @@ Database (SQLite)
   - Opens SeatMap on "Buy Tickets"
   - Displays session information
 
-**Файл: `src/components/SeatMap.jsx`**
+**File: `src/components/SeatMap.jsx`**
 - State: seats, selectedSeats, loading, sessionInfo
 - Props: sessionId, onClose
 - API: GET `/api/sessions/:id/seats`
@@ -180,9 +180,9 @@ Database (SQLite)
 
 ---
 
-### Admin Panel Компоненты
+### Admin Panel Components
 
-**Файл: `src/components/AdminDashboard.jsx`**
+**File: `src/components/AdminDashboard.jsx`**
 - State: activeTab, refresh
 - Props: (none)
 - Children: AddMovieForm, AddSessionForm, MoviesList, SessionsList
@@ -191,7 +191,7 @@ Database (SQLite)
   - Quick stats display
   - Main content switching
 
-**Файл: `src/components/AddMovieForm.jsx`**
+**File: `src/components/AddMovieForm.jsx`**
 - State: loading, error, formData
 - Props: onSuccess
 - API: POST `/api/movies`
@@ -201,7 +201,7 @@ Database (SQLite)
   - Error handling
   - Success callback
 
-**Файл: `src/components/AddSessionForm.jsx`**
+**File: `src/components/AddSessionForm.jsx`**
 - State: loading, error, movies, formData
 - Props: onSuccess
 - API: GET `/api/movies/top`, POST `/api/sessions`
@@ -210,7 +210,7 @@ Database (SQLite)
   - Cinema selection
   - Multiple options (language, format, etc.)
 
-**Файл: `src/components/MoviesList.jsx`**
+**File: `src/components/MoviesList.jsx`**
 - State: movies, loading
 - Props: refresh
 - API: GET `/api/movies/top`
@@ -219,7 +219,7 @@ Database (SQLite)
   - Movie thumbnails
   - Edit/Delete buttons (UI ready)
 
-**Файл: `src/components/SessionsList.jsx`**
+**File: `src/components/SessionsList.jsx`**
 - State: sessions, loading
 - Props: refresh
 - API: GET `/api/sessions`
@@ -236,30 +236,30 @@ Database (SQLite)
 
 ```
 ├── /api/movies
-│   ├── /api/movies/top (20 фильмов)
-│   ├── /api/movies/:id (деталь фильма)
-│   └── /api/movies/coming-soon (скоро)
+│   ├── /api/movies/top (20 movies)
+│   ├── /api/movies/:id (movie details)
+│   └── /api/movies/coming-soon (coming soon)
 │
 ├── /api/sessions
-│   ├── /api/sessions (все сеансы) - ✅ обновлено с genres
-│   └── /api/sessions/:id/seats (места) - ✅ новое
+│   ├── /api/sessions (all sessions) - ✅ updated with genres
+│   └── /api/sessions/:id/seats (seats) - ✅ new
 │
 ├── /api/gifts
 │
-└── Другие...
+└── Others...
 ```
 
-### POST Endpoints (новые)
+### POST Endpoints (new)
 
 ```
 ├── /api/movies
-│   └── Создает новый фильм
+│   └── Creates new movie
 │       ├── Required: title, overview, poster, duration
 │       ├── Optional: genre, directors, releaseDate, rating
 │       └── Returns: { id, title, ... }
 │
 └── /api/sessions
-    └── Создает новый сеанс
+    └── Creates new session
         ├── Required: movieId, cinema, date, time, seatsAvailable
         ├── Optional: hall, language, subtitles, format
         └── Returns: { id, movieId, cinema, ... }

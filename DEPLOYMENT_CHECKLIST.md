@@ -1,203 +1,203 @@
-# ✅ Финальный Чек-Лист Развертывания
+# ✅ Final Deployment Checklist
 
-**Дата:** 5 февраля 2026  
-**Версия:** 1.0.0  
-**Статус:** Ready to Deploy
-
----
-
-## 📋 Предполетная Проверка (Pre-Flight Check)
-
-### Пункт 1: Файлы на Месте
-- [ ] `main-site/src/components/SeatMap.jsx` существует
-- [ ] `main-site/src/components/SeatMap.css` существует
-- [ ] `admin-worker-site/src/components/AdminDashboard.jsx` существует
-- [ ] Все CSS файлы для админ-компонентов на месте (10 файлов)
-- [ ] `main-site/server/index.js` обновлен
-- [ ] Все 10 документов в корне проекта
-
-### Пункт 2: Зависимости
-- [ ] `npm install` запущен в `main-site`
-- [ ] `npm install` запущен в `admin-worker-site`
-- [ ] Нет ошибок при установке
-- [ ] node_modules существуют в обоих проектах
-
-### Пункт 3: База Данных
-- [ ] `database/db.sqlite` существует
-- [ ] БД содержит таблицы: movie, sessions, genres
-- [ ] Таблица movie содержит данные
-- [ ] Таблица sessions содержит данные
+**Date:** February 5, 2026  
+**Version:** 1.0.0  
+**Status:** Ready to Deploy
 
 ---
 
-## 🚀 Запуск Сервисов
+## 📋 Pre-Flight Check
 
-### Шаг 1: Запуск Backend
+### Item 1: Files in Place
+- [ ] `main-site/src/components/SeatMap.jsx` exists
+- [ ] `main-site/src/components/SeatMap.css` exists
+- [ ] `admin-worker-site/src/components/AdminDashboard.jsx` exists
+- [ ] All CSS files for admin components in place (10 files)
+- [ ] `main-site/server/index.js` updated
+- [ ] All 10 documents in project root
+
+### Item 2: Dependencies
+- [ ] `npm install` run in `main-site`
+- [ ] `npm install` run in `admin-worker-site`
+- [ ] No errors during installation
+- [ ] node_modules exist in both projects
+
+### Item 3: Database
+- [ ] `database/db.sqlite` exists
+- [ ] DB contains tables: movie, sessions, genres
+- [ ] movie table contains data
+- [ ] sessions table contains data
+
+---
+
+## 🚀 Running Services
+
+### Step 1: Start Backend
 ```bash
 cd main-site
 node server/index.js
 ```
-- [ ] Сервер запустился без ошибок
-- [ ] Вывод: `✓ Database opened successfully`
-- [ ] Вывод: `API on http://localhost:4000`
-- [ ] Нет ошибок в логах
+- [ ] Server started without errors
+- [ ] Output: `✓ Database opened successfully`
+- [ ] Output: `API on http://localhost:4000`
+- [ ] No errors in logs
 
-### Шаг 2: Проверка Backend
+### Step 2: Check Backend
 ```bash
 curl http://localhost:4000/api/sessions | jq ".[] | .title" | head -5
 ```
-- [ ] Возвращает список фильмов (не пусто)
-- [ ] JSON валидный
-- [ ] Статус 200 OK
+- [ ] Returns list of movies (not empty)
+- [ ] JSON valid
+- [ ] Status 200 OK
 
-### Шаг 3: Запуск Main Site
+### Step 3: Start Main Site
 ```bash
 cd main-site
 npm run dev
 ```
-- [ ] Vite сервер запустился
-- [ ] Вывод содержит `Local: http://localhost:...`
-- [ ] Нет ошибок в компиляции
+- [ ] Vite server started
+- [ ] Output contains `Local: http://localhost:...`
+- [ ] No compilation errors
 
-### Шаг 4: Запуск Admin Site
+### Step 4: Start Admin Site
 ```bash
 cd admin-worker-site
 npm run dev
 ```
-- [ ] Vite сервер запустился
-- [ ] Вывод содержит `Local: http://localhost:...`
-- [ ] Нет ошибок в компиляции
+- [ ] Vite server started
+- [ ] Output contains `Local: http://localhost:...`
+- [ ] No compilation errors
 
 ---
 
-## 🧪 Функциональное Тестирование
+## 🧪 Functional Testing
 
-### Main Site - Фильтрация
-1. Откройте http://localhost:5173/showtime (или указанный адрес)
-   - [ ] Страница загружается
-   - [ ] Нет JavaScript ошибок (F12 Console)
-   - [ ] Нет сетевых ошибок (F12 Network)
+### Main Site - Filtering
+1. Open http://localhost:5173/showtime (or specified address)
+   - [ ] Page loads
+   - [ ] No JavaScript errors (F12 Console)
+   - [ ] No network errors (F12 Network)
 
-2. Проверьте фильтры
-   - [ ] Выпадающий список "Location" отображается
-   - [ ] Выпадающий список "Genre" отображается
-   - [ ] Дни недели отображаются
-   - [ ] Все выпадающие списки имеют опции
+2. Check filters
+   - [ ] "Location" dropdown displayed
+   - [ ] "Genre" dropdown displayed
+   - [ ] Days of week displayed
+   - [ ] All dropdowns have options
 
-3. Тестируйте фильтрацию
-   - [ ] Выберите город - сеансы фильтруются
-   - [ ] Выберите жанр - сеансы фильтруются
-   - [ ] Выберите день - сеансы фильтруются
-   - [ ] Несколько фильтров работают вместе
-   - [ ] При "All Cities" показываются все города
+3. Test filtering
+   - [ ] Select city - sessions filtered
+   - [ ] Select genre - sessions filtered
+   - [ ] Select day - sessions filtered
+   - [ ] Multiple filters work together
+   - [ ] "All Cities" shows all cities
 
 ### Main Site - SeatMap
-1. Откройте http://localhost:5173/showtime
-   - [ ] На каждом сеансе видна кнопка "Buy Tickets"
+1. Open http://localhost:5173/showtime
+   - [ ] "Buy Tickets" button visible on each session
 
-2. Нажмите "Buy Tickets"
-   - [ ] Модальное окно открывается
-   - [ ] Задний фон затемняется
-   - [ ] Нет JavaScript ошибок
+2. Click "Buy Tickets"
+   - [ ] Modal window opens
+   - [ ] Background darkened
+   - [ ] No JavaScript errors
 
-3. Проверьте SeatMap
-   - [ ] Отображается сетка 10×15
-   - [ ] Ряды подписаны (A-J)
-   - [ ] Места пронумерованы (1-15)
-   - [ ] Некоторые места красные (занятые)
-   - [ ] Некоторые места зелёные (свободные)
-   - [ ] Отображается экран (SCREEN)
-   - [ ] Отображается легенда
+3. Check SeatMap
+   - [ ] 10×15 grid displayed
+   - [ ] Rows labeled (A-J)
+   - [ ] Seats numbered (1-15)
+   - [ ] Some seats red (occupied)
+   - [ ] Some seats green (available)
+   - [ ] Screen displayed (SCREEN)
+   - [ ] Legend displayed
 
-4. Тестируйте выбор мест
-   - [ ] Кликните на зелёное место
-   - [ ] Место становится фиолетовым
-   - [ ] Кликните снова - место возвращается в зелёное
-   - [ ] Красные места не кликаются
-   - [ ] Список выбранных мест обновляется
-   - [ ] Цена считается правильно (seats × 12)
+4. Test seat selection
+   - [ ] Click on green seat
+   - [ ] Seat becomes purple
+   - [ ] Click again - seat returns to green
+   - [ ] Red seats not clickable
+   - [ ] Selected seats list updates
+   - [ ] Price calculated correctly (seats × 12)
 
-5. Закрытие
-   - [ ] Кнопка X закрывает модальное окно
-   - [ ] Клик вне окна закрывает его
-   - [ ] Кнопка Cancel закрывает его
-   - [ ] Кнопка "Book Seats" отключена при нулевых местах
+5. Closing
+   - [ ] X button closes modal
+   - [ ] Click outside modal closes it
+   - [ ] Cancel button closes it
+   - [ ] "Book Seats" button disabled with zero seats
 
-### Admin Site - Общее
-1. Откройте http://localhost:5174
-   - [ ] Админ-панель загружается
-   - [ ] Видно боковое меню
-   - [ ] Видно логотип "Absolute Cinema"
-   - [ ] Видно аватар администратора
+### Admin Site - General
+1. Open http://localhost:5174
+   - [ ] Admin panel loads
+   - [ ] Sidebar menu visible
+   - [ ] "Absolute Cinema" logo visible
+   - [ ] Admin avatar visible
 
-2. Проверьте навигацию
-   - [ ] При клике на пункт меню загружается содержимое
-   - [ ] Активный пункт подсвечивается
-   - [ ] Переход между вкладками работает
+2. Check navigation
+   - [ ] Menu item click loads content
+   - [ ] Active item highlighted
+   - [ ] Tab transitions work
 
-3. Проверьте Overview
-   - [ ] Отображаются 4 stat cards
-   - [ ] Видны цифры (24, 156, 8, €3,245)
-   - [ ] Видны иконки
-   - [ ] Видны кнопки Quick Actions
+3. Check Overview
+   - [ ] 4 stat cards displayed
+   - [ ] Numbers visible (24, 156, 8, €3,245)
+   - [ ] Icons visible
+   - [ ] Quick Actions buttons visible
 
 ### Admin Site - Movies
-1. Нажмите "Movies" в меню
-   - [ ] Загружается таблица фильмов
-   - [ ] Видны колонки: Poster, Title, Overview, Genre, Actions
-   - [ ] Видны данные из БД
-   - [ ] Видны кнопки Edit и Delete
+1. Click "Movies" in menu
+   - [ ] Movies table loads
+   - [ ] Columns visible: Poster, Title, Overview, Genre, Actions
+   - [ ] Data from DB visible
+   - [ ] Edit and Delete buttons visible
 
-2. Нажмите "Add New Movie"
-   - [ ] Загружается форма
-   - [ ] Все поля видны
-   - [ ] Обязательные поля помечены *
-   - [ ] Genre выпадающий список содержит опции
+2. Click "Add New Movie"
+   - [ ] Form loads
+   - [ ] All fields visible
+   - [ ] Required fields marked with *
+   - [ ] Genre dropdown contains options
 
-3. Заполните форму
-   - [ ] Введите название: "Test Movie"
-   - [ ] Введите описание: "Test Description"
-   - [ ] Введите продолжительность: "120"
-   - [ ] Выберите дату
-   - [ ] Выберите жанр: "Action"
-   - [ ] Введите URL постера: "https://via.placeholder.com/300x450"
+3. Fill form
+   - [ ] Enter title: "Test Movie"
+   - [ ] Enter description: "Test Description"
+   - [ ] Enter duration: "120"
+   - [ ] Select date
+   - [ ] Select genre: "Action"
+   - [ ] Enter poster URL: "https://via.placeholder.com/300x450"
 
-4. Отправьте форму
-   - [ ] Кнопка становится "Adding Movie..."
-   - [ ] Кнопка отключается
-   - [ ] При успехе - переход на вкладку Movies
-   - [ ] Новый фильм появляется в таблице (может потребоваться рефреш)
+4. Submit form
+   - [ ] Button becomes "Adding Movie..."
+   - [ ] Button disabled
+   - [ ] On success - redirects to Movies tab
+   - [ ] New movie appears in table (may require refresh)
 
 ### Admin Site - Sessions
-1. Нажмите "Sessions" в меню
-   - [ ] Загружается таблица сеансов
-   - [ ] Видны колонки: Movie, Cinema, Date, Time, Hall, Seats, Language, Format, Actions
+1. Click "Sessions" in menu
+   - [ ] Sessions table loads
+   - [ ] Columns visible: Movie, Cinema, Date, Time, Hall, Seats, Language, Format, Actions
 
-2. Нажмите "Add New Session"
-   - [ ] Загружается форма
-   - [ ] Movie выпадающий список содержит фильмы (загружено с API)
-   - [ ] Cinema выпадающий список содержит кинотеатры
-   - [ ] Hall выпадающий список содержит 1-5
+2. Click "Add New Session"
+   - [ ] Form loads
+   - [ ] Movie dropdown contains films (loaded from API)
+   - [ ] Cinema dropdown contains cinemas
+   - [ ] Hall dropdown contains 1-5
 
-3. Заполните форму
-   - [ ] Выберите фильм
-   - [ ] Выберите кинотеатр
-   - [ ] Выберите дату (завтра)
-   - [ ] Введите время: "18:30"
-   - [ ] Введите места: "100"
+3. Fill form
+   - [ ] Select movie
+   - [ ] Select cinema
+   - [ ] Select date (tomorrow)
+   - [ ] Enter time: "18:30"
+   - [ ] Enter seats: "100"
 
-4. Отправьте форму
-   - [ ] Кнопка становится "Adding Session..."
-   - [ ] При успехе - переход на Sessions
-   - [ ] Новый сеанс появляется в таблице
+4. Submit form
+   - [ ] Button becomes "Adding Session..."
+   - [ ] On success - redirects to Sessions
+   - [ ] New session appears in table
 
 ---
 
-## 🔌 API Тестирование
+## 🔌 API Testing
 
 ### GET Endpoints
 ```bash
-# 1. Все сеансы
+# 1. All sessions
 curl http://localhost:4000/api/sessions | jq '. | length'
 # Должно быть число > 0
 

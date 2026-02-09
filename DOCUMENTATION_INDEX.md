@@ -1,203 +1,203 @@
-# 📚 Индекс Документации
+# 📚 Documentation Index
 
-Полный навигационный справочник по всем документам проекта.
-
----
-
-## 🚀 Начните Отсюда
-
-### Вы в спешке?
-👉 **[CHEATSHEET.md](CHEATSHEET.md)** - Шпаргалка на 5 минут
-
-### Хотите быстро запустить?
-👉 **[QUICKSTART.md](QUICKSTART.md)** - Запуск за 5 шагов
-
-### Ищете краткий обзор?
-👉 **[UPDATES_README.md](UPDATES_README.md)** - Что нового в версии 1.0
+Complete navigation guide for all project documents.
 
 ---
 
-## 📖 Полная Документация
+## 🚀 Start Here
 
-### 1. Описание Функций
+### Are you in a rush?
+👉 **[CHEATSHEET.md](CHEATSHEET.md)** - 5-minute quick reference
+
+### Want to start quickly?
+👉 **[QUICKSTART.md](QUICKSTART.md)** - Launch in 5 steps
+
+### Looking for a brief overview?
+👉 **[UPDATES_README.md](UPDATES_README.md)** - What's new in version 1.0
+
+---
+
+## 📖 Full Documentation
+
+### 1. Features Description
 - **[NEW_FEATURES.md](NEW_FEATURES.md)** 📄
-  - Подробное описание каждой функции
-  - Примеры использования
-  - Технические детали реализации
+  - Detailed description of each feature
+  - Usage examples
+  - Technical implementation details
   - API endpoints
-  - Скриншоты (описания)
+  - Screenshots (descriptions)
 
-### 2. Архитектура и Дизайн
+### 2. Architecture and Design
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** 🏗️
-  - Общая архитектура приложения
-  - Диаграммы компонентов
-  - Data flow диаграммы
+  - Overall application architecture
+  - Component diagrams
+  - Data flow diagrams
   - State management
-  - Производительность и оптимизация
+  - Performance and optimization
 
-### 3. Реализация
+### 3. Implementation
 - **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** ✅
-  - Резюме всех выполненных задач
-  - Статистика изменений
-  - Список всех новых файлов
-  - Дизайн и цветовая схема
-  - Планы на будущее
+  - Summary of all completed tasks
+  - Change statistics
+  - List of all new files
+  - Design and color scheme
+  - Future plans
 
-### 4. Список Файлов
+### 4. File List
 - **[FILES_MANIFEST.md](FILES_MANIFEST.md)** 📋
-  - Полный список всех файлов
-  - Описание каждого файла
-  - Структура проекта
-  - Статистика кода
+  - Complete list of all files
+  - Description of each file
+  - Project structure
+  - Code statistics
 
-### 5. Тестирование
+### 5. Testing
 - **[TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)** ✔️
-  - Контрольный список для тестирования
-  - Проверка каждого компонента
-  - API endpoint тесты
-  - Проверка адаптивности
-  - Обработка ошибок
+  - Testing checklist
+  - Component verification
+  - API endpoint tests
+  - Responsiveness check
+  - Error handling
 
-### 6. База Данных
+### 6. Database
 - **[DATABASE_SETUP.sql](DATABASE_SETUP.sql)** 🗄️
-  - SQL примеры
-  - Миграции БД
-  - Создание таблиц
-  - Тестовые данные
+  - SQL examples
+  - DB migrations
+  - Table creation
+  - Test data
 
 ---
 
-## 🎯 По Задачам
+## 🎯 By Tasks
 
-### Если вы хотите...
+### If you want to...
 
-#### 🔍 Использовать фильтрацию
-1. Прочитайте: [NEW_FEATURES.md](NEW_FEATURES.md#1-фильтрация-на-главной-странице-showtimes)
-2. Смотрите: [ARCHITECTURE.md](ARCHITECTURE.md) - раздел Showtimes
-3. Тестируйте: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md#-main-site---фильтрация-и-места)
+#### 🔍 Use filtering
+1. Read: [NEW_FEATURES.md](NEW_FEATURES.md#1-фильтрация-на-главной-странице-showtimes)
+2. See: [ARCHITECTURE.md](ARCHITECTURE.md) - Showtimes section
+3. Test: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md#-main-site---фильтрация-и-места)
 
-#### 🎫 Использовать SeatMap
-1. Прочитайте: [NEW_FEATURES.md](NEW_FEATURES.md#2-система-мест-seatmap)
-2. Смотрите: [ARCHITECTURE.md](ARCHITECTURE.md) - раздел SeatMap
-3. Интегрируйте: [QUICKSTART.md](QUICKSTART.md#3️⃣-запустить-admin-panel)
+#### 🎫 Use SeatMap
+1. Read: [NEW_FEATURES.md](NEW_FEATURES.md#2-система-мест-seatmap)
+2. See: [ARCHITECTURE.md](ARCHITECTURE.md) - SeatMap section
+3. Integrate: [QUICKSTART.md](QUICKSTART.md#3%EF%B8%8F%E2%83%A3-запустить-admin-panel)
 
-#### 📊 Использовать Админ-панель
-1. Прочитайте: [NEW_FEATURES.md](NEW_FEATURES.md#3-админ-панель)
-2. Смотрите: [ARCHITECTURE.md](ARCHITECTURE.md) - Admin Panel section
-3. Тестируйте: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md#-admin-panel---интерфейс)
+#### 📊 Use Admin Panel
+1. Read: [NEW_FEATURES.md](NEW_FEATURES.md#3-админ-панель)
+2. See: [ARCHITECTURE.md](ARCHITECTURE.md) - Admin Panel section
+3. Test: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md#-admin-panel---интерфейс)
 
-#### 🔌 Работать с API
-1. Прочитайте: [NEW_FEATURES.md](NEW_FEATURES.md#4-api-endpoints)
-2. Смотрите: [CHEATSHEET.md](CHEATSHEET.md#api-endpoints)
-3. Тестируйте: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md#-backend-api)
+#### 🔌 Work with API
+1. Read: [NEW_FEATURES.md](NEW_FEATURES.md#4-api-endpoints)
+2. See: [CHEATSHEET.md](CHEATSHEET.md#api-endpoints)
+3. Test: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md#-backend-api)
 
-#### 🚀 Развернуть на production
-1. Прочитайте: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
-2. Смотрите: [FILES_MANIFEST.md](FILES_MANIFEST.md#✅-чек-лист-развертывания)
-3. Запустите: [QUICKSTART.md](QUICKSTART.md)
-4. Тестируйте: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)
+#### 🚀 Deploy to production
+1. Read: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
+2. See: [FILES_MANIFEST.md](FILES_MANIFEST.md#✅-чек-лист-развертывания)
+3. Run: [QUICKSTART.md](QUICKSTART.md)
+4. Test: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)
 
 ---
 
-## 📱 По Компонентам
+## 📱 By Components
 
 ### Main Site Components
 
 #### Showtimes
-- Где: `main-site/src/components/Showtimes.jsx`
-- Документация: [NEW_FEATURES.md - Фильтрация](NEW_FEATURES.md#1-фильтрация-на-главной-странице-showtimes)
-- Архитектура: [ARCHITECTURE.md - Showtimes](ARCHITECTURE.md)
-- Тесты: [TESTING_CHECKLIST.md - Фильтрация](TESTING_CHECKLIST.md#фильтрация)
+- Location: `main-site/src/components/Showtimes.jsx`
+- Documentation: [NEW_FEATURES.md - Filtering](NEW_FEATURES.md#1-фильтрация-на-главной-странице-showtimes)
+- Architecture: [ARCHITECTURE.md - Showtimes](ARCHITECTURE.md)
+- Tests: [TESTING_CHECKLIST.md - Filtering](TESTING_CHECKLIST.md#фильтрация)
 
 #### SeatMap
-- Где: `main-site/src/components/SeatMap.jsx`
-- Документация: [NEW_FEATURES.md - SeatMap](NEW_FEATURES.md#2-система-мест-seatmap)
-- Архитектура: [ARCHITECTURE.md - SeatMap](ARCHITECTURE.md)
-- Тесты: [TESTING_CHECKLIST.md - Места](TESTING_CHECKLIST.md#места-seatmap)
+- Location: `main-site/src/components/SeatMap.jsx`
+- Documentation: [NEW_FEATURES.md - SeatMap](NEW_FEATURES.md#2-система-мест-seatmap)
+- Architecture: [ARCHITECTURE.md - SeatMap](ARCHITECTURE.md)
+- Tests: [TESTING_CHECKLIST.md - Seats](TESTING_CHECKLIST.md#места-seatmap)
 
 #### SessionCard
-- Где: `main-site/src/components/SessionCard.jsx`
-- Изменения: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
-- Архитектура: [ARCHITECTURE.md](ARCHITECTURE.md)
+- Location: `main-site/src/components/SessionCard.jsx`
+- Changes: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
+- Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ### Admin Site Components
 
 #### AdminDashboard
-- Где: `admin-worker-site/src/components/AdminDashboard.jsx`
-- Документация: [NEW_FEATURES.md - Админ-панель](NEW_FEATURES.md#3-админ-панель)
-- Архитектура: [ARCHITECTURE.md - AdminDashboard](ARCHITECTURE.md)
-- Тесты: [TESTING_CHECKLIST.md - Admin Panel](TESTING_CHECKLIST.md#-admin-panel---интерфейс)
+- Location: `admin-worker-site/src/components/AdminDashboard.jsx`
+- Documentation: [NEW_FEATURES.md - Admin Panel](NEW_FEATURES.md#3-админ-панель)
+- Architecture: [ARCHITECTURE.md - AdminDashboard](ARCHITECTURE.md)
+- Tests: [TESTING_CHECKLIST.md - Admin Panel](TESTING_CHECKLIST.md#-admin-panel---интерфейс)
 
 #### AddMovieForm
-- Где: `admin-worker-site/src/components/AddMovieForm.jsx`
-- Документация: [NEW_FEATURES.md - Управление фильмами](NEW_FEATURES.md#🎬-управление-фильмами)
-- Тесты: [TESTING_CHECKLIST.md - Форма добавления фильма](TESTING_CHECKLIST.md#🎬-admin-panel---форма-добавления-фильма)
+- Location: `admin-worker-site/src/components/AddMovieForm.jsx`
+- Documentation: [NEW_FEATURES.md - Movie Management](NEW_FEATURES.md#🎬-управление-фильмами)
+- Tests: [TESTING_CHECKLIST.md - Add Movie Form](TESTING_CHECKLIST.md#🎬-admin-panel---форма-добавления-фильма)
 
 #### AddSessionForm
-- Где: `admin-worker-site/src/components/AddSessionForm.jsx`
-- Документация: [NEW_FEATURES.md - Управление сеансами](NEW_FEATURES.md#🎫-управление-сеансами)
-- Тесты: [TESTING_CHECKLIST.md - Форма добавления сеанса](TESTING_CHECKLIST.md#🎫-admin-panel---форма-добавления-сеанса)
+- Location: `admin-worker-site/src/components/AddSessionForm.jsx`
+- Documentation: [NEW_FEATURES.md - Session Management](NEW_FEATURES.md#🎫-управление-сеансами)
+- Tests: [TESTING_CHECKLIST.md - Add Session Form](TESTING_CHECKLIST.md#🎫-admin-panel---форма-добавления-сеанса)
 
 #### MoviesList
-- Где: `admin-worker-site/src/components/MoviesList.jsx`
-- Архитектура: [ARCHITECTURE.md](ARCHITECTURE.md)
-- Тесты: [TESTING_CHECKLIST.md - Movies Management](TESTING_CHECKLIST.md#movies-management)
+- Location: `admin-worker-site/src/components/MoviesList.jsx`
+- Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
+- Tests: [TESTING_CHECKLIST.md - Movies Management](TESTING_CHECKLIST.md#movies-management)
 
 #### SessionsList
-- Где: `admin-worker-site/src/components/SessionsList.jsx`
-- Архитектура: [ARCHITECTURE.md](ARCHITECTURE.md)
-- Тесты: [TESTING_CHECKLIST.md - Sessions Management](TESTING_CHECKLIST.md#sessions-management)
+- Location: `admin-worker-site/src/components/SessionsList.jsx`
+- Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
+- Tests: [TESTING_CHECKLIST.md - Sessions Management](TESTING_CHECKLIST.md#sessions-management)
 
 ---
 
-## 🔧 По Технологиям
+## 🔧 By Technologies
 
 ### React
-- Основные концепции: [ARCHITECTURE.md - Component Hierarchy](ARCHITECTURE.md)
-- Hooks использование: [ARCHITECTURE.md - State Management](ARCHITECTURE.md)
+- Core concepts: [ARCHITECTURE.md - Component Hierarchy](ARCHITECTURE.md)
+- Hooks usage: [ARCHITECTURE.md - State Management](ARCHITECTURE.md)
 - Best Practices: [ARCHITECTURE.md - Architecture Considerations](ARCHITECTURE.md)
 
 ### CSS/Styling
-- Дизайн система: [IMPLEMENTATION_SUMMARY.md - Дизайн](IMPLEMENTATION_SUMMARY.md#🎨-дизайн)
-- Адаптивность: [IMPLEMENTATION_SUMMARY.md - Адаптивность](IMPLEMENTATION_SUMMARY.md#адаптивность)
-- CSS архитектура: [ARCHITECTURE.md - CSS Architecture](ARCHITECTURE.md)
+- Design system: [IMPLEMENTATION_SUMMARY.md - Design](IMPLEMENTATION_SUMMARY.md#🎨-дизайн)
+- Responsiveness: [IMPLEMENTATION_SUMMARY.md - Responsiveness](IMPLEMENTATION_SUMMARY.md#адаптивность)
+- CSS architecture: [ARCHITECTURE.md - CSS Architecture](ARCHITECTURE.md)
 
 ### API/Backend
 - API endpoints: [NEW_FEATURES.md - API Endpoints](NEW_FEATURES.md#4-api-endpoints)
-- Примеры запросов: [CHEATSHEET.md - API Endpoints](CHEATSHEET.md#api-endpoints)
-- Тестирование API: [TESTING_CHECKLIST.md - Backend API](TESTING_CHECKLIST.md#-backend-api)
+- Request examples: [CHEATSHEET.md - API Endpoints](CHEATSHEET.md#api-endpoints)
+- API testing: [TESTING_CHECKLIST.md - Backend API](TESTING_CHECKLIST.md#-backend-api)
 
 ### Database
-- Setup инструкции: [DATABASE_SETUP.sql](DATABASE_SETUP.sql)
-- Схема БД: [NEW_FEATURES.md](NEW_FEATURES.md)
-- Требуемые поля: [FILES_MANIFEST.md - Зависимости](FILES_MANIFEST.md#-зависимости)
+- Setup instructions: [DATABASE_SETUP.sql](DATABASE_SETUP.sql)
+- DB schema: [NEW_FEATURES.md](NEW_FEATURES.md)
+- Required fields: [FILES_MANIFEST.md - Dependencies](FILES_MANIFEST.md#-зависимости)
 
 ---
 
-## 🎨 По Дизайну
+## 🎨 By Design
 
-### Цветовая Схема
-- Описание: [IMPLEMENTATION_SUMMARY.md - Дизайн](IMPLEMENTATION_SUMMARY.md#🎨-дизайн)
-- Использование: [CHEATSHEET.md - Цвета](CHEATSHEET.md#цвета)
-- Коды: [NEW_FEATURES.md - Дизайн и UI](NEW_FEATURES.md#5-дизайн-и-ui)
+### Color Scheme
+- Description: [IMPLEMENTATION_SUMMARY.md - Design](IMPLEMENTATION_SUMMARY.md#🎨-дизайн)
+- Usage: [CHEATSHEET.md - Colors](CHEATSHEET.md#цвета)
+- Codes: [NEW_FEATURES.md - Design and UI](NEW_FEATURES.md#5-дизайн-и-ui)
 
-### Адаптивность
-- Описание: [IMPLEMENTATION_SUMMARY.md - Адаптивность](IMPLEMENTATION_SUMMARY.md#адаптивность)
-- Брейкпоинты: [ARCHITECTURE.md - Responsive Design](ARCHITECTURE.md#responsive-design-breakpoints)
-- Тестирование: [TESTING_CHECKLIST.md - Адаптивность](TESTING_CHECKLIST.md#-адаптивность)
+### Responsiveness
+- Description: [IMPLEMENTATION_SUMMARY.md - Responsiveness](IMPLEMENTATION_SUMMARY.md#адаптивность)
+- Breakpoints: [ARCHITECTURE.md - Responsive Design](ARCHITECTURE.md#responsive-design-breakpoints)
+- Testing: [TESTING_CHECKLIST.md - Responsiveness](TESTING_CHECKLIST.md#-адаптивность)
 
-### Компоненты UI
-- Кнопки, формы, таблицы: [ARCHITECTURE.md - CSS Architecture](ARCHITECTURE.md)
-- Примеры: [NEW_FEATURES.md](NEW_FEATURES.md)
+### UI Components
+- Buttons, forms, tables: [ARCHITECTURE.md - CSS Architecture](ARCHITECTURE.md)
+- Examples: [NEW_FEATURES.md](NEW_FEATURES.md)
 
 ---
 
-## 🐛 По Проблемам
+## 🐛 By Issues
 
-### Ошибки и Решения
-- Частые проблемы: [CHEATSHEET.md - Частые проблемы](CHEATSHEET.md#частые-проблемы-и-решения)
-- Обработка ошибок: [ARCHITECTURE.md - Error Handling](ARCHITECTURE.md)
-- Известные проблемы: [FILES_MANIFEST.md - Известные проблемы](FILES_MANIFEST.md)
+### Errors and Solutions
+- Common problems: [CHEATSHEET.md - Common Issues](CHEATSHEET.md#частые-проблемы-и-решения)
+- Error handling: [ARCHITECTURE.md - Error Handling](ARCHITECTURE.md)
+- Known issues: [FILES_MANIFEST.md - Known Issues](FILES_MANIFEST.md)
 
 ### Дебаг
 - Советы: [CHEATSHEET.md - Горячие клавиши](CHEATSHEET.md#горячие-клавиши--советы)
