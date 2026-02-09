@@ -1,270 +1,270 @@
-# Absolute Cinema - Обновление 2026
+# Absolute Cinema - 2026 Update
 
-Полное обновление платформы с новыми функциями фильтрации, системой мест и админ-панелью.
+Complete platform update with new filtering features, seat system and admin panel.
 
-## ✨ Что Нового
+## ✨ What's New
 
-### 🔍 Фильтрация на Главной Странице
-- **По городу** - автоматически определяет города из кинотеатров
-- **По жанру** - динамический список жанров из БД
-- **По дате** - выбор из 7 дней (уже была)
-- Все фильтры работают одновременно
+### 🔍 Filtering on Main Page
+- **By city** - automatically identifies cities from cinemas
+- **By genre** - dynamic list of genres from DB
+- **By date** - selection from 7 days (already existed)
+- All filters work simultaneously
 
-### 🎫 Система Выбора Мест
-- Интерактивная сетка 10×15 мест
-- Визуальное отображение занятости:
-  - 🟢 Свободные (зелёные)
-  - 🔴 Занятые (красные)
-  - 🟣 Выбранные (фиолетовые)
-- Расчёт цены в реальном времени (€12 за место)
-- Отображение выбранных мест с номерами
-- Полная адаптивность для мобильных
+### 🎫 Seat Selection System
+- Interactive 10×15 seat grid
+- Visual occupancy display:
+  - 🟢 Available (green)
+  - 🔴 Occupied (red)
+  - 🟣 Selected (purple)
+- Real-time price calculation (€12 per seat)
+- Display of selected seats with numbers
+- Full responsiveness for mobile
 
-### 📊 Админ-Панель
-Профессиональный интерфейс для управления:
-- **Фильмы** - просмотр и добавление новых
-- **Сеансы** - управление расписанием
-- **Dashboard** - статистика и быстрые действия
+### 📊 Admin Panel
+Professional interface for management:
+- **Movies** - view and add new
+- **Sessions** - manage schedule
+- **Dashboard** - statistics and quick actions
 
-## 🚀 Быстрый Старт
+## 🚀 Quick Start
 
-### Требования
-- Node.js 14+ (лучше 18+)
-- npm или yarn
-- SQLite БД
+### Requirements
+- Node.js 14+ (best 18+)
+- npm or yarn
+- SQLite DB
 
-### Установка и Запуск
+### Installation and Launch
 
 ```bash
-# 1. Backend (на порту 4000)
+# 1. Backend (port 4000)
 cd main-site
 npm install
 node server/index.js
 
-# 2. Main Site (на порту 5173)
+# 2. Main Site (port 5173)
 cd main-site
 npm install
 npm run dev
-# Откройте: http://localhost:5173/showtime
+# Open: http://localhost:5173/showtime
 
-# 3. Admin Panel (на порту 5174)
+# 3. Admin Panel (port 5174)
 cd admin-worker-site
 npm install
 npm run dev
-# Откройте: http://localhost:5174
+# Open: http://localhost:5174
 ```
 
-## 📋 Содержимое Обновления
+## 📋 Update Contents
 
-### Компоненты Main Site (+ 2)
+### Main Site Components (+ 2)
 ```
-✅ Showtimes.jsx      - обновлено с фильтрами
-✅ SessionCard.jsx    - интегрирована SeatMap
-✅ SeatMap.jsx        - НОВОЕ
-✅ SeatMap.css        - НОВОЕ
+✅ Showtimes.jsx      - updated with filters
+✅ SessionCard.jsx    - SeatMap integrated
+✅ SeatMap.jsx        - NEW
+✅ SeatMap.css        - NEW
 ```
 
-### Компоненты Admin Site (+ 10)
+### Admin Site Components (+ 10)
 ```
-✅ AdminDashboard.jsx        - НОВОЕ (главный компонент)
-✅ AdminDashboard.css        - НОВОЕ
-✅ AddMovieForm.jsx          - НОВОЕ
-✅ AddMovieForm.css          - НОВОЕ
-✅ AddSessionForm.jsx        - НОВОЕ
-✅ AddSessionForm.css        - НОВОЕ
-✅ MoviesList.jsx            - НОВОЕ
-✅ MoviesList.css            - НОВОЕ
-✅ SessionsList.jsx          - НОВОЕ
-✅ SessionsList.css          - НОВОЕ
-✅ App.jsx                   - обновлено
-✅ App.css                   - обновлено
+✅ AdminDashboard.jsx        - NEW (main component)
+✅ AdminDashboard.css        - NEW
+✅ AddMovieForm.jsx          - NEW
+✅ AddMovieForm.css          - NEW
+✅ AddSessionForm.jsx        - NEW
+✅ AddSessionForm.css        - NEW
+✅ MoviesList.jsx            - NEW
+✅ MoviesList.css            - NEW
+✅ SessionsList.jsx          - NEW
+✅ SessionsList.css          - NEW
+✅ App.jsx                   - updated
+✅ App.css                   - updated
 ```
 
 ### Backend (API)
 ```
-✅ server/index.js - добавлены POST endpoints и обновлены GET
+✅ server/index.js - added POST endpoints and updated GET
 ```
 
-## 🎯 Основные Функции
+## 🎯 Main Features
 
-### Фильтрация
+### Filtering
 ```jsx
-// Автоматически работает на странице /showtime
-Выберите город → Фильтруются сеансы
-Выберите жанр  → Фильтруются сеансы
-Выберите дату  → Фильтруются сеансы
+// Automatically works on /showtime page
+Select city → Sessions filtered
+Select genre  → Sessions filtered
+Select date   → Sessions filtered
 ```
 
-### Выбор Мест
+### Seat Selection
 ```jsx
-// Нажмите "Buy Tickets" на сеансе
-Откроется сетка мест
-Кликните на свободные места
-Видите цену в реальном времени
-Нажмите "Book Seats"
+// Click "Buy Tickets" on session
+Seat grid opens
+Click on available seats
+See price in real time
+Click "Book Seats"
 ```
 
-### Админ-Панель
+### Admin Panel
 ```jsx
-// Добавление фильма
-Перейдите на "Add New Movie"
-Заполните форму
-Нажмите "✓ Add Movie"
-Фильм появится в списке
+// Add movie
+Go to "Add New Movie"
+Fill form
+Click "✓ Add Movie"
+Movie appears in list
 
-// Добавление сеанса
-Перейдите на "Add New Session"
-Выберите фильм и кинотеатр
-Заполните остальные поля
-Нажмите "✓ Add Session"
+// Add session
+Go to "Add New Session"
+Select movie and cinema
+Fill remaining fields
+Click "✓ Add Session"
 ```
 
 ## 🔌 API Endpoints
 
 ### GET Endpoints
 ```
-GET /api/sessions               → Все сеансы (+ genres)
-GET /api/sessions/:id/seats     → Места для сеанса
-GET /api/movies/top             → Топ 20 фильмов
+GET /api/sessions               → All sessions (+ genres)
+GET /api/sessions/:id/seats     → Seats for session
+GET /api/movies/top             → Top 20 movies
 ```
 
-### POST Endpoints (НОВЫЕ)
+### POST Endpoints (NEW)
 ```
-POST /api/movies                → Добавить фильм
-POST /api/sessions              → Добавить сеанс
+POST /api/movies                → Add movie
+POST /api/sessions              → Add session
 ```
 
-## 📊 Структура БД
+## 📊 Database Structure
 
-Используемые таблицы:
-- `movie` - фильмы
-- `sessions` - сеансы
-- `genres` - жанры
-- `comingsoon_movies` - скоро
-- `Gifts` - подарки
+Tables used:
+- `movie` - movies
+- `sessions` - sessions
+- `genres` - genres
+- `comingsoon_movies` - coming soon
+- `Gifts` - gifts
 
-Требуемые поля:
+Required fields:
 ```sql
--- movie.genres VARCHAR(255)  -- для хранения жанров
--- sessions.format VARCHAR(20) -- для формата (2D/3D/IMAX)
+-- movie.genres VARCHAR(255)  -- to store genres
+-- sessions.format VARCHAR(20) -- for format (2D/3D/IMAX)
 -- sessions.language VARCHAR(20)
 -- sessions.subtitles VARCHAR(20)
 ```
 
-## 🎨 Дизайн
+## 🎨 Design
 
-### Цветовая Схема
-- **Primary**: #00d084 (зелёный) - основные элементы
-- **Dark**: #0f0f0f, #1a1a1a, #2a2a2a - фон
-- **Text**: #fff, #ddd, #aaa - текст
-- **Error**: #ff4444 - ошибки
-- **Warning**: #ff8800 - предупреждения
+### Color Scheme
+- **Primary**: #00d084 (green) - main elements
+- **Dark**: #0f0f0f, #1a1a1a, #2a2a2a - background
+- **Text**: #fff, #ddd, #aaa - text
+- **Error**: #ff4444 - errors
+- **Warning**: #ff8800 - warnings
 
-### Особенности
-- ✅ Тёмная тема (dark mode)
-- ✅ Адаптивный дизайн (mobile-friendly)
-- ✅ Smooth переходы и эффекты
-- ✅ Интерактивные компоненты
-- ✅ Профессиональный внешний вид
+### Features
+- ✅ Dark theme (dark mode)
+- ✅ Responsive design (mobile-friendly)
+- ✅ Smooth transitions and effects
+- ✅ Interactive components
+- ✅ Professional appearance
 
-## 📱 Адаптивность
+## 📱 Responsiveness
 
-| Устройство | Поддержка |
-|-----------|-----------|
-| Мобильные (< 768px) | ✅ Полная |
-| Планшеты (768px - 1024px) | ✅ Полная |
-| Десктоп (> 1024px) | ✅ Полная |
+| Device | Support |
+|--------|---------|
+| Mobile (< 768px) | ✅ Full |
+| Tablets (768px - 1024px) | ✅ Full |
+| Desktop (> 1024px) | ✅ Full |
 
-## 📚 Документация
+## 📚 Documentation
 
-| Документ | Описание |
+| Document | Description |
 |----------|---------|
-| `NEW_FEATURES.md` | Подробное описание всех функций |
-| `ARCHITECTURE.md` | Архитектура и структура компонентов |
-| `IMPLEMENTATION_SUMMARY.md` | Полное резюме реализации |
-| `TESTING_CHECKLIST.md` | Контрольный список тестирования |
-| `CHEATSHEET.md` | Быстрая справка и шпаргалка |
-| `DATABASE_SETUP.sql` | SQL примеры и миграции |
-| `QUICKSTART.md` | Руководство для быстрого старта |
+| `NEW_FEATURES.md` | Detailed feature description |
+| `ARCHITECTURE.md` | Architecture and structure |
+| `IMPLEMENTATION_SUMMARY.md` | Complete implementation summary |
+| `TESTING_CHECKLIST.md` | Testing checklist |
+| `CHEATSHEET.md` | Quick reference |
+| `DATABASE_SETUP.sql` | SQL examples and migrations |
+| `QUICKSTART.md` | Quick start guide |
 
-## 🐛 Известные Проблемы
+## 🐛 Known Issues
 
-- [ ] Edit функция отложена (UI готов)
-- [ ] Delete функция отложена (UI готов)
-- [ ] Поиск не реализован
-- [ ] Пагинация не реализована
+- [ ] Edit function postponed (UI ready)
+- [ ] Delete function postponed (UI ready)
+- [ ] Search not implemented
+- [ ] Pagination not implemented
 
-## 🔮 Планы на Будущее
+## 🔮 Future Plans
 
-- [ ] Редактирование фильмов и сеансов
-- [ ] Удаление с подтверждением
-- [ ] Поиск по названию
-- [ ] Сортировка и пагинация
-- [ ] Система уведомлений
-- [ ] Экспорт отчетов
-- [ ] Управление пользователями
-- [ ] История изменений (audit log)
+- [ ] Movie and session editing
+- [ ] Deletion with confirmation
+- [ ] Name search
+- [ ] Sorting and pagination
+- [ ] Notification system
+- [ ] Report export
+- [ ] User management
+- [ ] Change history (audit log)
 
-## 🧪 Тестирование
+## 🧪 Testing
 
-Используйте контрольный список в `TESTING_CHECKLIST.md` для проверки всех функций.
+Use the checklist in `TESTING_CHECKLIST.md` to verify all features.
 
-Быстрая проверка:
+Quick check:
 ```bash
-# 1. Откройте main-site /showtime
-# 2. Используйте фильтры
-# 3. Нажмите "Buy Tickets"
-# 4. Выберите места
-# 5. Откройте admin-site
-# 6. Добавьте новый фильм
-# 7. Добавьте новый сеанс
+# 1. Open main-site /showtime
+# 2. Use filters
+# 3. Click "Buy Tickets"
+# 4. Select seats
+# 5. Open admin-site
+# 6. Add new movie
+# 7. Add new session
 ```
 
-## 🔐 Безопасность
+## 🔐 Security
 
-- ✅ Валидация на клиенте и сервере
-- ✅ Использование prepared statements для БД
-- ✅ Обработка ошибок
-- ❌ Нет аутентификации (добавить в будущем)
-- ❌ Нет авторизации (добавить в будущем)
+- ✅ Validation on client and server
+- ✅ Using prepared statements for DB
+- ✅ Error handling
+- ❌ No authentication (add in future)
+- ❌ No authorization (add in future)
 
-## 📈 Производительность
+## 📈 Performance
 
-- API запросы: < 1 сек
-- SeatMap открывается: < 100ms
-- Фильтрация: real-time
-- Таблицы: отзывчивые даже с 1000+ записей
+- API requests: < 1 sec
+- SeatMap opens: < 100ms
+- Filtering: real-time
+- Tables: responsive even with 1000+ records
 
-## 🤝 Вклад и Улучшения
+## 🤝 Contributing and Improvements
 
-Для добавления новых функций:
-1. Создайте новый компонент
-2. Добавьте API endpoint (если нужно)
-3. Обновите документацию
-4. Протестируйте
+To add new features:
+1. Create new component
+2. Add API endpoint (if needed)
+3. Update documentation
+4. Test
 
-## 📞 Контакты
+## 📞 Contacts
 
-- **Разработано**: GitHub Copilot
-- **Дата**: 5 февраля 2026
-- **Версия**: 1.0.0
-- **Статус**: ✅ Production Ready
+- **Developed**: GitHub Copilot
+- **Date**: February 5, 2026
+- **Version**: 1.0.0
+- **Status**: ✅ Production Ready
 
-## 📄 Лицензия
+## 📄 License
 
-Проект Absolute Cinema 2026. Все права защищены.
+Absolute Cinema project 2026. All rights reserved.
 
 ---
 
-## Быстрые Ссылки
+## Quick Links
 
 - 🔍 **Main Site Showtime**: http://localhost:5173/showtime
 - 📊 **Admin Panel**: http://localhost:5174
 - 🔌 **Backend API**: http://localhost:4000
-- 📖 **Полная Документация**: см. файлы `.md` в корне проекта
+- 📖 **Full Documentation**: see `.md` files in project root
 
 ---
 
-**🎉 Спасибо за использование Absolute Cinema!**
+**🎉 Thank you for using Absolute Cinema!**
 
-Для вопросов смотрите файл `CHEATSHEET.md` или `NEW_FEATURES.md`.
+For questions see `CHEATSHEET.md` or `NEW_FEATURES.md`.

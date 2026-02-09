@@ -1,203 +1,203 @@
-# 📦 Полный Список Файлов и Изменений
+# 📦 Complete List of Files and Changes
 
-Дата: 5 февраля 2026
-Версия: 1.0.0
+Date: February 5, 2026
+Version: 1.0.0
 
 ---
 
-## 📝 Новые Файлы (15 файлов)
+## 📝 New Files (15 files)
 
-### Main Site - Компоненты (2)
+### Main Site - Components (2)
 1. **[main-site/src/components/SeatMap.jsx](main-site/src/components/SeatMap.jsx)**
-   - Интерактивная сетка для выбора мест
-   - Модальное окно
-   - Расчет цены
-   - Отображение занятости
+   - Interactive seat selection grid
+   - Modal window
+   - Price calculation
+   - Occupancy display
 
 2. **[main-site/src/components/SeatMap.css](main-site/src/components/SeatMap.css)**
-   - Стили для сетки мест
-   - Оверлей и модальное окно
-   - Адаптивные стили
+   - Seat grid styles
+   - Overlay and modal window
+   - Responsive styles
 
-### Admin Site - Компоненты (10)
+### Admin Site - Components (10)
 3. **[admin-worker-site/src/components/AdminDashboard.jsx](admin-worker-site/src/components/AdminDashboard.jsx)**
-   - Главный компонент админ-панели
-   - Навигация и боковое меню
-   - Управление вкладками
-   - Dashboard с статистикой
+   - Main admin panel component
+   - Navigation and sidebar
+   - Tab management
+   - Dashboard with statistics
 
 4. **[admin-worker-site/src/components/AdminDashboard.css](admin-worker-site/src/components/AdminDashboard.css)**
-   - Стили админ-панели
-   - Меню и навигация
-   - Карточки статистики
-   - Адаптивные стили
+   - Admin panel styles
+   - Menu and navigation
+   - Stats cards
+   - Responsive styles
 
 5. **[admin-worker-site/src/components/AddMovieForm.jsx](admin-worker-site/src/components/AddMovieForm.jsx)**
-   - Форма добавления фильма
-   - Валидация полей
-   - Отправка на API
-   - Обработка ошибок
+   - Movie addition form
+   - Field validation
+   - API submission
+   - Error handling
 
 6. **[admin-worker-site/src/components/AddMovieForm.css](admin-worker-site/src/components/AddMovieForm.css)**
-   - Стили формы
-   - Поля ввода
-   - Кнопка отправки
+   - Form styles
+   - Input fields
+   - Submit button
 
 7. **[admin-worker-site/src/components/AddSessionForm.jsx](admin-worker-site/src/components/AddSessionForm.jsx)**
-   - Форма добавления сеанса
-   - Выбор фильма из списка
-   - Опции языка и формата
-   - Валидация и отправка
+   - Session addition form
+   - Movie selection from list
+   - Language and format options
+   - Validation and submission
 
 8. **[admin-worker-site/src/components/AddSessionForm.css](admin-worker-site/src/components/AddSessionForm.css)**
-   - Стили для формы сеанса
-   - Наследует стили от AddMovieForm
+   - Session form styles
+   - Inherits styles from AddMovieForm
 
 9. **[admin-worker-site/src/components/MoviesList.jsx](admin-worker-site/src/components/MoviesList.jsx)**
-   - Таблица с фильмами
-   - Загрузка из API
-   - Кнопки Edit/Delete
-   - Обработка loading состояния
+   - Table with movies
+   - Loading from API
+   - Edit/Delete buttons
+   - Loading state handling
 
 10. **[admin-worker-site/src/components/MoviesList.css](admin-worker-site/src/components/MoviesList.css)**
-    - Стили таблицы
-    - Адаптивные колонки
-    - Hover эффекты
+    - Table styles
+    - Responsive columns
+    - Hover effects
 
 11. **[admin-worker-site/src/components/SessionsList.jsx](admin-worker-site/src/components/SessionsList.jsx)**
-    - Таблица с сеансами
-    - Загрузка из API
-    - Цветовой код для мест
-    - Кнопки действий
+    - Table with sessions
+    - Loading from API
+    - Color code for seats
+    - Action buttons
 
 12. **[admin-worker-site/src/components/SessionsList.css](admin-worker-site/src/components/SessionsList.css)**
-    - Стили таблицы сеансов
-    - Badge для мест
-    - Адаптивный дизайн
+    - Session table styles
+    - Badge for seats
+    - Responsive design
 
-### Документация (5)
+### Documentation (5)
 13. **[NEW_FEATURES.md](NEW_FEATURES.md)**
-    - Подробное описание всех новых функций
-    - Примеры использования
-    - Технические детали
+    - Detailed description of all new features
+    - Usage examples
+    - Technical details
 
 14. **[ARCHITECTURE.md](ARCHITECTURE.md)**
-    - Архитектура приложения
-    - Иерархия компонентов
-    - Data flow диаграммы
-    - Производительность
+    - Application architecture
+    - Component hierarchy
+    - Data flow diagrams
+    - Performance
 
 15. **[DATABASE_SETUP.sql](DATABASE_SETUP.sql)**
-    - SQL примеры
-    - Миграции БД
-    - Тестовые данные
+    - SQL examples
+    - DB migrations
+    - Test data
 
 ---
 
-## ✏️ Обновленные Файлы (5 файлов)
+## ✏️ Updated Files (5 files)
 
 ### Main Site
 1. **[main-site/src/components/Showtimes.jsx](main-site/src/components/Showtimes.jsx)**
    ```
-   Добавлено:
-   - Фильтр по городу (автоматическое извлечение)
-   - Фильтр по жанру (динамический список)
-   - Состояние для selectedGenre
-   - Состояние для availableGenres
-   - Функция getCities()
-   - Улучшенная фильтрация (filteredSessions)
-   - Новый UI для жанров
+   Added:
+   - City filter (auto-extracted)
+   - Genre filter (dynamic list)
+   - State for selectedGenre
+   - State for availableGenres
+   - getCities() function
+   - Improved filtering (filteredSessions)
+   - New UI for genres
    ```
 
 2. **[main-site/src/components/SessionCard.jsx](main-site/src/components/SessionCard.jsx)**
    ```
-   Добавлено:
-   - Импорт SeatMap компонента
-   - Состояние showSeatMap
-   - Обработчик onClick для "Buy Tickets"
-   - Условный рендеринг SeatMap
-   - Передача параметров sessionId и onClose
+   Added:
+   - SeatMap component import
+   - showSeatMap state
+   - onClick handler for "Buy Tickets"
+   - Conditional SeatMap rendering
+   - Parameter passing to sessionId and onClose
    ```
 
 3. **[main-site/server/index.js](main-site/server/index.js)**
    ```
-   Добавлено:
-   - app.use(express.json()) - для парсинга JSON
-   - Обновлен GET /api/sessions (добавлено поле genres)
-   - Новый GET /api/sessions/:id/seats - для мест
-   - Новый POST /api/movies - добавление фильма
-   - Новый POST /api/sessions - добавление сеанса
-   - Валидация на сервере
-   - Обработка ошибок
+   Added:
+   - app.use(express.json()) - for JSON parsing
+   - Updated GET /api/sessions (added genres field)
+   - New GET /api/sessions/:id/seats - for seats
+   - New POST /api/movies - add movie
+   - New POST /api/sessions - add session
+   - Server-side validation
+   - Error handling
    ```
 
 ### Admin Site
 4. **[admin-worker-site/src/App.jsx](admin-worker-site/src/App.jsx)**
    ```
-   Изменено:
-   - Удален весь Vite boilerplate код
-   - Импортирован AdminDashboard
-   - Новый main компонент
-   - Структура для админ-панели
+   Changed:
+   - Removed all Vite boilerplate code
+   - Imported AdminDashboard
+   - New main component
+   - Admin panel structure
    ```
 
 5. **[admin-worker-site/src/App.css](admin-worker-site/src/App.css)**
    ```
-   Изменено:
-   - Полностью переписаны стили
-   - Удален boilerplate CSS
-   - Добавлены стили для admin-app
-   - Global стили (body, html)
-   - Flexbox макет
+   Changed:
+   - Completely rewritten styles
+   - Removed boilerplate CSS
+   - Added admin-app styles
+   - Global styles (body, html)
+   - Flexbox layout
    ```
 
 ---
 
-## 📄 Дополнительные Файлы (6 файлов)
+## 📄 Additional Files (6 files)
 
 1. **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)**
-   - Полное резюме реализации
-   - Чек-лист выполненных задач
-   - Статистика изменений
-   - Особенности и улучшения
+   - Complete implementation summary
+   - Completed tasks checklist
+   - Change statistics
+   - Features and improvements
 
 2. **[TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)**
-   - Контрольный список для тестирования
-   - Проверка каждого компонента
-   - API endpoints проверка
-   - Edge cases и обработка ошибок
+   - Testing checklist
+   - Component verification
+   - API endpoints check
+   - Edge cases and error handling
 
 3. **[QUICKSTART.md](QUICKSTART.md)**
-   - Быстрый старт за 5 минут
-   - Команды для запуска
-   - Проверка интеграции
-   - Решение проблем
+   - Quick start in 5 minutes
+   - Commands to run
+   - Integration check
+   - Troubleshooting
 
 4. **[CHEATSHEET.md](CHEATSHEET.md)**
-   - Шпаргалка для разработчиков
-   - Быстрые ссылки
-   - Команды и советы
-   - Горячие клавиши
+   - Developer cheat sheet
+   - Quick links
+   - Commands and tips
+   - Keyboard shortcuts
 
 5. **[UPDATES_README.md](UPDATES_README.md)**
-   - README обновления
-   - Краткий обзор
-   - Быстрые ссылки
-   - Структура БД
+   - README updates
+   - Brief overview
+   - Quick links
+   - DB structure
 
-6. **[FILES_MANIFEST.md](FILES_MANIFEST.md)** - этот файл
-   - Полный список всех файлов
-   - Описание каждого файла
-   - Размеры и строки кода
+6. **[FILES_MANIFEST.md](FILES_MANIFEST.md)** - this file
+   - Complete list of all files
+   - Description of each file
+   - Sizes and lines of code
 
 ---
 
-## 📊 Статистика
+## 📊 Statistics
 
-### Файлы по Типам
-- **React JSX**: 12 компонентов
-- **CSS**: 12 файлов стилей
-- **Documentation**: 7 файлов
+### Files by Type
+- **React JSX**: 12 components
+- **CSS**: 12 style files
+- **Documentation**: 7 files
 - **Backend**: 1 обновленный файл
 
 ### Строки Кода (примерно)
