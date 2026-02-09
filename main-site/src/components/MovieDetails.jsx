@@ -37,7 +37,7 @@ export default function MovieDetails() {
 
   const handleBack = () => {
     if (location.state?.from === 'showtimes') {
-      navigate(`/showtime?movieId=${id}`);
+      navigate('/showtime');
       return;
     }
     navigate(-1);

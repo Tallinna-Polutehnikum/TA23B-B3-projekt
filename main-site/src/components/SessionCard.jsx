@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./SessionCard.css";
 import SeatMap from "./SeatMap";
 
-export default function SessionCard({ session }) {
+export default function SessionCard({ session, onViewAllShows }) {
   const [showSeatMap, setShowSeatMap] = useState(false);
 
   const posterSrc = session.poster
@@ -49,7 +49,12 @@ export default function SessionCard({ session }) {
                 <div className="session-card__genres">{session.genres}</div>
               </div>
               <div className="session-card__actions">
-                <button className="session-card__shows">View all shows</button>
+                <button
+                  className="session-card__shows"
+                  onClick={() => onViewAllShows?.(session.movie_id)}
+                >
+                  View all shows
+                </button>
                 <button 
                   className="session-card__buy"
                   onClick={() => setShowSeatMap(true)}

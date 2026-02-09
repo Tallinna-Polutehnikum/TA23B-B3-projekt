@@ -57,28 +57,7 @@ export default function Showtimes() {
     setSelectedMovieId(movieId);
   }, [routerLocation.search]);
 
-  useEffect(() => {
-    if (sessions.length === 0) return;
-    const hasMatchForDay = sessions.some((s) => {
-      const matchesMovie = !selectedMovieId || String(s.movie_id) === selectedMovieId;
-      const matchesDay = s.date === activeDay;
-      if (!matchesMovie || !matchesDay) return false;
-
-      const todayKey = toDateKey(new Date());
-      if (activeDay === todayKey) {
-        const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
-        return toMinutes(s.time) >= nowMinutes;
-      }
-
-      return true;
-    });
-    if (!hasMatchForDay) {
-      const nextDay = pickInitialDay(sessions, selectedMovieId);
-      if (nextDay !== activeDay) {
-        setActiveDay(nextDay);
-      }
-    }
-  }, [sessions, selectedMovieId, activeDay]);
+  // User can freely switch days; no auto-reset to avoid interfering with manual selection
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
@@ -138,6 +117,12 @@ export default function Showtimes() {
   const movieFilterTitle = selectedMovieId
     ? sessions.find((s) => String(s.movie_id) === selectedMovieId)?.title
     : null;
+
+  const handleViewAllShows = (movieId) => {
+    if (!movieId) return;
+    navigate(`/showtime?movieId=${movieId}`);
+    setSelectedMovieId(String(movieId));
+  };
 
   return (
     <section className="section showtimes-section">
@@ -238,7 +223,11 @@ export default function Showtimes() {
       <div className="showtimes-list">
         {filteredSessions.length > 0 ? (
           filteredSessions.map((session) => (
-            <SessionCard key={session.id} session={session} />
+            <SessionCard
+              key={session.id}
+              session={session}
+              onViewAllShows={handleViewAllShows}
+            />
           ))
         ) : (
           <div style={{ padding: '60px 20px', color: '#999', textAlign: 'center' }}>
