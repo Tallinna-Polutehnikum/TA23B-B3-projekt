@@ -5,13 +5,7 @@ export default function AddSessionForm({ onSuccess }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [movies, setMovies] = useState([])
-  const [cinemas] = useState([
-    'Tallinn - Kino',
-    'Tallinn - CinemaX',
-    'Tallinn - Forum',
-    'Tartu - Cinema',
-    'Tartu - Plaza'
-  ])
+  const [cinemas, setCinemas] = useState([])
 
   const [formData, setFormData] = useState({
     movieId: '',
@@ -31,6 +25,12 @@ export default function AddSessionForm({ onSuccess }) {
       .then(res => res.json())
       .then(data => setMovies(data))
       .catch(err => console.error('Failed to load movies', err))
+
+    // Fetch cinemas list
+    fetch('/api/cinemas')
+      .then(res => res.json())
+      .then(data => setCinemas(data))
+      .catch(err => console.error('Failed to load cinemas', err))
   }, [])
 
   const handleChange = (e) => {
@@ -62,7 +62,7 @@ export default function AddSessionForm({ onSuccess }) {
       // Reset form
       setFormData({
         movieId: '',
-        cinema: '',
+        cinemaId: '',
         date: '',
         time: '',
         hall: '1',
@@ -105,18 +105,18 @@ export default function AddSessionForm({ onSuccess }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="cinema">Cinema *</label>
+            <label htmlFor="cinemaId">Cinema *</label>
             <select
-              id="cinema"
-              name="cinema"
-              value={formData.cinema}
+              id="cinemaId"
+              name="cinemaId"
+              value={formData.cinemaId}
               onChange={handleChange}
               required
             >
               <option value="">Choose a cinema...</option>
               {cinemas.map(cinema => (
-                <option key={cinema} value={cinema}>
-                  {cinema}
+                <option key={cinema.id} value={cinema.id}>
+                  {cinema.name}
                 </option>
               ))}
             </select>

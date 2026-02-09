@@ -46,6 +46,8 @@ app.get('/api/movies', (_req, res) => {
       m.title,
       m.overview,
       m.poster,
+      m.duration,
+      m.directors,
       COALESCE(g.type, '—') AS genre
     FROM movie m
     LEFT JOIN genres g ON m.genre_id = g.id
@@ -144,6 +146,12 @@ app.get('/api/genres', (_req, res) => {
   res.json(rows);
 });
 
+// Return all cinemas
+app.get('/api/cinemas', (_req, res) => {
+  const rows = db.prepare(`SELECT id, name FROM cinema ORDER BY name`).all();
+  res.json(rows);
+});
+
 // Get latest movie for a given genre (by genre type)
 app.get('/api/genres/:type/movie', (req, res) => {
   const type = req.params.type;
@@ -205,6 +213,7 @@ app.get('/api/sessions', (_req, res) => {
       m.title,
       m.poster,
       COALESCE(c.name, s.cinema_name, 'Cinema') as cinema,
+      c.id as cinema_id,
       s.hall,
       s.time,
       s.date,
@@ -228,6 +237,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
       s.id,
       m.title,
       COALESCE(c.name, s.cinema_name, 'Cinema') as cinema,
+      c.id as cinema_id,
       s.time,
       s.seats_available as seatsAvailable
     FROM sessions s
@@ -267,7 +277,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
 // ============= POST ENDPOINTS =============
 
 app.post('/api/movies', (req, res) => {
-  const { title, originalTitle, overview, poster, duration, genre, directors, releaseDate, rating } = req.body;
+  const { title, originalTitle, overview, poster, duration, genre, directors, releaseDate } = req.body;
 
   // Validate required fields
   if (!title || !overview || !poster || !duration) {
@@ -300,8 +310,7 @@ app.post('/api/movies', (req, res) => {
       poster,
       duration,
       genre,
-      directors,
-      rating
+      directors
     });
   } catch (err) {
     console.error('Error creating movie:', err);
@@ -309,19 +318,94 @@ app.post('/api/movies', (req, res) => {
   }
 });
 
+// Update movie
+app.put('/api/movies/:id', (req, res) => {
+  const { title, overview, poster, duration, genre, directors } = req.body;
+  const movieId = req.params.id;
+
+  const existing = db.prepare(`SELECT id, genre_id FROM movie WHERE id = ?`).get(movieId);
+  if (!existing) return res.status(404).json({ message: 'Movie not found' });
+
+  try {
+    // Resolve genre
+    let genreId = existing.genre_id;
+    if (genre) {
+      const g = db.prepare(`SELECT id FROM genres WHERE type = ?`).get(genre);
+      if (g) {
+        genreId = g.id;
+      } else {
+        const result = db.prepare(`INSERT INTO genres (type) VALUES (?)`).run(genre);
+        genreId = result.lastInsertRowid;
+      }
+    }
+
+    db.prepare(`
+      UPDATE movie
+      SET
+        title = COALESCE(?, title),
+        overview = COALESCE(?, overview),
+        poster = COALESCE(?, poster),
+        duration = COALESCE(?, duration),
+        genre_id = COALESCE(?, genre_id),
+        directors = COALESCE(?, directors),
+        updated_at = datetime('now')
+      WHERE id = ?
+    `).run(title, overview, poster, duration, genreId, directors, movieId);
+
+    res.json({
+      id: Number(movieId),
+      title,
+      overview,
+      poster,
+      duration,
+      genre,
+      directors
+    });
+  } catch (err) {
+    console.error('Error updating movie:', err);
+    res.status(500).json({ message: 'Failed to update movie' });
+  }
+});
+
+// Delete movie
+app.delete('/api/movies/:id', (req, res) => {
+  const movieId = req.params.id;
+  const existing = db.prepare(`SELECT id FROM movie WHERE id = ?`).get(movieId);
+  if (!existing) return res.status(404).json({ message: 'Movie not found' });
+
+  try {
+    db.prepare(`DELETE FROM movie WHERE id = ?`).run(movieId);
+    res.status(204).end();
+  } catch (err) {
+    console.error('Error deleting movie:', err);
+    res.status(500).json({ message: 'Failed to delete movie' });
+  }
+});
+
 app.post('/api/sessions', (req, res) => {
-  const { movieId, cinema, date, time, hall, seatsAvailable, language, subtitles, format } = req.body;
+  const { movieId, cinemaId, cinema, date, time, hall, seatsAvailable, language, subtitles, format } = req.body;
 
   // Validate required fields
-  if (!movieId || !cinema || !date || !time || !seatsAvailable) {
+  if (!movieId || (!cinemaId && !cinema) || !date || !time || !seatsAvailable) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
+    let cinemaName = cinema;
+    let cinemaRowId = cinemaId || null;
+
+    if (cinemaId) {
+      const row = db.prepare(`SELECT id, name FROM cinema WHERE id = ?`).get(cinemaId);
+      if (!row) return res.status(400).json({ message: 'Invalid cinemaId' });
+      cinemaName = row.name;
+      cinemaRowId = row.id;
+    }
+
     // Insert session
     const result = db.prepare(`
       INSERT INTO sessions (
         movie_id, 
+        cinema_id,
         cinema_name, 
         date, 
         time, 
@@ -330,10 +414,11 @@ app.post('/api/sessions', (req, res) => {
         language, 
         subtitles, 
         format
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       movieId,
-      cinema,
+      cinemaRowId,
+      cinemaName,
       date,
       time,
       hall || 1,
@@ -346,7 +431,8 @@ app.post('/api/sessions', (req, res) => {
     res.status(201).json({
       id: result.lastInsertRowid,
       movieId,
-      cinema,
+      cinema: cinemaName,
+      cinemaId: cinemaRowId,
       date,
       time,
       hall,
@@ -358,6 +444,87 @@ app.post('/api/sessions', (req, res) => {
   } catch (err) {
     console.error('Error creating session:', err);
     res.status(500).json({ message: 'Failed to create session' });
+  }
+});
+
+// Update session
+app.put('/api/sessions/:id', (req, res) => {
+  const sessionId = req.params.id;
+  const { movieId, cinemaId, cinema, date, time, hall, seatsAvailable, language, subtitles, format } = req.body;
+
+  const existing = db.prepare(`SELECT * FROM sessions WHERE id = ?`).get(sessionId);
+  if (!existing) return res.status(404).json({ message: 'Session not found' });
+
+  try {
+    let cinemaName = cinema ?? existing.cinema_name;
+    let cinemaRowId = cinemaId ?? existing.cinema_id ?? null;
+
+    if (cinemaId) {
+      const row = db.prepare(`SELECT id, name FROM cinema WHERE id = ?`).get(cinemaId);
+      if (!row) return res.status(400).json({ message: 'Invalid cinemaId' });
+      cinemaName = row.name;
+      cinemaRowId = row.id;
+    }
+
+    db.prepare(`
+      UPDATE sessions
+      SET
+        movie_id = COALESCE(?, movie_id),
+        cinema_id = ?,
+        cinema_name = ?,
+        date = COALESCE(?, date),
+        time = COALESCE(?, time),
+        hall = COALESCE(?, hall),
+        seats_available = COALESCE(?, seats_available),
+        language = COALESCE(?, language),
+        subtitles = COALESCE(?, subtitles),
+        format = COALESCE(?, format)
+      WHERE id = ?
+    `).run(
+      movieId,
+      cinemaRowId,
+      cinemaName,
+      date,
+      time,
+      hall,
+      seatsAvailable,
+      language,
+      subtitles,
+      format,
+      sessionId
+    );
+
+    res.json({
+      id: Number(sessionId),
+      movieId: movieId ?? existing.movie_id,
+      cinema: cinemaName,
+      cinemaId: cinemaRowId,
+      date: date ?? existing.date,
+      time: time ?? existing.time,
+      hall: hall ?? existing.hall,
+      seatsAvailable: seatsAvailable ?? existing.seats_available,
+      language: language ?? existing.language,
+      subtitles: subtitles ?? existing.subtitles,
+      format: format ?? existing.format
+    });
+  } catch (err) {
+    console.error('Error updating session:', err);
+    res.status(500).json({ message: 'Failed to update session' });
+  }
+});
+
+// Delete session
+app.delete('/api/sessions/:id', (req, res) => {
+  const sessionId = req.params.id;
+  const existing = db.prepare(`SELECT id FROM sessions WHERE id = ?`).get(sessionId);
+  if (!existing) return res.status(404).json({ message: 'Session not found' });
+
+  try {
+    db.prepare(`DELETE FROM sessions WHERE id = ?`).run(sessionId);
+    res.status(204).end();
+  } catch (err) {
+    console.error('Error deleting session:', err);
+    res.status(500).json({ message: 'Failed to delete session' });
   }
 });
 
