@@ -1,0 +1,356 @@
+.vaartkino-page {
+  background: radial-gradient(120% 110% at 18% 12%, rgba(146,73,255,0.16), transparent 40%),
+              radial-gradient(90% 90% at 86% 8%, rgba(255,191,112,0.12), transparent 48%),
+              linear-gradient(170deg, #0a001a 0%, #140026 46%, #1b0a32 100%);
+  color: #f1e7ff;
+  min-height: 100vh;
+  padding: 10px 18px 64px;
+  box-sizing: border-box;
+}
+
+.vaartkino-hero {
+  position: relative;
+  max-width: 1320px;
+  margin: 0 auto 22px;
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 420px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 28px 70px rgba(0,0,0,0.45);
+}
+
+.vaartkino-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(10,0,26,0.85) 0%, rgba(10,0,26,0.6) 44%, rgba(10,0,26,0.32) 78%);
+  z-index: 1;
+}
+
+.vaartkino-hero__content {
+  position: relative;
+  z-index: 2;
+  padding: 48px 42px 56px;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vaartkino-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: #f6c847;
+  font-weight: 700;
+}
+
+.vaartkino-title {
+  margin: 0;
+  font-size: clamp(44px, 5vw, 70px);
+  line-height: 0.96;
+  font-family: "Playfair Display", "Times New Roman", serif;
+  color: #ffeaff;
+}
+
+.vaartkino-subtitle {
+  margin: 6px 0 0;
+  max-width: 640px;
+  font-size: 17px;
+  color: #f1e7ff;
+  line-height: 1.6;
+}
+
+.vaartkino-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.vaartkino-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #7b2ff7, #a020f0);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(122, 47, 247, 0.38);
+  width: fit-content;
+}
+
+.vaartkino-button:hover {
+  transform: translateY(-1px);
+}
+
+.vaartkino-hint {
+  font-size: 13px;
+  color: #dcd0f5;
+}
+
+.vaartkino-brandline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.vaartkino-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+  color: #fff;
+}
+
+.vaartkino-logo--poff { color: #f1e7ff; }
+.vaartkino-logo--vaart { color: #f1e7ff; }
+.vaartkino-logo--absolute { color: #f6c847; font-weight: 900; }
+
+.vaartkino-hero__badge {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(0,0,0,0.7);
+  color: #f6c847;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  z-index: 2;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+}
+
+.vaartkino-strip {
+  margin: 10px auto 16px;
+  max-width: 1220px;
+  padding: 0 4px;
+}
+
+.vaartkino-strip__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  padding: 14px 16px;
+  background: #0f0a1f;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.32);
+  color: #fff;
+}
+
+.vaartkino-strip__item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px;
+}
+
+.vaartkino-strip__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  display: grid;
+  place-items: center;
+  color: #f6c847;
+}
+
+.vaartkino-strip__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.vaartkino-strip__title {
+  font-weight: 800;
+  color: #f1e7ff;
+}
+
+.vaartkino-strip__descr {
+  font-size: 14px;
+  color: #d0c5e6;
+}
+
+.vaartkino-ticket {
+  margin: 0 auto 20px;
+  max-width: 1220px;
+  padding: 0 6px;
+}
+
+.vaartkino-ticket__form {
+  background: #0b0b0d;
+  color: #fff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  box-shadow: 0 16px 34px rgba(0,0,0,0.38);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.vaartkino-ticket__select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 240px;
+  flex: 1;
+}
+
+.vaartkino-ticket__select label {
+  font-size: 12px;
+  opacity: 0.72;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.vaartkino-ticket__select select {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #242424;
+  background: #161616;
+  color: #fff;
+  font-size: 15px;
+}
+
+.vaartkino-ticket__button {
+  padding: 12px 22px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #7b2ff7, #a020f0);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 12px 26px rgba(122, 47, 247, 0.42);
+}
+
+.vaartkino-info {
+  max-width: 1220px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 22px;
+  align-items: center;
+}
+
+.vaartkino-info__text {
+  background: rgba(10,10,14,0.86);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 18px 36px rgba(0,0,0,0.32);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  line-height: 1.65;
+}
+
+.vaartkino-info__text h2 {
+  margin: 0;
+  color: #f6c847;
+  font-size: 24px;
+}
+
+.vaartkino-info__text strong {
+  color: #f6c847;
+}
+
+.vaartkino-info__cta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vaartkino-info__button {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #7b2ff7, #a020f0);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 12px 26px rgba(122, 47, 247, 0.32);
+}
+
+.vaartkino-info__note {
+  font-size: 13px;
+  color: #d0c5e6;
+}
+
+.vaartkino-info__visual {
+  display: flex;
+  justify-content: center;
+}
+
+.vaartkino-collage {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  min-height: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 20px 44px rgba(0,0,0,0.42);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.vaartkino-collage__tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0,0,0,0.68);
+  color: #f6c847;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.vaartkino-collage__label {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.75);
+  color: #f1e7ff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+@media (max-width: 1080px) {
+  .vaartkino-info {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .vaartkino-page {
+    padding: 6px 12px 48px;
+  }
+
+  .vaartkino-hero__content {
+    padding: 32px 24px 28px;
+  }
+
+  .vaartkino-title {
+    font-size: clamp(36px, 9vw, 52px);
+  }
+
+  .vaartkino-strip__grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}

@@ -1,32 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "./HeroBanner.css";
+import hero1 from "../assets/HeroBanner/hero1.jpg";
+import hero2 from "../assets/HeroBanner/hero2.jpg";
+import hero3 from "../assets/HeroBanner/hero3.jpg";
+import hero4 from "../assets/HeroBanner/hero4.jpg";
+import heroBirthday from "../assets/HeroBanner/hero-birthday.svg";
 
-const slides = [
-  {
-    title: "Movie Premiere: The Big Adventure",
-    description: "Join us for the premiere of The Big Adventure!",
-    image: "https://via.placeholder.com/1200x350?text=Movie+Premiere",
-  },
-  {
-    title: "Live Event: Stand-up Night",
-    description: "Enjoy a night of laughter with top comedians!",
-    image: "https://via.placeholder.com/1200x350?text=Stand-up+Night",
-  },
-  {
-    title: "Family Day: Animated Hits",
-    description: "Bring your family for a day of animated movies.",
-    image: "https://via.placeholder.com/1200x350?text=Animated+Hits",
-  },
-  {
-    title: "Special Screening: Classic Cinema",
-    description: "Experience timeless classics on the big screen.",
-    image: "https://via.placeholder.com/1200x350?text=Classic+Cinema",
-  },
-];
+const slides = [hero1, hero2, hero3, hero4];
 
 const HeroBanner = () => {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef(null);
+  const navigate = useNavigate();
+  const slideLinks = {
+    0: "/family?slide=0",
+    1: "/birthday?slide=1",
+    2: "/vaartkino?slide=2",
+    3: "/pancake-morning?slide=3",
+  };
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -44,22 +36,40 @@ const HeroBanner = () => {
     }, 30000);
   };
 
+  const goToSlideLink = () => {
+    const target = slideLinks[current];
+    if (target) {
+      navigate(target);
+    }
+  };
+
+  const isClickable = Boolean(slideLinks[current]);
+
   return (
     <section className="hero-banner" aria-roledescription="carousel">
-      <div className="hero-banner__viewport">
-        {slides.map((s, idx) => (
+      <div
+        className="hero-banner__viewport"
+        role="button"
+        tabIndex={0}
+        onClick={goToSlideLink}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            goToSlideLink();
+          }
+        }}
+        aria-label={isClickable ? "Ava kampaanialeht" : "Vaheta slaidi"}
+        style={{ cursor: isClickable ? "pointer" : "default" }}
+      >
+        {slides.map((image, idx) => (
           <div
             key={idx}
             className={`hero-banner__slide ${idx === current ? "active" : ""}`}
-            style={{ backgroundImage: `url(${s.image})` }}
+            style={{ backgroundImage: `url(${image})` }}
             role="group"
             aria-roledescription="slide"
             aria-label={`${idx + 1} of ${slides.length}`}
-          >
-            <div className="hero-banner__mini-info">
-              <h2>{s.title}</h2>
-            </div>
-          </div>
+          />
         ))}
       </div>
 
