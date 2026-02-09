@@ -1,9 +1,10 @@
 import "./index.css";
 import "./App.css";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HeroBanner from "./components/HeroBanner";
 import Showtimes from "./components/Showtimes";
+import AllMovies from "./components/AllMovies";
 import TopMovies from "./components/TopMovies";
 import Genres from "./components/Genres";
 import Gifts from "./components/Gifts";
@@ -15,13 +16,20 @@ import AdminDashboard from "./components/AdminDashboard";
 function App() {
   const location = useLocation();
   const isShowtime = location.pathname === "/showtime";
+  const isMovies = location.pathname === "/movies";
   const isAdmin = location.pathname === "/admin";
+
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedMovies, setSelectedMovies] = useState([]);
   const [genreLoading, setGenreLoading] = useState(false);
+
+  // Keep the viewport at the top whenever we land on a route
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   const handleGenreSelect = async (genre) => {
     setSelectedGenre(genre);
@@ -31,20 +39,18 @@ function App() {
     try {
       const res = await fetch(`/api/genres/${encodeURIComponent(genre)}/movies`);
       if (!res.ok) {
+        throw new Error("Failed to fetch movies by genre");
+      }
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setSelectedMovies(data);
+        setSelectedMovie(data[0]);
+      } else {
         setSelectedMovies([]);
         setSelectedMovie(null);
-      } else {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setSelectedMovies(data);
-          setSelectedMovie(data[0]);
-        } else {
-          setSelectedMovies([]);
-          setSelectedMovie(null);
-        }
       }
     } catch (err) {
-      console.error('Failed to fetch movies by genre', err);
+      console.error("Failed to fetch movies by genre", err);
       setSelectedMovies([]);
       setSelectedMovie(null);
     } finally {
@@ -54,20 +60,51 @@ function App() {
 
   const addToCart = (gift, quantity) => {
     setCart(prev => {
-      const existing = prev.find(item => item.id === gift.id);
+      const existing = prev.find(item => item.id === gift.id && item.type !== 'seats');
       if (existing) {
         return prev.map(item =>
-          item.id === gift.id
+          item.id === gift.id && item.type !== 'seats'
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { ...gift, quantity }];
+      return [...prev, { ...gift, quantity, type: 'gift' }];
     });
+  };
+
+  const addSeatsToCart = (sessionInfo, seats) => {
+    if (!sessionInfo || !seats || seats.length === 0) return;
+
+    const seatLabels = seats.map(s => `${s.row}${s.number}`);
+    const seatItem = {
+      id: `seats-${sessionInfo.id ?? sessionInfo.sessionId ?? sessionInfo.movie_id ?? 'session'}-${Date.now()}`,
+      type: 'seats',
+      title: sessionInfo.title || 'Cinema Session',
+      cinema: sessionInfo.cinema,
+      time: sessionInfo.time,
+      sessionId: sessionInfo.id ?? sessionInfo.sessionId,
+      price: 12,
+      quantity: seatLabels.length,
+      seats: seatLabels,
+    };
+
+    setCart(prev => [...prev, seatItem]);
+    setShowCart(true);
   };
 
   const removeFromCart = (id) => {
     setCart(prev => prev.filter(item => item.id !== id));
+  };
+
+  const removeSeatFromCartItem = (itemId, seatLabel) => {
+    setCart(prev => prev.flatMap(item => {
+      if (item.id !== itemId || item.type !== 'seats' || !item.seats) return item;
+      const remainingSeats = item.seats.filter(label => label !== seatLabel);
+      if (remainingSeats.length === 0) {
+        return [];
+      }
+      return { ...item, seats: remainingSeats, quantity: remainingSeats.length };
+    }));
   };
 
   const updateQuantity = (id, newQuantity) => {
@@ -95,7 +132,13 @@ function App() {
   } else if (isShowtime) {
     content = (
       <main className="site-container main-content">
-        <Showtimes />
+        <Showtimes addSeatsToCart={addSeatsToCart} />
+      </main>
+    );
+  } else if (isMovies) {
+    content = (
+      <main className="site-container main-content">
+        <AllMovies />
       </main>
     );
   } else {
@@ -124,7 +167,7 @@ function App() {
             <nav className="site-nav">
               <Link to="/showtime">Showtime</Link>
               <a href="#">Cinemas</a>
-              <a href="#">Movies</a>
+              <Link to="/movies">Movies</Link>
               <a href="#">Events</a>
               <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
               <a
@@ -247,82 +290,144 @@ function App() {
             ) : (
               <>
                 <div style={{ flex: 1, overflowY: 'auto', marginBottom: 20 }}>
-                  {cart.map(item => (
-                    <div
-                      key={item.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '12px 0',
-                        borderBottom: '1px solid rgba(255,255,255,0.1)'
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                        <div style={{ fontSize: 14, opacity: 0.8, marginTop: 4 }}>
-                          {item.price} € each
+                  {cart.map(item => {
+                    const isSeatItem = item.type === 'seats';
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '12px 0',
+                          borderBottom: '1px solid rgba(255,255,255,0.1)'
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 'bold' }}>
+                            {isSeatItem
+                              ? `${item.title || 'Session'}${item.time ? ' · ' + item.time : ''}`
+                              : item.name}
+                          </div>
+                          {isSeatItem ? (
+                            <>
+                              {item.cinema && (
+                                <div style={{ fontSize: 13, opacity: 0.8, marginTop: 2 }}>
+                                  {item.cinema}
+                                </div>
+                              )}
+                              <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>
+                                Seats:
+                              </div>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
+                                {item.seats?.map((seatLabel) => (
+                                  <span
+                                    key={seatLabel}
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: 6,
+                                      background: 'rgba(255,255,255,0.08)',
+                                      borderRadius: 999,
+                                      padding: '4px 10px',
+                                      fontSize: 13,
+                                    }}
+                                  >
+                                    {seatLabel}
+                                    <button
+                                      onClick={() => removeSeatFromCartItem(item.id, seatLabel)}
+                                      style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#fff',
+                                        cursor: 'pointer',
+                                        fontSize: 14,
+                                        lineHeight: 1,
+                                        padding: 0,
+                                      }}
+                                      aria-label={`Remove seat ${seatLabel}`}
+                                    >
+                                      ×
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                              <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>
+                                €{item.price} per seat
+                              </div>
+                            </>
+                          ) : (
+                            <div style={{ fontSize: 14, opacity: 0.8, marginTop: 4 }}>
+                              {item.price} € each
+                            </div>
+                          )}
                         </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            style={{
-                              background: 'rgba(255,255,255,0.15)',
-                              border: 'none',
-                              color: '#fff',
-                              width: 24,
-                              height: 24,
-                              borderRadius: 4,
-                              cursor: 'pointer',
-                              fontSize: 16,
-                              fontWeight: 'bold'
-                            }}
-                          >
-                            −
-                          </button>
-                          <span style={{ minWidth: 20, textAlign: 'center', fontSize: 15 }}>
-                            {item.quantity}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          {isSeatItem ? (
+                            <div style={{ fontSize: 14, opacity: 0.85 }}>
+                              × {item.quantity} seat{item.quantity > 1 ? 's' : ''}
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                style={{
+                                  background: 'rgba(255,255,255,0.15)',
+                                  border: 'none',
+                                  color: '#fff',
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: 4,
+                                  cursor: 'pointer',
+                                  fontSize: 16,
+                                  fontWeight: 'bold'
+                                }}
+                              >
+                                −
+                              </button>
+                              <span style={{ minWidth: 20, textAlign: 'center', fontSize: 15 }}>
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                style={{
+                                  background: 'rgba(255,255,255,0.15)',
+                                  border: 'none',
+                                  color: '#fff',
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: 4,
+                                  cursor: 'pointer',
+                                  fontSize: 16,
+                                  fontWeight: 'bold'
+                                }}
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                          <span style={{ fontWeight: 'bold', minWidth: 60, textAlign: 'right' }}>
+                            {(item.price * item.quantity).toFixed(2)} €
                           </span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => removeFromCart(item.id)}
                             style={{
-                              background: 'rgba(255,255,255,0.15)',
+                              background: 'rgba(255,255,255,0.1)',
                               border: 'none',
                               color: '#fff',
                               width: 24,
                               height: 24,
                               borderRadius: 4,
                               cursor: 'pointer',
-                              fontSize: 16,
-                              fontWeight: 'bold'
+                              fontSize: 16
                             }}
                           >
-                            +
+                            ×
                           </button>
                         </div>
-                        <span style={{ fontWeight: 'bold', minWidth: 60, textAlign: 'right' }}>
-                          {(item.price * item.quantity).toFixed(2)} €
-                        </span>
-                        <button
-                          onClick={() => removeFromCart(item.id)}
-                          style={{
-                            background: 'rgba(255,255,255,0.1)',
-                            border: 'none',
-                            color: '#fff',
-                            width: 24,
-                            height: 24,
-                            borderRadius: 4,
-                            cursor: 'pointer',
-                            fontSize: 16
-                          }}
-                        >
-                          ×
-                        </button>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div style={{ borderTop: '2px solid rgba(255,255,255,0.2)', paddingTop: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
