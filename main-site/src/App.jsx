@@ -18,6 +18,7 @@ import BirthdayPage from "./components/BirthdayPage";
 import VaartKinoPage from "./components/VaartKinoPage";
 import PancakeMorningPage from "./components/PancakeMorningPage";
 import EventsPage from "./components/EventsPage";
+import CinemasPage from "./components/CinemasPage";
 
 function App() {
   const location = useLocation();
@@ -30,6 +31,7 @@ function App() {
   const isVaart = location.pathname === "/vaartkino";
   const isPancake = location.pathname === "/pancake-morning";
   const isEvents = location.pathname === "/events";
+  const isCinemas = location.pathname === "/cinemas";
 
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
@@ -199,6 +201,12 @@ function App() {
         <EventsPage />
       </main>
     );
+  } else if (isCinemas) {
+    content = (
+      <main className="main-content">
+        <CinemasPage />
+      </main>
+    );
   } else {
     content = (
       <main className="site-container main-content">
@@ -224,7 +232,7 @@ function App() {
             </div>
             <nav className="site-nav">
               <Link to="/showtime">Showtime</Link>
-              <a href="#">Cinemas</a>
+              <Link to="/cinemas" className={isCinemas ? "showtimes-active" : ""}>Cinemas</Link>
               <Link to="/events" className={isEvents ? "showtimes-active" : ""}>Events</Link>
               <Link to="/movies">Movies</Link>
               <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
