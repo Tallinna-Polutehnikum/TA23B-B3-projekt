@@ -1,6 +1,6 @@
 import "./index.css";
 import "./App.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import HeroBanner from "./components/HeroBanner";
 import Showtimes from "./components/Showtimes";
@@ -18,9 +18,12 @@ import BirthdayPage from "./components/BirthdayPage";
 import VaartKinoPage from "./components/VaartKinoPage";
 import PancakeMorningPage from "./components/PancakeMorningPage";
 import EventsPage from "./components/EventsPage";
+import CinemasPage from "./components/CinemasPage";
+import CheckoutPage from "./components/CheckoutPage";
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isShowtime = location.pathname === "/showtime";
   const isMovies = location.pathname === "/movies";
   const isAdmin = location.pathname === "/admin";
@@ -30,6 +33,8 @@ function App() {
   const isVaart = location.pathname === "/vaartkino";
   const isPancake = location.pathname === "/pancake-morning";
   const isEvents = location.pathname === "/events";
+  const isCinemas = location.pathname === "/cinemas";
+  const isCheckout = location.pathname === "/checkout";
 
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
@@ -140,6 +145,8 @@ function App() {
     ));
   };
 
+  const clearCart = () => setCart([]);
+
   const getTotalItems = () => {
     return cart.reduce((sum, item) => sum + item.quantity, 0);
   };
@@ -151,6 +158,25 @@ function App() {
   let content = null;
   if (isAdmin) {
     content = <AdminDashboard />;
+  } else if (isCheckout) {
+    content = (
+      <main className="site-container main-content">
+        <CheckoutPage
+          cart={cart}
+          totalPrice={getTotalPrice()}
+          onRemoveFromCart={removeFromCart}
+          onUpdateQuantity={updateQuantity}
+          onRemoveSeat={removeSeatFromCartItem}
+          onBack={() => navigate(-1)}
+          onNavigateHome={() => navigate("/")}
+          onComplete={() => {
+            clearCart();
+            setShowCart(false);
+            navigate("/");
+          }}
+        />
+      </main>
+    );
   } else if (isShowtime) {
     content = (
       <main className="site-container main-content">
@@ -199,6 +225,12 @@ function App() {
         <EventsPage />
       </main>
     );
+  } else if (isCinemas) {
+    content = (
+      <main className="main-content">
+        <CinemasPage />
+      </main>
+    );
   } else {
     content = (
       <main className="site-container main-content">
@@ -224,7 +256,7 @@ function App() {
             </div>
             <nav className="site-nav">
               <Link to="/showtime">Showtime</Link>
-              <a href="#">Cinemas</a>
+              <Link to="/cinemas" className={isCinemas ? "showtimes-active" : ""}>Cinemas</Link>
               <Link to="/events" className={isEvents ? "showtimes-active" : ""}>Events</Link>
               <Link to="/movies">Movies</Link>
               <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
@@ -508,11 +540,14 @@ function App() {
                       padding: '12px 24px',
                       fontWeight: 'bold',
                       fontSize: 16,
-                      cursor: 'pointer',
+                      cursor: cart.length === 0 ? 'not-allowed' : 'pointer',
+                      opacity: cart.length === 0 ? 0.4 : 1,
                     }}
+                    disabled={cart.length === 0}
                     onClick={() => {
-                      alert('Proceeding to checkout...');
+                      if (cart.length === 0) return;
                       setShowCart(false);
+                      navigate('/checkout');
                     }}
                   >
                     Checkout

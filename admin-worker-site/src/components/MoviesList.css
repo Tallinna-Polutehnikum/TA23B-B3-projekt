@@ -11,8 +11,16 @@
 
 .movies-table {
   width: 100%;
+  min-width: 1100px;
   border-collapse: collapse;
   font-size: 14px;
+  table-layout: fixed;
+}
+
+.movies-table th,
+.movies-table td {
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .movies-table thead {
@@ -32,7 +40,7 @@
 
 .movies-table tbody tr {
   border-bottom: 1px solid #333;
-  transition: background 0.2s;
+  transition: background 0.15s ease;
 }
 
 .movies-table tbody tr:hover {
@@ -54,6 +62,11 @@
 .movie-title {
   font-weight: 600;
   color: #00d084;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  word-break: keep-all;
 }
 
 .movie-overview {
@@ -62,6 +75,52 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.4;
+}
+
+.movies-table th:nth-child(1),
+.movies-table td:nth-child(1) {
+  width: 72px;
+}
+
+.movies-table th:nth-child(2),
+.movies-table td:nth-child(2) {
+  width: 220px;
+}
+
+.movies-table th:nth-child(3),
+.movies-table td:nth-child(3) {
+  width: 360px;
+}
+
+.movies-table th:nth-child(4),
+.movies-table td:nth-child(4) {
+  width: 110px;
+}
+
+.movies-table th:nth-child(5),
+.movies-table td:nth-child(5) {
+  width: 170px;
+}
+
+.movies-table th:nth-child(6),
+.movies-table td:nth-child(6) {
+  width: 120px;
+}
+
+.movies-table th:nth-child(7),
+.movies-table td:nth-child(7) {
+  width: 140px;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.action-btn {
+  flex: 0 0 auto;
 }
 
 .actions-cell {
@@ -75,7 +134,7 @@
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.15s ease;
   background: #2a2a2a;
   color: #fff;
   font-weight: 500;
@@ -83,7 +142,6 @@
 
 .action-btn:hover {
   background: #333;
-  transform: scale(1.05);
 }
 
 .action-btn.delete:hover {
@@ -112,6 +170,16 @@
   justify-content: center;
   z-index: 50;
   padding: 16px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal {
@@ -121,6 +189,9 @@
   padding: 20px;
   width: min(640px, 100%);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  max-height: 90vh;
+  overflow-y: auto;
+  will-change: transform;
 }
 
 .modal h3 {
@@ -152,6 +223,8 @@
   padding: 10px;
   font-size: 14px;
   outline: none;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .poster-preview {
@@ -191,6 +264,26 @@
 
 .modal-actions .action-btn {
   min-width: 90px;
+}
+
+.loading {
+  background: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #333;
+  padding: 40px;
+  text-align: center;
+  color: #aaa;
+  font-size: 16px;
+}
+
+.error {
+  background: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #d32f2f;
+  padding: 20px;
+  color: #ff6b6b;
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 
 @media (max-width: 768px) {
