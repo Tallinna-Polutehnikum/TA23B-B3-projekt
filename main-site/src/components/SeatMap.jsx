@@ -13,7 +13,20 @@ export default function SeatMap({ sessionId, onClose, onAddSeatsToCart, sessionM
       .then((res) => res.json())
       .then((data) => {
         const normalizedSeats = (data.seats || generateSeatsGrid(data.sessionInfo?.seatsAvailable))
-          .map((seat) => ({ ...seat, occupied: false }));
+          .map((seat, idx) => {
+            const seatLabel = seat.seat_number || seat.seatNumber || `S${idx + 1}`;
+            const rowMatch = seatLabel.match(/^[A-Za-z]/);
+            const numMatch = seatLabel.match(/(\d+)/);
+            return {
+              id: seat.id ?? seatLabel,
+              row: (rowMatch ? rowMatch[0] : 'A').toUpperCase(),
+              number: numMatch ? Number(numMatch[1]) : idx + 1,
+              occupied: Boolean(seat.occupied),
+              seatNumber: seatLabel,
+              type: seat.type,
+              price: seat.price
+            };
+          });
         setSeats(normalizedSeats);
         setSessionInfo(data.sessionInfo || sessionMeta || null);
         setLoading(false);
