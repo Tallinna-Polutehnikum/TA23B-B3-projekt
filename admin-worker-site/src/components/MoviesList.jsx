@@ -1,70 +1,75 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import './MoviesList.css'
 
 export default function MoviesList({ refresh }) {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
   const [genres, setGenres] = useState([])
-  const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState({ title: '', overview: '', poster: '', duration: '', genre: '', directors: '' })
-  const posterFallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="90" viewBox="0 0 60 90" fill="none"><rect width="60" height="90" fill="%23181818" rx="4"/><text x="50%" y="50%" fill="%23aaaaaa" font-size="9" font-family="Arial" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>'
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({
+    title: '',
+    overview: '',
+    poster: '',
+    duration: '',
+    genre: '',
+    directors: ''
+  })
+  
+  // Use refs to track if we've already loaded data
+  const genresLoadedRef = useRef(false)
 
-  const buildPosterSrc = (poster) => {
-    const url = (poster || '').trim()
-    if (!url) return posterFallback
-    if (url.startsWith('http')) return url
-    if (url.startsWith('/')) return `https://image.tmdb.org/t/p/w200${url}`
-    return url
-  }
-
-  useEffect(() => {
-    fetchMovies()
-  }, [refresh])
-
-  useEffect(() => {
-    const loadGenres = async () => {
-      try {
-        const res = await fetch('/api/genres')
-        const data = await res.json()
-        setGenres(data)
-      } catch (err) {
-        console.error('Failed to fetch genres', err)
-      }
-    }
-
-    loadGenres()
-  }, [])
-
-  const fetchMovies = async () => {
-    setLoading(true)
+  // Simple fetch functions without useCallback to avoid re-render loops
+  const loadMovies = async () => {
     try {
-      const response = await fetch('/api/movies')
-      const data = await response.json()
+      setLoading(true)
+      const res = await fetch('http://localhost:4000/api/movies')
+      const data = await res.json()
       setMovies(data)
     } catch (err) {
-      console.error('Failed to fetch movies', err)
+      console.error('Error loading movies:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDelete = async (movieId) => {
-    const ok = window.confirm('Delete this movie?')
-    if (!ok) return
-
+  const loadGenres = async () => {
     try {
-      const res = await fetch(`/api/movies/${movieId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Delete failed')
-      fetchMovies()
+      const res = await fetch('http://localhost:4000/api/genres')
+      const data = await res.json()
+      setGenres(data)
     } catch (err) {
-      console.error('Failed to delete movie', err)
-      alert('Could not delete movie')
+      console.error('Error loading genres:', err)
     }
   }
 
-  const openEditor = (movie) => {
-    setEditing(movie)
-    setForm({
+  // Load movies when refresh changes
+  useEffect(() => {
+    loadMovies()
+  }, [refresh])
+
+  // Load genres only once on mount
+  useEffect(() => {
+    if (!genresLoadedRef.current) {
+      genresLoadedRef.current = true
+      loadGenres()
+    }
+  }, [])
+
+  // Prevent scroll when modal is open
+  useEffect(() => {
+    if (editingId) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [editingId])
+
+  const handleEdit = (movie) => {
+    setEditingId(movie.id)
+    setEditForm({
       title: movie.title || '',
       overview: movie.overview || '',
       poster: movie.poster || '',
@@ -74,46 +79,74 @@ export default function MoviesList({ refresh }) {
     })
   }
 
-  const closeEditor = () => {
-    setEditing(null)
-  }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
-  }
-
   const handleSave = async () => {
-    if (!editing) return
-    const payload = {
-      title: form.title.trim(),
-      overview: form.overview.trim(),
-      poster: form.poster.trim(),
-      duration: form.duration === '' ? null : Number(form.duration),
-      genre: form.genre.trim(),
-      directors: form.directors.trim()
+    if (!editingId) return
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/movies/${editingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editForm.title,
+          overview: editForm.overview,
+          poster: editForm.poster,
+          duration: editForm.duration === '' ? null : Number(editForm.duration),
+          genre: editForm.genre,
+          directors: editForm.directors
+        })
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to save')
+      }
+
+      // Reset state immediately
+      setEditingId(null)
+      setEditForm({
+        title: '',
+        overview: '',
+        poster: '',
+        duration: '',
+        genre: '',
+        directors: ''
+      })
+      // Reload movies after successful save
+      loadMovies()
+    } catch (err) {
+      alert('Error saving movie: ' + err.message)
+    }
+  }
+
+  const handleDelete = async (movieId) => {
+    if (!window.confirm('Are you sure you want to delete this movie?')) {
+      return
     }
 
     try {
-      const res = await fetch(`/api/movies/${editing.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      const res = await fetch(`http://localhost:4000/api/movies/${movieId}`, {
+        method: 'DELETE'
       })
 
-      if (!res.ok) throw new Error('Update failed')
-      closeEditor()
-      fetchMovies()
+      if (!res.ok) {
+        throw new Error('Failed to delete')
+      }
+
+      loadMovies()
     } catch (err) {
-      console.error('Failed to update movie', err)
-      alert('Could not update movie')
+      alert('Error deleting movie: ' + err.message)
     }
   }
 
-  const handleImgError = (e) => {
-    if (e.target.dataset.fallback) return
-    e.target.dataset.fallback = 'true'
-    e.target.src = posterFallback
+  const handleCancel = () => {
+    setEditingId(null)
+    setEditForm({
+      title: '',
+      overview: '',
+      poster: '',
+      duration: '',
+      genre: '',
+      directors: ''
+    })
   }
 
   if (loading) {
@@ -121,8 +154,12 @@ export default function MoviesList({ refresh }) {
   }
 
   return (
-    <>
-      <div className="movies-list-container">
+    <div className="movies-list-container">
+      {movies.length === 0 ? (
+        <div className="empty-state">
+          <p>No movies found. Create your first movie!</p>
+        </div>
+      ) : (
         <div className="movies-table-wrapper">
           <table className="movies-table">
             <thead>
@@ -140,85 +177,112 @@ export default function MoviesList({ refresh }) {
               {movies.map(movie => (
                 <tr key={movie.id}>
                   <td>
-                    <img 
-                      src={buildPosterSrc(movie.poster)}
+                    <img
+                      src={movie.poster || 'https://via.placeholder.com/60x90'}
                       alt={movie.title}
-                      onError={handleImgError}
                       className="movie-poster-thumb"
+                      onError={(e) => (e.target.src = 'https://via.placeholder.com/60x90')}
                     />
                   </td>
                   <td className="movie-title">{movie.title}</td>
-                  <td className="movie-overview">{movie.overview ? `${movie.overview.substring(0, 100)}...` : '—'}</td>
-                  <td>{movie.duration ?? '—'}</td>
+                  <td className="movie-overview">
+                    {movie.overview ? `${movie.overview.substring(0, 100)}...` : '—'}
+                  </td>
+                  <td>{movie.duration || '—'}</td>
                   <td>{movie.directors || '—'}</td>
                   <td>{movie.genre || '—'}</td>
                   <td className="actions-cell">
-                    <button className="action-btn edit" onClick={() => openEditor(movie)}>✏️ Edit</button>
-                    <button className="action-btn delete" onClick={() => handleDelete(movie.id)}>🗑️ Delete</button>
+                    <button
+                      className="action-btn edit"
+                      onClick={() => handleEdit(movie)}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      className="action-btn delete"
+                      onClick={() => handleDelete(movie.id)}
+                    >
+                      🗑️ Delete
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
 
-        {movies.length === 0 && (
-          <div className="empty-state">
-            <p>No movies found. Create your first movie!</p>
-          </div>
-        )}
-      </div>
-
-      {editing && (
-        <div className="modal-backdrop" onClick={closeEditor}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+      {editingId && (
+        <div className="modal-backdrop" onClick={handleCancel}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>Edit Movie</h3>
             <div className="form-grid">
               <label>
                 <span>Title</span>
-                <input name="title" value={form.title} onChange={handleChange} />
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                />
               </label>
               <label>
                 <span>Poster URL</span>
-                <input name="poster" value={form.poster} onChange={handleChange} />
-                {form.poster && (
-                  <div className="poster-preview">
-                    <img src={buildPosterSrc(form.poster)} alt="Poster preview" onError={handleImgError} />
-                  </div>
-                )}
+                <input
+                  type="text"
+                  value={editForm.poster}
+                  onChange={(e) => setEditForm({ ...editForm, poster: e.target.value })}
+                />
               </label>
               <label>
                 <span>Genre</span>
-                <select name="genre" value={form.genre} onChange={handleChange}>
+                <select
+                  value={editForm.genre}
+                  onChange={(e) => setEditForm({ ...editForm, genre: e.target.value })}
+                >
                   <option value="">Select genre</option>
-                  {genres.map(g => (
-                    <option key={g.id} value={g.type}>{g.type}</option>
+                  {genres.map((g) => (
+                    <option key={g.id} value={g.type}>
+                      {g.type}
+                    </option>
                   ))}
-                  {form.genre && !genres.find(g => g.type === form.genre) && (
-                    <option value={form.genre}>{form.genre}</option>
-                  )}
                 </select>
               </label>
               <label>
                 <span>Duration (min)</span>
-                <input name="duration" value={form.duration} onChange={handleChange} />
+                <input
+                  type="number"
+                  value={editForm.duration}
+                  onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
+                />
               </label>
               <label>
                 <span>Directors</span>
-                <input name="directors" value={form.directors} onChange={handleChange} />
+                <input
+                  type="text"
+                  value={editForm.directors}
+                  onChange={(e) => setEditForm({ ...editForm, directors: e.target.value })}
+                />
               </label>
               <label className="full-row">
                 <span>Overview</span>
-                <textarea name="overview" value={form.overview} onChange={handleChange} rows={4} />
+                <textarea
+                  rows="4"
+                  value={editForm.overview}
+                  onChange={(e) => setEditForm({ ...editForm, overview: e.target.value })}
+                />
               </label>
             </div>
             <div className="modal-actions">
-              <button className="action-btn" onClick={closeEditor}>Cancel</button>
-              <button className="action-btn edit" onClick={handleSave}>Save</button>
+              <button className="action-btn" onClick={handleCancel}>
+                Cancel
+              </button>
+              <button className="action-btn edit" onClick={handleSave}>
+                Save
+              </button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

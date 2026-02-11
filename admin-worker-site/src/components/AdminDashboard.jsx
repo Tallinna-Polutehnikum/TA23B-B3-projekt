@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './AdminDashboard.css'
 import AddMovieForm from './AddMovieForm'
 import AddSessionForm from './AddSessionForm'
@@ -8,6 +8,22 @@ import SessionsList from './SessionsList'
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
   const [refresh, setRefresh] = useState(0)
+  const [movieCount, setMovieCount] = useState(0)
+
+  useEffect(() => {
+    const loadMovieCount = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/api/movies')
+        if (response.ok) {
+          const movies = await response.json()
+          setMovieCount(movies.length)
+        }
+      } catch (error) {
+        console.error('Error loading movie count:', error)
+      }
+    }
+    loadMovieCount()
+  }, [refresh])
 
   const handleRefresh = () => {
     setRefresh(prev => prev + 1)
@@ -98,7 +114,7 @@ export default function AdminDashboard() {
                 <div className="stat-card">
                   <div className="stat-icon">🎬</div>
                   <div className="stat-info">
-                    <div className="stat-value">24</div>
+                    <div className="stat-value">{movieCount}</div>
                     <div className="stat-label">Movies in Database</div>
                   </div>
                 </div>
@@ -114,13 +130,6 @@ export default function AdminDashboard() {
                   <div className="stat-info">
                     <div className="stat-value">8</div>
                     <div className="stat-label">Cinemas</div>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon">💰</div>
-                  <div className="stat-info">
-                    <div className="stat-value">€3,245</div>
-                    <div className="stat-label">Today Revenue</div>
                   </div>
                 </div>
               </div>
