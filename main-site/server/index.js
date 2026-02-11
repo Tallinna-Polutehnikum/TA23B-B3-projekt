@@ -513,6 +513,48 @@ app.put('/api/sessions/:id', (req, res) => {
   }
 });
 
+// Bulk delete sessions by date range
+app.post('/api/sessions/bulk-delete', (req, res) => {
+  const { startDate, endDate } = req.body;
+  if (!startDate || !endDate) return res.status(400).json({ message: 'startDate and endDate are required (YYYY-MM-DD or DD.MM.YYYY)' });
+
+  const normalize = (value) => {
+    if (!value) return null;
+    const trimmed = String(value).trim();
+    if (trimmed.includes('.')) {
+      // DD.MM.YYYY -> YYYY-MM-DD
+      const [d, m, y] = trimmed.split('.');
+      if (d && m && y) return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    }
+    return trimmed;
+  };
+
+  const isoStart = normalize(startDate);
+  const isoEnd = normalize(endDate);
+
+  try {
+    const deleteSessions = db.prepare(`
+      DELETE FROM sessions 
+      WHERE datetime(date) >= datetime(?) AND datetime(date) < datetime(?, '+1 day')
+    `);
+    const deleteShowtime = db.prepare(`
+      DELETE FROM showtime 
+      WHERE datetime(date) >= datetime(?) AND datetime(date) < datetime(?, '+1 day')
+    `);
+
+    const resultSessions = isoStart && isoEnd ? deleteSessions.run(isoStart, isoEnd) : { changes: 0 };
+    const resultShowtime = isoStart && isoEnd ? deleteShowtime.run(isoStart, isoEnd) : { changes: 0 };
+
+    res.json({
+      deletedSessions: resultSessions.changes || 0,
+      deletedShowtime: resultShowtime.changes || 0
+    });
+  } catch (err) {
+    console.error('Error bulk deleting sessions:', err);
+    res.status(500).json({ message: 'Failed to delete sessions' });
+  }
+});
+
 // Delete session
 app.delete('/api/sessions/:id', (req, res) => {
   const sessionId = req.params.id;
