@@ -11,6 +11,7 @@
 -- ALTER TABLE sessions ADD COLUMN format TEXT DEFAULT '2D';
 -- ALTER TABLE sessions ADD COLUMN language TEXT DEFAULT 'Estonian';
 -- ALTER TABLE sessions ADD COLUMN subtitles TEXT DEFAULT 'English';
+-- ALTER TABLE sessions ADD COLUMN hall_id INTEGER REFERENCES hall(id);
 
 -- Пример данных для тестирования
 
@@ -28,12 +29,13 @@ VALUES (
   datetime('now')
 );
 
--- Добавить тестовый сеанс
-INSERT INTO sessions (id, movie_id, cinema_name, date, time, hall, seats_available, language, subtitles, format)
+-- Добавить тестовый сеанс (предполагается, что cinema и hall с id = 1 существуют)
+INSERT INTO sessions (id, movie_id, cinema_id, hall_id, date, time, hall, seats_available, language, subtitles, format)
 VALUES (
   999,
   999,
-  'Tallinn - Kino',
+  1,
+  1,
   date('now', '+1 day'),
   '18:30',
   1,
@@ -47,13 +49,16 @@ VALUES (
 SELECT 
   s.id,
   m.title,
-  s.cinema_name,
+  COALESCE(c.name, 'Cinema') AS cinema,
+  COALESCE(h.hall_number, s.hall) AS hall,
   s.date,
   s.time,
   s.seats_available,
   m.genres
 FROM sessions s
 LEFT JOIN movie m ON s.movie_id = m.id
+LEFT JOIN cinema c ON s.cinema_id = c.id
+LEFT JOIN hall h ON s.hall_id = h.id
 LIMIT 10;
 
 -- Если нужно очистить тестовые данные

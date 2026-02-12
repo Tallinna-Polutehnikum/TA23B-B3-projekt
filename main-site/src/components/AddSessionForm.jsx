@@ -5,20 +5,15 @@ export default function AddSessionForm({ onSuccess }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [movies, setMovies] = useState([])
-  const [cinemas] = useState([
-    'Tallinn - Kino',
-    'Tallinn - CinemaX',
-    'Tallinn - Forum',
-    'Tartu - Cinema',
-    'Tartu - Plaza'
-  ])
+  const [cinemas, setCinemas] = useState([])
+  const [halls, setHalls] = useState([])
 
   const [formData, setFormData] = useState({
     movieId: '',
-    cinema: '',
+    cinemaId: '',
     date: '',
     time: '',
-    hall: '1',
+    hallId: '',
     seatsAvailable: '100',
     language: 'Estonian',
     subtitles: 'English',
@@ -31,13 +26,30 @@ export default function AddSessionForm({ onSuccess }) {
       .then(res => res.json())
       .then(data => setMovies(data))
       .catch(err => console.error('Failed to load movies', err))
+    fetch('/api/cinemas')
+      .then(res => res.json())
+      .then(data => setCinemas(data))
+      .catch(err => console.error('Failed to load cinemas', err))
   }, [])
+
+  useEffect(() => {
+    if (!formData.cinemaId) {
+      setHalls([])
+      return
+    }
+
+    fetch(`/api/halls?cinemaId=${formData.cinemaId}`)
+      .then(res => res.json())
+      .then(data => setHalls(data))
+      .catch(err => console.error('Failed to load halls', err))
+  }, [formData.cinemaId])
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      ...(name === 'cinemaId' ? { hallId: '' } : {})
     }))
   }
 
@@ -62,10 +74,10 @@ export default function AddSessionForm({ onSuccess }) {
       // Reset form
       setFormData({
         movieId: '',
-        cinema: '',
+        cinemaId: '',
+        hallId: '',
         date: '',
         time: '',
-        hall: '1',
         seatsAvailable: '100',
         language: 'Estonian',
         subtitles: 'English',
@@ -105,18 +117,18 @@ export default function AddSessionForm({ onSuccess }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="cinema">Cinema *</label>
+            <label htmlFor="cinemaId">Cinema *</label>
             <select
-              id="cinema"
-              name="cinema"
-              value={formData.cinema}
+              id="cinemaId"
+              name="cinemaId"
+              value={formData.cinemaId}
               onChange={handleChange}
               required
             >
               <option value="">Choose a cinema...</option>
               {cinemas.map(cinema => (
-                <option key={cinema} value={cinema}>
-                  {cinema}
+                <option key={cinema.id} value={cinema.id}>
+                  {cinema.name}
                 </option>
               ))}
             </select>
@@ -147,18 +159,21 @@ export default function AddSessionForm({ onSuccess }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="hall">Hall Number</label>
+            <label htmlFor="hallId">Hall *</label>
             <select
-              id="hall"
-              name="hall"
-              value={formData.hall}
+              id="hallId"
+              name="hallId"
+              value={formData.hallId}
               onChange={handleChange}
+              required
+              disabled={!formData.cinemaId}
             >
-              <option value="1">Hall 1</option>
-              <option value="2">Hall 2</option>
-              <option value="3">Hall 3</option>
-              <option value="4">Hall 4</option>
-              <option value="5">Hall 5</option>
+              <option value="">{formData.cinemaId ? 'Choose a hall...' : 'Select cinema first'}</option>
+              {halls.map(hall => (
+                <option key={hall.id} value={hall.id}>
+                  Hall {hall.hall_number}
+                </option>
+              ))}
             </select>
           </div>
 

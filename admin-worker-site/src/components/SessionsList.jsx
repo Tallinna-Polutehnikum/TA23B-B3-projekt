@@ -98,24 +98,22 @@ export default function SessionsList({ refresh }) {
       return
     }
 
-    const toDelete = sessions.filter(s => s.date >= startDate && s.date <= endDate)
-    if (toDelete.length === 0) {
-      alert('No sessions in that range')
-      return
-    }
-
-    const ok = window.confirm(`Delete ${toDelete.length} sessions between ${startDate} and ${endDate}?`)
+    const ok = window.confirm(`Delete all sessions between ${startDate} and ${endDate}?`)
     if (!ok) return
 
     setBulkDeleting(true)
     try {
-      await Promise.all(
-        toDelete.map(s => fetch(`/api/sessions/${s.id}`, { method: 'DELETE' }))
-      )
+      const res = await fetch('/api/sessions/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startDate, endDate })
+      })
+
+      if (!res.ok) throw new Error('Bulk delete failed')
       fetchSessions()
     } catch (err) {
       console.error('Failed bulk delete', err)
-      alert('Could not delete some sessions')
+      alert('Could not delete sessions')
     } finally {
       setBulkDeleting(false)
     }

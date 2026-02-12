@@ -11,7 +11,6 @@ import dramaImg from '../assets/genres/genre-drama.jpg';
 import fantasyImg from '../assets/genres/genre-fantasy.jpg';
 import familyImg from '../assets/genres/genre-family.jpg';
 import actionImg from '../assets/genres/genre-action.jpg';
-import musicImg from '../assets/genres/genre-music.jpg';
 import sciFiImg from '../assets/genres/genre-scifi.jpg';
 import warImg from '../assets/genres/genre-war.jpg';
 import sportImg from '../assets/genres/genre-sport.jpg';
@@ -19,7 +18,7 @@ import adventureImg from '../assets/genres/genre-adventure.jpg';
 
 const DEFAULT_GENRES = [
   'Horror','Comedy','Historycal','Animation','Anime','Documentary','Drama','Fantasy',
-  'Family','Action','Music','SCI-FI','War','Sport','Adventure'
+  'Family','Action','SCI-FI','War','Sport','Adventure'
 ];
 
 const GENRE_IMAGES = {
@@ -34,18 +33,35 @@ const GENRE_IMAGES = {
   Fantasy: fantasyImg,
   Family: familyImg,
   Action: actionImg,
-  Music: musicImg,
   'SCI-FI': sciFiImg,
   War: warImg,
   Sport: sportImg,
   Adventure: adventureImg,
 };
 
+const cleanGenres = (list = []) => {
+  const seen = new Set();
+  const result = [];
+
+  list.forEach(raw => {
+    const value = typeof raw === 'string' ? raw.trim() : '';
+    if (!value) return;
+    if (/^music$/i.test(value)) return; // drop Music entirely
+
+    const normalized = value.toUpperCase() === 'SCI-FI' ? 'SCI-FI' : value;
+    if (seen.has(normalized)) return; // dedupe (e.g., Sci-Fi vs SCI-FI)
+    seen.add(normalized);
+    result.push(normalized);
+  });
+
+  return result;
+};
+
 export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
   const rowRef = useRef(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
-  const [items, setItems] = useState(genres);
+  const [items, setItems] = useState(() => cleanGenres(genres));
 
   useEffect(() => {
     let mounted = true;
@@ -54,7 +70,7 @@ export default function Genres({ genres = DEFAULT_GENRES, onSelect }) {
       .then(data => {
         if (!mounted) return;
         if (Array.isArray(data) && data.length > 0) {
-          setItems(data.map(d => d.type));
+          setItems(cleanGenres(data.map(d => d.type)));
         }
       })
       .catch(() => {
