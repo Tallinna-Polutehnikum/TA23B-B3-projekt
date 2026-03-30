@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './MoviesList.css'
 
 export default function MoviesList({ refresh }) {

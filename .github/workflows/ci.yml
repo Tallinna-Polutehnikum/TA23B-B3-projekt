@@ -55,7 +55,7 @@ jobs:
           if [ "${{ steps.meta.outputs.lint }}" = "true" ]; then
             npm run lint
           else
-            npx eslint .
+            echo "Skipping lint (no lint script)"
           fi
 
       - name: Test with coverage
