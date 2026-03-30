@@ -1,0 +1,91 @@
+name: Deploy Zone Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-zone-production
+  cancel-in-progress: true
+
+env:
+  SSH_HOST: spjo.eu
+  SSH_USER: virt137396
+  SSH_PORT: "22"
+  DEPLOY_ROOT: /data02/virt137396/domeenid/www.spjo.eu/htdocs
+  APP_DIR: /data02/virt137396/domeenid/www.spjo.eu/htdocs/main-site
+  DB_PATH: /data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite
+  LOOPBACK_HOST: 127.2.63.196
+  APP_PORT: "8080"
+  APP_NAME: absolute-cinema-main
+
+jobs:
+  deploy:
+    name: Deploy to Zone
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        env:
+          ZONE_SSH_PRIVATE_KEY: ${{ secrets.ZONE_SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "$ZONE_SSH_PRIVATE_KEY" ]; then
+            echo "Missing required secret: ZONE_SSH_PRIVATE_KEY"
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          printf "%s\n" "$ZONE_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Ensure remote directories
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$APP_DIR' '$DEPLOY_ROOT/database'"
+
+      - name: Sync application files
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -p $SSH_PORT" \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'node_modules/' \
+            --exclude 'dist/' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            main-site/ "$SSH_USER@$SSH_HOST:$APP_DIR/"
+
+      - name: Install, build and restart PM2
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "
+            set -e
+            cd '$APP_DIR'
+
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+
+            npm run build
+            export HOST='$LOOPBACK_HOST' PORT='$APP_PORT' DB_PATH='$DB_PATH'
+
+            if pm2 describe '$APP_NAME' >/dev/null 2>&1; then
+              pm2 restart '$APP_NAME' --update-env
+            else
+              pm2 start ecosystem.config.cjs --only '$APP_NAME' --update-env
+            fi
+
+            pm2 save
+            curl -fsS 'http://$LOOPBACK_HOST:$APP_PORT/api/genres' >/dev/null
+          "
+
+      - name: Public endpoint smoke test
+        run: |
+          curl -fsS https://absolutecinema.spjo.eu/api/genres >/dev/null
+          echo "Deploy completed successfully"

@@ -200,3 +200,47 @@ npm.cmd run sync:movies
 - The project currently relies on local SQLite data, so keep database/db.sqlite available.
 
 ---
+
+## 13. Automatic Deployment (GitHub Actions -> Zone)
+
+This repository includes a production deployment workflow that runs on every push to `main`.
+
+Workflow file:
+
+- `.github/workflows/deploy-zone.yml`
+
+### 13.1 What the workflow does
+
+1. Connects to your Zone server over SSH.
+2. Synchronizes `main-site/` to `/data02/virt137396/domeenid/www.spjo.eu/htdocs/main-site`.
+3. Runs `npm ci` (or `npm install`) and `npm run build` on server.
+4. Restarts PM2 process `absolute-cinema-main` with:
+	- `HOST=127.2.63.196`
+	- `PORT=8080`
+	- `DB_PATH=/data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite`
+5. Verifies API health on local loopback and public domain.
+
+Note: The workflow does not overwrite `database/db.sqlite`.
+
+### 13.2 Required GitHub Secret
+
+Add this repository secret in GitHub:
+
+- `ZONE_SSH_PRIVATE_KEY`
+
+Value should be the full private key content from your local key file:
+
+- `C:\Users\USER\.ssh\zone_ed25519`
+
+Include the full block:
+
+```text
+-----BEGIN OPENSSH PRIVATE KEY-----
+...
+-----END OPENSSH PRIVATE KEY-----
+```
+
+### 13.3 Triggering deployment
+
+- Automatic: push or merge to `main`.
+- Manual: run `Deploy Zone Production` from the Actions tab.
