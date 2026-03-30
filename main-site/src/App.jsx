@@ -102,7 +102,15 @@ function App() {
   const addSeatsToCart = (sessionInfo, seats) => {
     if (!sessionInfo || !seats || seats.length === 0) return;
 
-    const seatLabels = seats.map(s => `${s.row}${s.number}`);
+    const seatEntries = seats.map((s) => ({
+      label: `${s.row}${s.number}`,
+      // Keep numeric seat ids for checkout booking API.
+      seatId: Number.isFinite(Number(s.id)) ? Number(s.id) : null,
+    }));
+
+    const seatLabels = seatEntries.map((entry) => entry.label);
+    const seatIds = seatEntries.map((entry) => entry.seatId);
+
     const seatItem = {
       id: `seats-${sessionInfo.id ?? sessionInfo.sessionId ?? sessionInfo.movie_id ?? 'session'}-${Date.now()}`,
       type: 'seats',
@@ -113,6 +121,7 @@ function App() {
       price: 12,
       quantity: seatLabels.length,
       seats: seatLabels,
+      seatIds,
     };
 
     setCart(prev => [...prev, seatItem]);
@@ -126,11 +135,25 @@ function App() {
   const removeSeatFromCartItem = (itemId, seatLabel) => {
     setCart(prev => prev.flatMap(item => {
       if (item.id !== itemId || item.type !== 'seats' || !item.seats) return item;
-      const remainingSeats = item.seats.filter(label => label !== seatLabel);
+      const remainingIndexes = item.seats
+        .map((label, idx) => ({ label, idx }))
+        .filter(({ label }) => label !== seatLabel)
+        .map(({ idx }) => idx);
+
+      const remainingSeats = remainingIndexes.map((idx) => item.seats[idx]);
+      const remainingSeatIds = Array.isArray(item.seatIds)
+        ? remainingIndexes.map((idx) => item.seatIds[idx] ?? null)
+        : [];
+
       if (remainingSeats.length === 0) {
         return [];
       }
-      return { ...item, seats: remainingSeats, quantity: remainingSeats.length };
+      return {
+        ...item,
+        seats: remainingSeats,
+        seatIds: remainingSeatIds,
+        quantity: remainingSeats.length,
+      };
     }));
   };
 
@@ -167,6 +190,10 @@ function App() {
           onRemoveFromCart={removeFromCart}
           onUpdateQuantity={updateQuantity}
           onRemoveSeat={removeSeatFromCartItem}
+          onPaymentSuccess={() => {
+            clearCart();
+            setShowCart(false);
+          }}
           onBack={() => navigate(-1)}
           onNavigateHome={() => navigate("/")}
           onComplete={() => {

@@ -1,7 +1,9 @@
 import express from 'express';
 import Database from 'better-sqlite3';
 import cors from 'cors';
+import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -17,7 +19,8 @@ app.use((req, res, next) => {
 
 let db;
 try {
-  const dbPath = path.resolve(__dirname, '..', '..', 'database', 'db.sqlite');
+  const defaultDbPath = path.resolve(__dirname, '..', '..', 'database', 'db.sqlite');
+  const dbPath = process.env.DB_PATH ? path.resolve(process.env.DB_PATH) : defaultDbPath;
   console.log('Opening database at:', dbPath);
   db = new Database(dbPath);
   console.log('✓ Database opened successfully');
@@ -32,6 +35,97 @@ const seatAvailabilityWhere = hasSeatAvailabilityFlag ? 'WHERE is_available = 1'
 
 const AUTO_SHOW_TIMES = ['12:00', '15:00', '18:00', '21:00'];
 const AUTO_WINDOW_DAYS = 7;
+const AUTH_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+const authSessions = new Map();
+const MOCK_PAYMENT_PROVIDERS = new Set(['montonio']);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS payment_tx (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    payment_id TEXT NOT NULL UNIQUE,
+    provider TEXT NOT NULL,
+    amount_cents INTEGER NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'EUR',
+    status TEXT NOT NULL,
+    method TEXT,
+    metadata TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `scrypt$${salt}$${hash}`;
+}
+
+function verifyPassword(plainPassword, storedPassword) {
+  if (!storedPassword) return false;
+
+  if (!storedPassword.startsWith('scrypt$')) {
+    return storedPassword === plainPassword;
+  }
+
+  const parts = storedPassword.split('$');
+  if (parts.length !== 3) return false;
+
+  const [, salt, storedHashHex] = parts;
+  const calculatedHashHex = crypto.scryptSync(plainPassword, salt, 64).toString('hex');
+
+  const storedBuffer = Buffer.from(storedHashHex, 'hex');
+  const calculatedBuffer = Buffer.from(calculatedHashHex, 'hex');
+  if (storedBuffer.length !== calculatedBuffer.length) return false;
+
+  return crypto.timingSafeEqual(storedBuffer, calculatedBuffer);
+}
+
+function createAuthToken(userId) {
+  const token = crypto.randomBytes(32).toString('hex');
+  authSessions.set(token, {
+    userId,
+    expiresAt: Date.now() + AUTH_TOKEN_TTL_MS,
+  });
+  return token;
+}
+
+function getTokenFromRequest(req) {
+  const authHeader = req.headers.authorization || '';
+  if (authHeader.toLowerCase().startsWith('bearer ')) {
+    return authHeader.slice(7).trim();
+  }
+
+  const fallbackToken = req.headers['x-auth-token'];
+  return typeof fallbackToken === 'string' ? fallbackToken : '';
+}
+
+function getAuthUser(req) {
+  const token = getTokenFromRequest(req);
+  if (!token) return null;
+
+  const session = authSessions.get(token);
+  if (!session) return null;
+
+  if (session.expiresAt < Date.now()) {
+    authSessions.delete(token);
+    return null;
+  }
+
+  const user = db
+    .prepare(`SELECT id, username, email FROM user WHERE id = ?`)
+    .get(session.userId);
+
+  if (!user) {
+    authSessions.delete(token);
+    return null;
+  }
+
+  return { token, user };
+}
+
+function createMockPaymentId(provider) {
+  return `pay_${provider}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+}
 
 function formatIsoDate(date) {
   return date.toISOString().slice(0, 10);
@@ -562,6 +656,8 @@ app.get('/api/sessions/:id/seats', (req, res) => {
 app.post('/api/sessions/:id/book', (req, res) => {
   const sessionId = Number(req.params.id);
   const { seatIds, userId } = req.body || {};
+  const auth = getAuthUser(req);
+  const effectiveUserId = userId ?? auth?.user?.id ?? null;
 
   if (!sessionId || !Array.isArray(seatIds) || seatIds.length === 0) {
     return res.status(400).json({ message: 'sessionId and seatIds[] are required' });
@@ -608,7 +704,7 @@ app.post('/api/sessions/:id/book', (req, res) => {
 
     const runTx = db.transaction(() => {
       seatIds.forEach((seatId) => {
-        insertTicket.run(userId ?? null, sessionId, seatId);
+        insertTicket.run(effectiveUserId, sessionId, seatId);
       });
 
       db.prepare(`
@@ -638,6 +734,223 @@ app.post('/api/sessions/:id/book', (req, res) => {
 });
 
 // ============= POST ENDPOINTS =============
+
+app.post('/api/auth/register', (req, res) => {
+  const username = String(req.body?.username || '').trim();
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: 'username, email and password are required' });
+  }
+
+  if (username.length < 3) {
+    return res.status(400).json({ message: 'Username must be at least 3 characters' });
+  }
+
+  if (!email.includes('@')) {
+    return res.status(400).json({ message: 'Please provide a valid email' });
+  }
+
+  if (password.length < 4) {
+    return res.status(400).json({ message: 'Password must be at least 4 characters' });
+  }
+
+  const exists = db
+    .prepare(`
+      SELECT id
+      FROM user
+      WHERE lower(username) = lower(?) OR lower(email) = lower(?)
+      LIMIT 1
+    `)
+    .get(username, email);
+
+  if (exists) {
+    return res.status(409).json({ message: 'User with this username or email already exists' });
+  }
+
+  try {
+    const hashedPassword = hashPassword(password);
+    const inserted = db
+      .prepare(`INSERT INTO user (username, email, pass) VALUES (?, ?, ?)`)
+      .run(username, email, hashedPassword);
+
+    const userId = Number(inserted.lastInsertRowid);
+    const user = db
+      .prepare(`SELECT id, username, email FROM user WHERE id = ?`)
+      .get(userId);
+
+    const token = createAuthToken(userId);
+    res.status(201).json({ token, user });
+  } catch (err) {
+    console.error('Auth register failed:', err);
+    res.status(500).json({ message: 'Failed to register user' });
+  }
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const identifier = String(req.body?.identifier || req.body?.email || req.body?.username || '').trim();
+  const password = String(req.body?.password || '');
+
+  if (!identifier || !password) {
+    return res.status(400).json({ message: 'identifier and password are required' });
+  }
+
+  const userRow = db
+    .prepare(`
+      SELECT id, username, email, pass
+      FROM user
+      WHERE lower(username) = lower(?) OR lower(email) = lower(?)
+      LIMIT 1
+    `)
+    .get(identifier, identifier);
+
+  if (!userRow || !verifyPassword(password, userRow.pass)) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+
+  // Upgrade legacy plain-text passwords to hashed format on successful login.
+  if (userRow.pass && !String(userRow.pass).startsWith('scrypt$')) {
+    const upgraded = hashPassword(password);
+    db.prepare(`UPDATE user SET pass = ? WHERE id = ?`).run(upgraded, userRow.id);
+  }
+
+  const token = createAuthToken(userRow.id);
+  res.json({
+    token,
+    user: {
+      id: userRow.id,
+      username: userRow.username,
+      email: userRow.email,
+    },
+  });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const auth = getAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  res.json({ user: auth.user });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  const token = getTokenFromRequest(req);
+  if (token) authSessions.delete(token);
+  res.status(204).end();
+});
+
+app.post('/api/payments/mock-intent', (req, res) => {
+  const provider = String(req.body?.provider || '').trim().toLowerCase();
+  const amount = Number(req.body?.amount);
+  const currency = String(req.body?.currency || 'EUR').trim().toUpperCase();
+  const method = String(req.body?.method || '').trim().toLowerCase();
+  const metadata = req.body?.metadata ?? null;
+
+  if (!MOCK_PAYMENT_PROVIDERS.has(provider)) {
+    return res.status(400).json({ message: 'Unsupported provider' });
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return res.status(400).json({ message: 'Invalid amount' });
+  }
+
+  const amountCents = Math.round(amount * 100);
+  const paymentId = createMockPaymentId(provider);
+
+  db.prepare(`
+    INSERT INTO payment_tx (payment_id, provider, amount_cents, currency, status, method, metadata)
+    VALUES (?, ?, ?, ?, 'requires_confirmation', ?, ?)
+  `).run(
+    paymentId,
+    provider,
+    amountCents,
+    currency,
+    method || null,
+    metadata ? JSON.stringify(metadata) : null
+  );
+
+  res.status(201).json({
+    paymentId,
+    provider,
+    amount,
+    currency,
+    status: 'requires_confirmation',
+    clientSecret: `mock_secret_${paymentId}`,
+    mocked: true,
+  });
+});
+
+app.post('/api/payments/mock-confirm', (req, res) => {
+  const provider = String(req.body?.provider || '').trim().toLowerCase();
+  const paymentId = String(req.body?.paymentId || '').trim();
+  const forceFail = Boolean(req.body?.forceFail);
+
+  if (!MOCK_PAYMENT_PROVIDERS.has(provider)) {
+    return res.status(400).json({ message: 'Unsupported provider' });
+  }
+
+  if (!paymentId) {
+    return res.status(400).json({ message: 'paymentId is required' });
+  }
+
+  const payment = db
+    .prepare(`
+      SELECT payment_id, provider, amount_cents, currency, status
+      FROM payment_tx
+      WHERE payment_id = ? AND provider = ?
+      LIMIT 1
+    `)
+    .get(paymentId, provider);
+
+  if (!payment) {
+    return res.status(404).json({ message: 'Payment not found' });
+  }
+
+  if (payment.status === 'succeeded') {
+    return res.json({
+      paymentId: payment.payment_id,
+      provider: payment.provider,
+      status: payment.status,
+      amount: payment.amount_cents / 100,
+      currency: payment.currency,
+      mocked: true,
+    });
+  }
+
+  if (forceFail) {
+    db.prepare(`
+      UPDATE payment_tx
+      SET status = 'failed', updated_at = CURRENT_TIMESTAMP
+      WHERE payment_id = ?
+    `).run(paymentId);
+
+    return res.status(402).json({
+      message: 'Mock payment declined',
+      paymentId,
+      provider,
+      status: 'failed',
+      mocked: true,
+    });
+  }
+
+  db.prepare(`
+    UPDATE payment_tx
+    SET status = 'succeeded', updated_at = CURRENT_TIMESTAMP
+    WHERE payment_id = ?
+  `).run(paymentId);
+
+  return res.json({
+    paymentId,
+    provider,
+    status: 'succeeded',
+    amount: payment.amount_cents / 100,
+    currency: payment.currency,
+    mocked: true,
+    paidAt: new Date().toISOString(),
+  });
+});
 
 app.post('/api/movies', (req, res) => {
   const { title, originalTitle, overview, poster, duration, genre, directors, releaseDate } = req.body;
@@ -992,4 +1305,27 @@ app.delete('/api/sessions/:id', (req, res) => {
   }
 });
 
-app.listen(4000, () => console.log('API on http://localhost:4000'));
+const APP_PORT = Number(process.env.PORT || 4000);
+const APP_HOST = process.env.HOST || '';
+const distDir = path.resolve(__dirname, '..', 'dist');
+const distIndex = path.join(distDir, 'index.html');
+
+if (fs.existsSync(distDir) && fs.existsSync(distIndex)) {
+  app.use(express.static(distDir));
+
+  // Serve built frontend for non-API paths in production hosting.
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(distIndex);
+  });
+}
+
+if (APP_HOST) {
+  app.listen(APP_PORT, APP_HOST, () => {
+    console.log(`API on http://${APP_HOST}:${APP_PORT}`);
+  });
+} else {
+  app.listen(APP_PORT, () => {
+    console.log(`API on http://localhost:${APP_PORT}`);
+  });
+}

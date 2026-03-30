@@ -9,6 +9,8 @@
   padding: 24px;
   color: #fff;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .profile-header {
@@ -27,6 +29,14 @@
   background: #0d0818;
 }
 
+.profile-avatar--initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+}
+
 .profile-name {
   margin: 0 0 6px;
   font-size: 22px;
@@ -42,6 +52,79 @@
   margin: 4px 0 0;
   opacity: 0.7;
   font-size: 13px;
+}
+
+.profile-auth-tabs {
+  display: inline-flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 6px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+
+.profile-tab {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  color: #ddd;
+  background: transparent;
+  font-weight: 600;
+}
+
+.profile-tab.is-active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #ddd;
+}
+
+.profile-field input {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(6, 5, 10, 0.55);
+  color: #fff;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.profile-field input:focus {
+  border-color: rgba(180, 132, 255, 0.75);
+  box-shadow: 0 0 0 2px rgba(180, 132, 255, 0.2);
+}
+
+.profile-error {
+  margin: 0;
+  color: #ff9f9f;
+  font-size: 13px;
+}
+
+.profile-action {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7640cc, #9b6dff);
+}
+
+.profile-action:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .profile-body h3 {
