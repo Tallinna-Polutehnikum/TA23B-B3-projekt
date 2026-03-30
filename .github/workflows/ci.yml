@@ -38,7 +38,17 @@ jobs:
 
       - name: Detect scripts
         id: meta
-        run: node -e "const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));const s=pkg.scripts||{};const out={lint:!!s.lint,test:!!s.test,build:!!s.build};for(const[k,v] of Object.entries(out)){fs.appendFileSync(process.env.GITHUB_OUTPUT,`${k}=${v}\\n`);console.log(`${k}: ${v}`);}" 
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const scripts = pkg.scripts || {};
+          const outputs = { lint: !!scripts.lint, test: !!scripts.test, build: !!scripts.build };
+          for (const [key, val] of Object.entries(outputs)) {
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `${key}=${val}\n`);
+            console.log(`${key}: ${val}`);
+          }
+          NODE
 
       - name: Lint
         run: |
@@ -54,7 +64,22 @@ jobs:
 
       - name: Enforce coverage threshold
         if: steps.meta.outputs.test == 'true'
-        run: node -e "const fs=require('fs');const p='coverage/coverage-summary.json';if(!fs.existsSync(p)){console.error('Coverage summary not found');process.exit(1);}const d=JSON.parse(fs.readFileSync(p));const pct=d.total?.statements?.pct ?? d.total?.lines?.pct ?? 0;if(pct<70){console.error(`Coverage too low: ${pct}% < 70%`);process.exit(1);}console.log(`Coverage OK: ${pct}% >= 70%`);"
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = 'coverage/coverage-summary.json';
+          if (!fs.existsSync(path)) {
+            console.error('Coverage summary not found');
+            process.exit(1);
+          }
+          const data = JSON.parse(fs.readFileSync(path));
+          const pct = data.total?.statements?.pct ?? data.total?.lines?.pct ?? 0;
+          if (pct < 70) {
+            console.error(`Coverage too low: ${pct}% < 70%`);
+            process.exit(1);
+          }
+          console.log(`Coverage OK: ${pct}% >= 70%`);
+          NODE
 
       - name: Build
         if: steps.meta.outputs.build == 'true'
