@@ -590,7 +590,7 @@ app.get('/api/sessions', (_req, res) => {
     LEFT JOIN (
       SELECT hall_id, COUNT(*) AS total_seats
       FROM seat
-      ${seatAvailabilityWhere}
+      WHERE is_available = 1
       GROUP BY hall_id
     ) sc ON sc.hall_id = h.id
     LEFT JOIN (
@@ -622,7 +622,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
     LEFT JOIN (
       SELECT hall_id, COUNT(*) AS total_seats
       FROM seat
-      ${seatAvailabilityWhere}
+      WHERE is_available = 1
       GROUP BY hall_id
     ) sc ON sc.hall_id = h.id
     WHERE s.id = ?
@@ -638,7 +638,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
       s.seat_number,
       s.type,
       s.price,
-      ${hasSeatAvailabilityFlag ? 's.is_available' : '1 AS is_available'},
+      s.is_available,
       CASE WHEN t.id IS NULL THEN 0 ELSE 1 END AS occupied
     FROM seat s
     LEFT JOIN ticket t ON t.seat_id = s.id AND t.session_id = ?
@@ -979,29 +979,14 @@ app.post('/api/movies', (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
     `).run(title, overview, poster, duration, genreId, directors || null);
 
-    const movieId = Number(result.lastInsertRowid);
-    let autoSchedule;
-
-    try {
-      autoSchedule = seedUpcomingSessionsForMovie(movieId);
-    } catch (scheduleErr) {
-      console.error('Auto schedule failed for new movie:', movieId, scheduleErr);
-      autoSchedule = {
-        inserted: 0,
-        skippedPast: 0,
-        error: 'auto-schedule-failed'
-      };
-    }
-
     res.status(201).json({
-      id: movieId,
+      id: result.lastInsertRowid,
       title,
       overview,
       poster,
       duration,
       genre,
-      directors,
-      autoSchedule
+      directors
     });
   } catch (err) {
     console.error('Error creating movie:', err);
@@ -1062,7 +1047,7 @@ app.put('/api/movies/:id', (req, res) => {
 app.delete('/api/movies/:id', (req, res) => {
   const movieId = req.params.id;
   const existing = db.prepare(`SELECT id FROM movie WHERE id = ?`).get(movieId);
-  if (!existing) return res.status(404).json({ message: 'Movie not found' });
+  if (!existing) return res.status(404).json({ message: 'Movie not found' }); 
 
   try {
     db.prepare(`DELETE FROM movie WHERE id = ?`).run(movieId);
