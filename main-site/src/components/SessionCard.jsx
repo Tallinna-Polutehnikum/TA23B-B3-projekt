@@ -64,7 +64,6 @@ export default function SessionCard({ session, onViewAllShows, onAddSeats }) {
               </div>
             </div>
             <div className="session-card__meta-row">
-              <button className="session-card__trailer">Trailer</button>
               <div className="session-card__seats">
                 <span className="icon-seat" />
                 <span>Free seats</span>
