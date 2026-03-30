@@ -32,6 +32,7 @@ try {
 const seatColumns = db.prepare(`PRAGMA table_info(seat)`).all();
 const hasSeatAvailabilityFlag = seatColumns.some((col) => col.name === 'is_available');
 const seatAvailabilityWhere = hasSeatAvailabilityFlag ? 'WHERE is_available = 1' : '';
+const seatAvailabilitySelect = hasSeatAvailabilityFlag ? 's.is_available' : '1';
 
 const AUTO_SHOW_TIMES = ['12:00', '15:00', '18:00', '21:00'];
 const AUTO_WINDOW_DAYS = 7;
@@ -590,7 +591,7 @@ app.get('/api/sessions', (_req, res) => {
     LEFT JOIN (
       SELECT hall_id, COUNT(*) AS total_seats
       FROM seat
-      WHERE is_available = 1
+      ${seatAvailabilityWhere}
       GROUP BY hall_id
     ) sc ON sc.hall_id = h.id
     LEFT JOIN (
@@ -622,7 +623,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
     LEFT JOIN (
       SELECT hall_id, COUNT(*) AS total_seats
       FROM seat
-      WHERE is_available = 1
+      ${seatAvailabilityWhere}
       GROUP BY hall_id
     ) sc ON sc.hall_id = h.id
     WHERE s.id = ?
@@ -638,7 +639,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
       s.seat_number,
       s.type,
       s.price,
-      s.is_available,
+      ${seatAvailabilitySelect} AS is_available,
       CASE WHEN t.id IS NULL THEN 0 ELSE 1 END AS occupied
     FROM seat s
     LEFT JOIN ticket t ON t.seat_id = s.id AND t.session_id = ?

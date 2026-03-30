@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node app.js",
-    "start:pm2": "node pm2-app.js",
+    "start:pm2": "node app.js",
+    "pm2:start": "pm2 start ecosystem.config.cjs --only absolute-cinema-main",
+    "pm2:restart": "pm2 restart absolute-cinema-main",
+    "pm2:logs": "pm2 logs absolute-cinema-main",
     "sync:movies": "node scripts/syncMovies.js",
     "server": "node server/index.js"
   },
