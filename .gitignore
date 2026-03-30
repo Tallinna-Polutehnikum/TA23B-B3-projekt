@@ -1,2 +1,4 @@
 node_modules/
 main-site/.env
+main-site/coverage/
+admin-worker-site/coverage/

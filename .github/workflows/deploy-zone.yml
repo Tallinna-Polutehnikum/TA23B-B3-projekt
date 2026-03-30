@@ -33,18 +33,25 @@ jobs:
 
       - name: Prepare SSH key
         env:
+          ZONE_SSH_PRIVATE_KEY_B64: ${{ secrets.ZONE_SSH_PRIVATE_KEY_B64 }}
           ZONE_SSH_PRIVATE_KEY: ${{ secrets.ZONE_SSH_PRIVATE_KEY }}
         run: |
-          if [ -z "$ZONE_SSH_PRIVATE_KEY" ]; then
-            echo "Missing required secret: ZONE_SSH_PRIVATE_KEY"
+          if [ -z "$ZONE_SSH_PRIVATE_KEY_B64" ] && [ -z "$ZONE_SSH_PRIVATE_KEY" ]; then
+            echo "Missing required secret: ZONE_SSH_PRIVATE_KEY_B64 (preferred) or ZONE_SSH_PRIVATE_KEY"
             exit 1
           fi
 
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          # Normalize line endings in case the secret was pasted from Windows clipboard.
-          printf "%s" "$ZONE_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          if [ -n "$ZONE_SSH_PRIVATE_KEY_B64" ]; then
+            # Preferred: single-line base64 secret avoids multiline paste corruption.
+            printf "%s" "$ZONE_SSH_PRIVATE_KEY_B64" | base64 -d > ~/.ssh/id_ed25519
+          else
+            # Backward compatibility with raw multiline key secret.
+            printf "%s" "$ZONE_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          fi
+
           chmod 600 ~/.ssh/id_ed25519
 
           # Validate secret format and surface the loaded fingerprint in logs.

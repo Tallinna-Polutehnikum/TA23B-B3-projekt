@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Footer from './Footer';
 import './MovieDetails.css';
+import { formatDurationLabel, normalizeDisplayText } from '../utils/movieUi';
 
 export default function MovieDetails() {
   const { id } = useParams();
@@ -39,19 +40,9 @@ export default function MovieDetails() {
     })();
   }, [id]);
 
-  const formatDuration = (value) => {
-    if (!value) return '—';
-    const [h, m] = value.split(':');
-    return `${Number(h)}h ${m}min`;
-  };
-
-  const formatGenre = (value) => (value?.trim() ? value : '—');
-
-  const formatDirector = (value) => (value?.trim() ? value : '—');
-
-  const displayGenre = formatGenre(movie?.genre);
-  const displayDirector = formatDirector(movie?.director);
-  const displayDuration = formatDuration(movie?.duration);
+  const displayGenre = normalizeDisplayText(movie?.genre);
+  const displayDirector = normalizeDisplayText(movie?.director);
+  const displayDuration = formatDurationLabel(movie?.duration);
   const displayCast = movie?.cast ?? 'Cast info coming soon.';
 
   const goToShowtimes = () => {

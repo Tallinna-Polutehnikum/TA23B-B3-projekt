@@ -226,21 +226,72 @@ Note: The workflow does not overwrite `database/db.sqlite`.
 
 Add this repository secret in GitHub:
 
-- `ZONE_SSH_PRIVATE_KEY`
+- `ZONE_SSH_PRIVATE_KEY_B64` (preferred)
 
-Value should be the full private key content from your local key file:
+Value should be Base64 of your private key file:
 
 - `C:\Users\USER\.ssh\zone_ed25519`
 
-Include the full block:
+PowerShell command:
 
-```text
------BEGIN OPENSSH PRIVATE KEY-----
-...
------END OPENSSH PRIVATE KEY-----
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.ssh\zone_ed25519"))
 ```
+
+Fallback secret (if needed):
+
+- `ZONE_SSH_PRIVATE_KEY` with raw key block (`-----BEGIN OPENSSH PRIVATE KEY----- ...`).
 
 ### 13.3 Triggering deployment
 
 - Automatic: push or merge to `main`.
 - Manual: run `Deploy Zone Production` from the Actions tab.
+
+---
+
+## 14. CI Pipeline Coverage (Task 2)
+
+Workflow file:
+
+- `.github/workflows/ci.yml`
+
+### 14.1 What runs on each push and pull request
+
+For both projects (`main-site`, `admin-worker-site`):
+
+1. Lint (`npm run lint`)
+2. Test with coverage (`npm run test`)
+3. Coverage gate (minimum 70% statements)
+4. Build (`npm run build`)
+
+### 14.2 PR preview deployment
+
+On pull requests from this repository, CI deploys `main-site` build output to GitHub Pages under:
+
+- `https://<owner>.github.io/<repo>/previews/pr-<number>/`
+
+CI also comments the preview link directly on the PR.
+
+### 14.3 Email notification on CI failure
+
+To enable real email alerts, set these repository secrets:
+
+- `SMTP_SERVER`
+- `SMTP_PORT` (optional, default `587`)
+- `SMTP_USERNAME`
+- `SMTP_PASSWORD`
+- `CI_ALERT_EMAIL_TO`
+
+If these secrets are missing, CI logs a warning instead of sending mail.
+
+### 14.4 Blocking PR merge when checks fail
+
+Enable branch protection for `main` in GitHub settings and require these status checks:
+
+- `Web CI (main-site)`
+- `Web CI (admin-worker-site)`
+
+Optionally also require:
+
+- `PR Preview Deployment`
+

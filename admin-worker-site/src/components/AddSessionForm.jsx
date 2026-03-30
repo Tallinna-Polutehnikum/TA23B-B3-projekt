@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './AddSessionForm.css'
+import { buildHallsEndpoint, createInitialSessionFormData } from '../utils/sessionForm'
 
 export default function AddSessionForm({ onSuccess }) {
   const [loading, setLoading] = useState(false)
@@ -8,17 +9,7 @@ export default function AddSessionForm({ onSuccess }) {
   const [cinemas, setCinemas] = useState([])
   const [halls, setHalls] = useState([])
 
-  const [formData, setFormData] = useState({
-    movieId: '',
-    cinemaId: '',
-    date: '',
-    time: '',
-    hallId: '',
-    seatsAvailable: '100',
-    language: 'Estonian',
-    subtitles: 'English',
-    format: '2D'
-  })
+  const [formData, setFormData] = useState(createInitialSessionFormData)
 
   useEffect(() => {
     // Fetch movies list
@@ -40,7 +31,7 @@ export default function AddSessionForm({ onSuccess }) {
       return
     }
 
-    fetch(`/api/halls?cinemaId=${formData.cinemaId}`)
+    fetch(buildHallsEndpoint(formData.cinemaId))
       .then(res => res.json())
       .then(data => setHalls(data))
       .catch(err => console.error('Failed to load halls', err))
@@ -74,17 +65,7 @@ export default function AddSessionForm({ onSuccess }) {
       }
 
       // Reset form
-      setFormData({
-        movieId: '',
-        cinemaId: '',
-        hallId: '',
-        date: '',
-        time: '',
-        seatsAvailable: '100',
-        language: 'Estonian',
-        subtitles: 'English',
-        format: '2D'
-      })
+      setFormData(createInitialSessionFormData())
       
       onSuccess()
     } catch (err) {
