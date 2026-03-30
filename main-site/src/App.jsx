@@ -259,7 +259,6 @@ function App() {
               <Link to="/cinemas" className={isCinemas ? "showtimes-active" : ""}>Cinemas</Link>
               <Link to="/events" className={isEvents ? "showtimes-active" : ""}>Events</Link>
               <Link to="/movies">Movies</Link>
-              <Link to="/admin" style={{ color: '#00d084', fontWeight: 'bold', fontSize: 12 }}>ADMIN</Link>
               <a
                 href="#gifts"
                 onClick={(e) => {

@@ -1,304 +1,278 @@
-**Software Requirements Specification — Test Cases (Section 7.1)
+# Software Requirements Specification (SRS)
 
-7.1 Test Case
+Project: Absolute Cinema
+Version: 2.0
+Date: 2026-03-30
+Status: Active
 
-Below are test cases that map to the implemented functional requirements for the Cinema Project. Each test case includes Test ID, Precondition, Steps, Expected Result and Pass Criteria.
+---
 
-- **FR-01 — Display Top Movies**
-  - **Test ID:** TC-01-TopMovies
-  - **Precondition:** `main-site` dependencies installed; `main-site/server` running on `http://localhost:4000`; `database/db.sqlite` contains movie rows.
-  - **Test Steps:**
-    1. Open the `main-site` dev URL (Vite) and navigate to the main/home page.
-    2. Observe the Top Movies section or call `GET http://localhost:4000/api/movies/top`.
-  - **Expected Result:** API returns HTTP 200 and a JSON array (max 20) containing objects with `id`, `title`, `overview`, and `poster`. The UI displays the returned movie titles and posters.
-  - **Pass Criteria:** API returns 200 with at least one movie; UI shows the same movie titles displayed by the API.
+## 1. Purpose
 
-- **FR-02 — Movie Details**
-  - **Test ID:** TC-02-MovieDetails
-  - **Precondition:** `main-site` and server running; at least one movie exists in DB.
-  - **Test Steps:**
-    1. From Top Movies, click a movie to open its details page OR call `GET /api/movies/{id}` with an existing movie id.
-    2. Verify the response/UI contains `id`, `title`, `overview`, `poster`, `duration`, `genre`, and `director` (when available).
-    3. For a non-existent id call `GET /api/movies/9999999` and observe response.
-  - **Expected Result:** For existing id: HTTP 200 and JSON with expected fields; UI shows full details. For non-existent id: API returns HTTP 404 with `{ message: 'Not found' }`.
-  - **Pass Criteria:** Existing id returns expected payload and UI shows it; non-existent id returns HTTP 404.
+This document defines the functional and non-functional requirements for the Absolute Cinema project in its current repository state.
 
-- **FR-03 — List Gifts**
-  - **Test ID:** TC-03-Gifts
-  - **Precondition:** Server running; `gifts` table populated in DB.
-  - **Test Steps:**
-    1. Call `GET http://localhost:4000/api/gifts` or open Gifts page in the `main-site`.
-  - **Expected Result:** API returns HTTP 200 and a JSON array with objects containing `id`, `name`, `type`, and `price`, ordered by `price`.
-  - **Pass Criteria:** Returned list is present, each entry has required fields, and ordering by price is correct.
+It is written for:
 
-- **FR-04 — Sync Movies Script**
-  - **Test ID:** TC-04-SyncMovies
-  - **Precondition:** `main-site/.env` contains a valid `MOVIE_API_KEY` (or a mock `MOVIE_API_URL` is provided); `npm install` completed in `main-site`.
-  - **Test Steps:**
-    1. From `main-site` run `npm run sync:movies`.
-    2. Observe console output and verify database changes (rows inserted/updated and `updated_at` set).
-  - **Expected Result:** Script runs without uncaught errors, fetches movie list, inserts or updates rows in `database/db.sqlite`, and prints number of fetched items.
-  - **Negative Test:** Run without `MOVIE_API_KEY` — script should surface fetch/auth error.
-  - **Pass Criteria:** With valid key: DB rows updated and script exits normally. With invalid/missing key: script exits with non-zero status and shows an HTTP/auth error.
+- developers
+- testers
+- project supervisors
+- maintainers
 
-- **FR-05 — API Server Availability**
-  - **Test ID:** TC-05-APIServer
-  - **Precondition:** `main-site` dependencies installed.
-  - **Test Steps:**
-    1. From `main-site` run `npm run server` (or `node server/index.js`).
-    2. Call `GET http://localhost:4000/api/movies/top`.
-  - **Expected Result:** Server starts and listens on port 4000; endpoint returns HTTP 200 (or 404 if DB empty) and does not crash.
-  - **Pass Criteria:** Server remains running and responds; logs show `API on http://localhost:4000`.
+---
 
-- **FR-06 — Frontend Dev Startup (all sites)**
-  - **Test ID:** TC-06-FrontendDev
-  - **Precondition:** For each site (`main-site`, `admin-worker-site`, `user-profile-site`) run `npm install`.
-  - **Test Steps:**
-    1. For each site run `npm run dev` and open the provided dev URL.
-    2. Verify the app renders without critical console errors and main routes load.
-  - **Expected Result:** Each site builds and serves in dev mode; UI is accessible and core pages load.
-  - **Pass Criteria:** No fatal build errors and pages render; dev server remains running.
+## 2. Scope
 
-- **FR-07 — Production Build**
-  - **Test ID:** TC-07-Build
-  - **Precondition:** `npm install` ran for the target site.
-  - **Test Steps:**
-    1. Run `npm run build` in `main-site`, `admin-worker-site`, and `user-profile-site`.
-    2. Verify `dist/` (or Vite output folder) is created and contains static assets.
-    3. Optionally run `npm run preview` to serve built assets and check pages.
-  - **Expected Result:** Build completes successfully and produces static files.
-  - **Pass Criteria:** `build` command exits with code 0 and `dist/` contains assets and an `index.html`.
+Absolute Cinema is a cinema platform with:
 
-- **FR-08 — Linting (admin & user sites)**
-  - **Test ID:** TC-08-Lint
-  - **Precondition:** Dev dependencies installed for `admin-worker-site` and `user-profile-site`.
-  - **Test Steps:**
-    1. Run `npm run lint` in `admin-worker-site` and `user-profile-site`.
-  - **Expected Result:** Linter runs and reports issues (if any). For CI, ensure no blocking lint errors remain.
-  - **Pass Criteria:** Lint command runs without crashing; team-defined lint policy is satisfied.
+- a public web application for end users
+- an admin web application for cinema workers
+- a local REST API server
+- a local SQLite database
 
-- **FR-09 — Database File Handling**
-  - **Test ID:** TC-09-DBFile
-  - **Precondition:** `database/db.sqlite` may be present or removed to test both conditions.
-  - **Test Steps:**
-    1. Start server with `database/db.sqlite` present — confirm server runs.
-    2. Rename or remove `database/db.sqlite` and start server again.
-  - **Expected Result:** With file present: server starts. With missing file: server fails with clear error because `better-sqlite3` used with `{ fileMustExist: true }`.
-  - **Pass Criteria:** Behavior matches expectations: clear error when DB file missing; successful start when present.
+The system supports movie browsing, session discovery, seat booking, and admin-side content/session management.
 
-Notes on coverage and execution
-- These tests exercise functionality implemented in the repository. If your formal SRS uses different FR numbering, map these TC IDs to the official FR IDs.
-- For automation: API tests can be implemented with Jest + Supertest and a temporary test DB fixture. Frontend end-to-end tests can use Cypress or Playwright.
+---
 
-Additional Test Cases (TC-10 .. TC-20)
+## 3. Product Overview
 
-- **FR-10 — Authentication (basic)**
-  - **Test ID:** TC-10-Auth
-  - **Precondition:** Authentication endpoints implemented (if not present, this is a design test to add auth later). For now test via mock or stubbed auth.
-  - **Test Steps:**
-    1. Attempt to access an admin-only route (e.g., `/admin/*`) without credentials.
-    2. Attempt to login with valid credentials (if login UI exists) or call the auth API with correct credentials.
-    3. Attempt to access admin route with valid token/session.
-  - **Expected Result:** Unauthorized requests return HTTP 401/403. Valid credentials return a token/session and allow access to protected endpoints.
-  - **Pass Criteria:** Access control enforced; tokens/sessions allow restricted operations.
+### 3.1 Main Components
 
-- **FR-11 — Admin: Create / Update / Delete Movies**
-  - **Test ID:** TC-11-AdminMoviesCRUD
-  - **Precondition:** Admin API routes exist for CRUD (or will be implemented); admin auth available.
-  - **Test Steps:**
-    1. Using admin credentials, POST a new movie payload to the admin movie create endpoint.
-    2. Confirm the movie appears in the DB and via `GET /api/movies/:id`.
-    3. PATCH/PUT to update the movie fields and confirm changes.
-    4. DELETE the movie and confirm `GET /api/movies/:id` returns 404.
-  - **Expected Result:** CRUD operations succeed and DB state matches requests.
-  - **Pass Criteria:** Create/Update/Delete reflect on API responses and persistent DB.
+- main-site: public React + Vite app
+- admin-worker-site: admin React + Vite app
+- main-site/server: Express API server
+- database/db.sqlite: SQLite data storage
 
-- **FR-12 — Admin: Create / Update / Delete Gifts**
-  - **Test ID:** TC-12-AdminGiftsCRUD
-  - **Precondition:** Admin gift-management API exists.
-  - **Test Steps:**
-    1. Create a gift via admin API and verify listing and DB row.
-    2. Update gift price/type and verify ordering by price in `GET /api/gifts`.
-    3. Delete gift and verify it no longer appears.
-  - **Expected Result:** Gift CRUD works and `GET /api/gifts` reflects changes.
-  - **Pass Criteria:** Admin actions produce persistent changes and the public API reflects them.
+### 3.2 Runtime Context
 
-- **FR-13 — Booking Flow & Session Management (design/test if unimplemented)**
-  - **Test ID:** TC-13-Booking
-  - **Precondition:** Booking endpoints or a design specification exist. If not implemented, this test documents expected behavior for future work.
-  - **Test Steps:**
-    1. Create a session (movie screening) with available seats.
-    2. Reserve one or more seats as a user (authenticated or guest flow), then confirm reservation is held.
-    3. Complete purchase flow (if exists) and confirm seat status changes to sold.
-    4. Attempt double-booking same seat concurrently (see concurrency test TC-20).
-  - **Expected Result:** Seats reserved then sold on purchase; double-booking prevented; appropriate HTTP codes returned.
-  - **Pass Criteria:** Correct seat state transitions and user-visible confirmations.
+- API base URL: http://localhost:4000
+- Main site dev URL: http://localhost:5173
+- Admin site dev URL: http://localhost:5156
 
-- **FR-14 — Search and Filters**
-  - **Test ID:** TC-14-SearchFilters
-  - **Precondition:** Frontend search/filter UI or API query parameters implemented (or planned).
-  - **Test Steps:**
-    1. Use search box to search by partial movie title and verify results.
-    2. Apply genre/duration/price filters (if available) and verify results narrow accordingly.
-    3. Call API with query params (e.g., `/api/movies?search=star&genre=action`).
-  - **Expected Result:** Results match search criteria; filtering works as expected.
-  - **Pass Criteria:** Search returns relevant results and filters combine correctly.
+---
 
-- **FR-15 — Pagination / Limits**
-  - **Test ID:** TC-15-Pagination
-  - **Precondition:** API supports pagination or will be updated to support it.
-  - **Test Steps:**
-    1. Call `/api/movies/top?page=1&limit=10` (or equivalent) and note results.
-    2. Request page 2 and ensure no overlap with page 1 and correct ordering.
-  - **Expected Result:** API returns paginated results with `total`, `page`, and `limit` metadata or equivalent headers.
-  - **Pass Criteria:** Pagination works consistently and is documented.
+## 4. User Classes
 
-- **FR-16 — Input Validation & Error Responses**
-  - **Test ID:** TC-16-Validation
-  - **Precondition:** API routes accept JSON payloads.
-  - **Test Steps:**
-    1. Send malformed payloads (missing required fields, wrong types) to create/update endpoints.
-    2. Send oversized fields or invalid data (e.g., negative price).
-  - **Expected Result:** API returns HTTP 400 with helpful error messages; server does not crash.
-  - **Pass Criteria:** Validation prevents invalid data from being persisted and returns proper status codes.
+- Guest User: browses movies and sessions, selects seats
+- Customer: uses cart and checkout flow
+- Admin Worker: manages movies and sessions
+- Maintainer: runs scripts, monitors API, and updates data
 
-- **FR-17 — Static Assets & Preview (production-ready)**
-  - **Test ID:** TC-17-StaticPreview
-  - **Precondition:** `npm run build` completed; `npm run preview` available.
-  - **Test Steps:**
-    1. Run build for target site and `npm run preview`.
-    2. Load pages and verify assets (CSS, JS, images) are served correctly and UI functions.
-  - **Expected Result:** Built site serves static assets and behaves as expected in preview mode.
-  - **Pass Criteria:** No 404 on static assets; UI functional.
+---
 
-- **FR-18 — Accessibility Smoke Tests**
-  - **Test ID:** TC-18-Accessibility
-  - **Precondition:** Frontend accessible in dev/preview mode.
-  - **Test Steps:**
-    1. Run basic accessibility checks (Lighthouse or axe) on main pages (home, details, gifts).
-    2. Manually verify `alt` attributes exist for poster images and form elements have labels.
-  - **Expected Result:** No severe accessibility violations (contrast, missing labels, missing alt text).
-  - **Pass Criteria:** Major accessibility issues addressed or logged for remediation.
+## 5. Functional Requirements
 
-- **FR-19 — Logging & Error Handling (observability)**
-  - **Test ID:** TC-19-Logging
-  - **Precondition:** Server logging available (console or structured logs).
-  - **Test Steps:**
-    1. Generate an error (e.g., call endpoint with invalid payload) and observe logs.
-    2. Trigger server start/stop and note startup/shutdown messages.
-  - **Expected Result:** Errors and lifecycle events are logged with enough context for debugging.
-  - **Pass Criteria:** Logs include timestamps and context; stack traces not leaked to end-users in production.
+### FR-01 Top Movies
 
-- **FR-20 — Concurrency / Data Integrity (double-booking)**
-  - **Test ID:** TC-20-Concurrency
-  - **Precondition:** Booking/session endpoints exist for booking seats.
-  - **Test Steps:**
-    1. Simulate two concurrent requests attempting to reserve the same seat (use small script or test harness).
-    2. Observe DB state and responses.
-  - **Expected Result:** Only one request succeeds; other receives a clear failure (HTTP 409 Conflict or similar).
-  - **Pass Criteria:** Data integrity maintained; race conditions prevented by DB constraints or transactional logic.
+The system shall provide a top movies list on the public site.
 
-Automation notes
-- For CI-friendly automation:
-  - Implement API tests as Jest + Supertest suites using a disposable test DB created before tests and removed after.
-  - Use Playwright or Cypress for E2E flows (TC-01, TC-02, TC-13, TC-14).
-  - Add a `npm test` script and GitHub Actions workflow to run `install -> lint -> test -> build` on PRs.
+Acceptance:
 
-  Additional Test Cases (TC-21 .. TC-30)
+- API endpoint GET /api/movies/top returns JSON list with id, title, overview, poster.
 
-  - **FR-21 — Performance / Load Test**
-    - **Test ID:** TC-21-Performance
-    - **Precondition:** Test environment or local machine with tooling (k6, ApacheBench, or Artillery).
-    - **Test Steps:**
-      1. Run a load test against `GET /api/movies/top` with increasing concurrency (e.g., 50, 100, 200 concurrent users) for a sustained period (1-5 minutes).
-      2. Monitor response times, error rates, and server CPU/memory.
-    - **Expected Result:** API handles expected load with acceptable latency and low error rate (team-defined SLA).
-    - **Pass Criteria:** Throughput and latency meet performance criteria; no memory leaks or crashes.
+### FR-02 Movie Catalog and Details
 
-  - **FR-22 — Rate Limiting / Abuse Protection**
-    - **Test ID:** TC-22-RateLimit
-    - **Precondition:** Rate-limiting middleware configured (or planned).
-    - **Test Steps:**
-      1. Send a burst of requests from a single client exceeding the configured rate.
-      2. Observe responses for HTTP 429 or equivalent behavior.
-    - **Expected Result:** Requests above threshold are rejected with HTTP 429 and informative message.
-    - **Pass Criteria:** Abuse protection prevents excessive requests and legitimate users are unaffected.
+The system shall provide:
 
-  - **FR-23 — Backup & Restore DB**
-    - **Test ID:** TC-23-BackupRestore
-    - **Precondition:** Backup procedure documented (or to be implemented) using `database/db.sqlite` dump/copy.
-    - **Test Steps:**
-      1. Create a backup copy of `database/db.sqlite`.
-      2. Modify the DB (insert/delete rows) and then restore the backup.
-      3. Verify DB contents match pre-backup state.
-    - **Expected Result:** Backup and restore succeed without corruption.
-    - **Pass Criteria:** After restore, DB state equals the pre-backup snapshot.
+- full movie catalog
+- single movie details view
 
-  - **FR-24 — Internationalization / Localization**
-    - **Test ID:** TC-24-I18N
-    - **Precondition:** App supports localization (or plans exist to add it).
-    - **Test Steps:**
-      1. Switch UI language to a secondary language (e.g., Estonian or Russian) if available.
-      2. Verify UI strings, date/time, and number formats change accordingly.
-    - **Expected Result:** Translations appear for main UI elements; date/number formatting respects locale.
-    - **Pass Criteria:** No missing key placeholders; localized pages readable.
+Acceptance:
 
-  - **FR-25 — Notifications / Email (booking confirmations)**
-    - **Test ID:** TC-25-Notifications
-    - **Precondition:** Email/notification service configured (or a mock available).
-    - **Test Steps:**
-      1. Trigger an event that sends a notification (e.g., booking confirmation).
-      2. Observe the outgoing message via SMTP capture or mock service.
-    - **Expected Result:** Notification contains correct booking details and recipient address.
-    - **Pass Criteria:** Notification sent and contents verified; failures logged.
+- GET /api/movies returns list
+- GET /api/movies/:id returns details or 404 for unknown id
 
-  - **FR-26 — Role-Based Access Control (RBAC)**
-    - **Test ID:** TC-26-RBAC
-    - **Precondition:** User roles defined (admin, worker, customer) and enforced by the API.
-    - **Test Steps:**
-      1. Authenticate as different roles and attempt role-specific operations (admin-only, worker-only).
-      2. Verify unauthorized roles cannot perform restricted actions.
-    - **Expected Result:** Role checks enforce permissions; unauthorized attempts return HTTP 403.
-    - **Pass Criteria:** RBAC rules enforced across admin endpoints.
+### FR-03 Genres and Genre-Based Movies
 
-  - **FR-27 — File Uploads (movie posters)**
-    - **Test ID:** TC-27-FileUpload
-    - **Precondition:** API or admin UI supports uploading poster images (or planned).
-    - **Test Steps:**
-      1. Upload a valid image (JPG/PNG) as a poster for a movie.
-      2. Upload invalid file types (exe, large files) and observe behavior.
-      3. Verify uploaded image is served in the UI and stored in expected location.
-    - **Expected Result:** Valid images accepted; invalid files rejected with HTTP 400 and proper message.
-    - **Pass Criteria:** Uploads succeed for valid files and are rejected for invalid or oversized files.
+The system shall support genre listing and genre-based movie retrieval.
 
-  - **FR-28 — Image Optimization & CDN Behavior**
-    - **Test ID:** TC-28-CDNImages
-    - **Precondition:** Images served with caching headers or via CDN (or planned).
-    - **Test Steps:**
-      1. Request poster images and inspect response headers for cache-control and content delivery behavior.
-      2. Purge cache and confirm updated images are served.
-    - **Expected Result:** Images served with appropriate caching headers; CDN integration (if present) works.
-    - **Pass Criteria:** Cache headers present and updates propagate after purge.
+Acceptance:
 
-  - **FR-29 — Data Privacy / User Deletion (GDPR)**
-    - **Test ID:** TC-29-DataDeletion
-    - **Precondition:** User data model exists and deletion process defined (or planned).
-    - **Test Steps:**
-      1. Request deletion of a test user account via API or UI.
-      2. Verify personal data is anonymized or removed and backups handled per policy.
-    - **Expected Result:** Personal data removed/anonymized and no residual PII remains accessible.
-    - **Pass Criteria:** Deletion workflow completes and verification shows data removed per policy.
+- GET /api/genres returns genre list
+- GET /api/genres/:type/movies returns movies by genre or 404 when empty
 
-  - **FR-30 — Healthchecks & Metrics**
-    - **Test ID:** TC-30-HealthMetrics
-    - **Precondition:** Health endpoint (`/health` or `/metrics`) exists or planned.
-    - **Test Steps:**
-      1. Call `/health` and ensure status 200 and basic checks (DB reachable, disk space OK).
-      2. Scrape `/metrics` (Prometheus format) or verify basic metrics exist (request counts, error rates).
-    - **Expected Result:** Health endpoint returns 200 with service status; metrics exposed for observability.
-    - **Pass Criteria:** Health and metrics endpoints respond and show expected values.
+### FR-04 Gifts and Coming Soon
 
-  Automation / CI follow-up
-  - Add automated jobs for performance (k6) and accessibility audits into CI as optional pipelines.
-  - Include DB backup/restore verification step in staging job (non-destructive when possible).
+The system shall provide gifts and coming soon movie data.
 
+Acceptance:
+
+- GET /api/gifts returns gift list ordered by price
+- GET /api/movies/coming-soon returns coming soon data
+
+### FR-05 Session Listing and Filtering
+
+The system shall provide session listing data required by the showtime page, including city/cinema, date/time, and genre data.
+
+Acceptance:
+
+- GET /api/sessions returns joined session data sorted by date and time
+- Frontend filters by city, date, and genre
+
+### FR-06 Seat Map Retrieval
+
+The system shall provide seat map data for a selected session.
+
+Acceptance:
+
+- GET /api/sessions/:id/seats returns sessionInfo and seat list with occupied status
+- Unknown session id returns 404
+
+### FR-07 Seat Booking
+
+The system shall allow booking one or more seats for a session and prevent duplicate bookings.
+
+Acceptance:
+
+- POST /api/sessions/:id/book accepts seatIds[]
+- Returns 201 on success
+- Returns 409 if one or more seats are already booked
+- Updates remaining seat count for the session
+
+### FR-08 Cart and Checkout (Public UI)
+
+The public site shall support:
+
+- adding gifts to cart
+- adding selected seats to cart
+- quantity updates and removals
+- checkout completion flow
+
+Acceptance:
+
+- cart totals and item counts update correctly
+- checkout completion clears cart
+
+### FR-09 Admin Movie Management
+
+Admin workers shall be able to create, update, and delete movies.
+
+Acceptance:
+
+- POST /api/movies creates movie
+- PUT /api/movies/:id updates movie
+- DELETE /api/movies/:id removes movie
+
+### FR-10 Admin Session Management
+
+Admin workers shall be able to create, update, and delete sessions.
+
+Acceptance:
+
+- POST /api/sessions creates session with hall and cinema validation
+- PUT /api/sessions/:id updates session
+- DELETE /api/sessions/:id removes session
+
+### FR-11 Admin Bulk Session Deletion
+
+Admin workers shall be able to remove sessions by date range.
+
+Acceptance:
+
+- POST /api/sessions/bulk-delete accepts startDate and endDate
+- Returns number of deleted rows
+
+### FR-12 Database Access
+
+The backend shall read and write to the local SQLite database file.
+
+Acceptance:
+
+- server starts only when database/db.sqlite is accessible
+- database errors are logged and result in safe error responses
+
+---
+
+## 6. Non-Functional Requirements
+
+### NFR-01 Reliability
+
+- API server must remain running during normal request flow.
+- Booking writes must be transactional to protect data integrity.
+
+### NFR-02 Performance
+
+- Standard list endpoints should respond within 1500 ms in local development with normal dataset size.
+
+### NFR-03 Maintainability
+
+- Codebase is separated into two frontends and one backend module.
+- ESLint configuration is used in frontend projects.
+
+### NFR-04 Usability
+
+- Public site routes and admin tabs must be navigable without page crashes.
+- Error cases should show clear feedback in UI or API response body.
+
+### NFR-05 Compatibility
+
+- Frontends must run in modern Chromium-based browsers and Firefox.
+- Development startup must work on Windows with Node.js and npm.
+
+### NFR-06 Security Baseline
+
+- API accepts JSON payloads only for write operations.
+- Invalid payloads should return 4xx responses, not crash the server.
+- No seat may be sold twice for the same session.
+
+---
+
+## 7. External Interface Requirements
+
+### 7.1 User Interface
+
+- Main site: React SPA with routes for home, showtime, movies, events, cinemas, checkout, and more.
+- Admin site: React dashboard with tabs for overview, movies, sessions, add movie, add session.
+
+### 7.2 API Interface
+
+- REST over HTTP
+- JSON request/response format
+- Status code expectations:
+  - 200 for successful reads/updates
+  - 201 for successful creates/bookings
+  - 204 for successful delete without body
+  - 400 for invalid request data
+  - 404 for missing resource
+  - 409 for booking conflict
+  - 500 for unexpected server errors
+
+### 7.3 Database Interface
+
+- SQLite file: database/db.sqlite
+- Backend uses better-sqlite3
+- Booking and update operations may use transactions
+
+---
+
+## 8. Assumptions and Constraints
+
+- This project currently targets local or classroom deployment.
+- Authentication and role-based authorization are not fully implemented in this repository state.
+- Payment gateway integration is out of scope for this SRS version.
+- Availability depends on local database file integrity.
+
+---
+
+## 9. Verification and Test Matrix
+
+| ID | Requirement | Verification Method |
+| --- | --- | --- |
+| TC-01 | FR-01 | Call GET /api/movies/top and verify UI section displays returned items |
+| TC-02 | FR-02 | Call GET /api/movies and GET /api/movies/:id with valid and invalid id |
+| TC-03 | FR-03 | Call GET /api/genres and GET /api/genres/:type/movies |
+| TC-04 | FR-04 | Call GET /api/gifts and GET /api/movies/coming-soon |
+| TC-05 | FR-05 | Open showtime page, verify filters and session data correctness |
+| TC-06 | FR-06 | Call GET /api/sessions/:id/seats for valid and invalid id |
+| TC-07 | FR-07 | Book seats twice and verify second attempt returns 409 |
+| TC-08 | FR-08 | Add gifts and seats to cart, verify totals, complete checkout |
+| TC-09 | FR-09 | Use admin UI or API to create, edit, and delete a movie |
+| TC-10 | FR-10 | Use admin UI or API to create, edit, and delete a session |
+| TC-11 | FR-11 | Use bulk delete with date range and verify deleted counts |
+| TC-12 | FR-12 | Start server with and without DB file and verify behavior |
+
+---
+
+## 10. Traceability Notes
+
+- This SRS reflects the implemented architecture and endpoints in the current repository.
+- If new major modules are added, update both README and this SRS in the same change set.

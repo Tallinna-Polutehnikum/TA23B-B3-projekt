@@ -1,0 +1,7 @@
+Running session scheduler...
+Using database: C:\Users\USER\TA23B-B3-projekt\database\db.sqlite
+Expired sessions deleted: 0
+Sessions deleted beyond 7 days: 0
+Past times skipped: 2625
+New sessions inserted: 0
+Scheduler finished.
