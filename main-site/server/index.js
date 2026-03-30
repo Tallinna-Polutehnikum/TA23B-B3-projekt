@@ -26,6 +26,250 @@ try {
   process.exit(1);
 }
 
+const seatColumns = db.prepare(`PRAGMA table_info(seat)`).all();
+const hasSeatAvailabilityFlag = seatColumns.some((col) => col.name === 'is_available');
+const seatAvailabilityWhere = hasSeatAvailabilityFlag ? 'WHERE is_available = 1' : '';
+
+const AUTO_SHOW_TIMES = ['12:00', '15:00', '18:00', '21:00'];
+const AUTO_WINDOW_DAYS = 7;
+
+function formatIsoDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function toShowtimeDate(dateStr, timeStr) {
+  return new Date(`${dateStr}T${timeStr}:00`);
+}
+
+function groupHallsByCinema(halls) {
+  const grouped = new Map();
+
+  for (const hall of halls) {
+    if (!grouped.has(hall.cinema_id)) {
+      grouped.set(hall.cinema_id, []);
+    }
+    grouped.get(hall.cinema_id).push(hall);
+  }
+
+  return [...grouped.entries()]
+    .map(([cinemaId, cinemaHalls]) => ({
+      cinemaId,
+      halls: cinemaHalls.sort((a, b) => a.id - b.id)
+    }))
+    .sort((a, b) => a.cinemaId - b.cinemaId);
+}
+
+function seedUpcomingSessionsForMovie(movieId) {
+  const sessionColumns = db.prepare(`PRAGMA table_info(sessions)`).all();
+  const hasHallTextColumn = sessionColumns.some((col) => col.name === 'hall');
+
+  const halls = db.prepare(`
+    SELECT
+      h.id,
+      h.cinema_id,
+      h.hall_number,
+      COALESCE(sc.total_seats, 100) AS default_seats
+    FROM hall h
+    LEFT JOIN (
+      SELECT hall_id, COUNT(*) AS total_seats
+      FROM seat
+      ${seatAvailabilityWhere}
+      GROUP BY hall_id
+    ) sc ON sc.hall_id = h.id
+    WHERE h.cinema_id IS NOT NULL
+    ORDER BY h.cinema_id, h.id
+  `).all();
+
+  if (halls.length === 0) {
+    return { inserted: 0, skippedPast: 0, reason: 'no-halls' };
+  }
+
+  const cinemas = groupHallsByCinema(halls);
+
+  const findSlotSessions = db.prepare(`
+    SELECT id, movie_id
+    FROM sessions
+    WHERE hall_id = ? AND date = ? AND time = ?
+    ORDER BY id
+  `);
+
+  const ticketCountBySession = db.prepare(`
+    SELECT COUNT(*) AS cnt
+    FROM ticket
+    WHERE session_id = ?
+  `);
+
+  const deleteSessionById = db.prepare(`DELETE FROM sessions WHERE id = ?`);
+
+  const insertSession = db.prepare(`
+    INSERT INTO sessions (
+      movie_id,
+      cinema_id,
+      hall_id,
+      date,
+      time,
+      seats_available,
+      language,
+      subtitles,
+      format
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const updateSession = db.prepare(`
+    UPDATE sessions
+    SET movie_id = ?, cinema_id = ?, hall_id = ?
+    WHERE id = ?
+  `);
+
+  const insertSessionWithHall = hasHallTextColumn
+    ? db.prepare(`
+        INSERT INTO sessions (
+          movie_id,
+          cinema_id,
+          hall_id,
+          hall,
+          date,
+          time,
+          seats_available,
+          language,
+          subtitles,
+          format
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `)
+    : null;
+
+  const updateSessionWithHall = hasHallTextColumn
+    ? db.prepare(`
+        UPDATE sessions
+        SET movie_id = ?, cinema_id = ?, hall_id = ?, hall = ?
+        WHERE id = ?
+      `)
+    : null;
+
+  let inserted = 0;
+  let updated = 0;
+  let skippedPast = 0;
+  let skippedLocked = 0;
+  let duplicateRemoved = 0;
+  const now = new Date();
+
+  const tx = db.transaction(() => {
+    for (let dayOffset = 0; dayOffset < AUTO_WINDOW_DAYS; dayOffset += 1) {
+      const day = new Date(now);
+      day.setHours(0, 0, 0, 0);
+      day.setDate(day.getDate() + dayOffset);
+      const dateStr = formatIsoDate(day);
+
+      for (let cinemaIndex = 0; cinemaIndex < cinemas.length; cinemaIndex += 1) {
+        const cinema = cinemas[cinemaIndex];
+        const forcedTime = AUTO_SHOW_TIMES[(dayOffset + cinemaIndex) % AUTO_SHOW_TIMES.length];
+        const forcedHall = cinema.halls[(dayOffset + cinemaIndex) % cinema.halls.length];
+
+        for (const hall of cinema.halls) {
+          for (const showTime of AUTO_SHOW_TIMES) {
+            if (hall.id !== forcedHall.id || showTime !== forcedTime) {
+              continue;
+            }
+
+          const candidateDate = toShowtimeDate(dateStr, showTime);
+          if (candidateDate <= now) {
+            skippedPast += 1;
+            continue;
+          }
+
+            const slotSessions = findSlotSessions.all(hall.id, dateStr, showTime);
+
+            if (slotSessions.length === 0) {
+              if (hasHallTextColumn && insertSessionWithHall) {
+                insertSessionWithHall.run(
+                  movieId,
+                  hall.cinema_id,
+                  hall.id,
+                  hall.hall_number,
+                  dateStr,
+                  showTime,
+                  hall.default_seats,
+                  'Estonian',
+                  'English',
+                  '2D'
+                );
+              } else {
+                insertSession.run(
+                  movieId,
+                  hall.cinema_id,
+                  hall.id,
+                  dateStr,
+                  showTime,
+                  hall.default_seats,
+                  'Estonian',
+                  'English',
+                  '2D'
+                );
+              }
+              inserted += 1;
+              continue;
+            }
+
+            let keeper = slotSessions[0];
+            let keeperTickets = ticketCountBySession.get(keeper.id).cnt;
+
+            for (const candidate of slotSessions.slice(1)) {
+              const candidateTickets = ticketCountBySession.get(candidate.id).cnt;
+              if (candidateTickets > keeperTickets) {
+                if (keeperTickets === 0) {
+                  deleteSessionById.run(keeper.id);
+                  duplicateRemoved += 1;
+                }
+                keeper = candidate;
+                keeperTickets = candidateTickets;
+              } else if (candidateTickets === 0) {
+                deleteSessionById.run(candidate.id);
+                duplicateRemoved += 1;
+              }
+            }
+
+            if (keeper.movie_id === movieId) {
+              continue;
+            }
+
+            if (keeperTickets > 0) {
+              skippedLocked += 1;
+              continue;
+            }
+
+            if (hasHallTextColumn && updateSessionWithHall) {
+              updateSessionWithHall.run(
+                movieId,
+                hall.cinema_id,
+                hall.id,
+                hall.hall_number,
+                keeper.id
+              );
+            } else {
+              updateSession.run(movieId, hall.cinema_id, hall.id, keeper.id);
+            }
+            updated += 1;
+          }
+        }
+      }
+    }
+  });
+
+  tx();
+
+  return {
+    inserted,
+    updated,
+    skippedPast,
+    skippedLocked,
+    duplicateRemoved,
+    cinemasScanned: cinemas.length,
+    daysPlanned: AUTO_WINDOW_DAYS
+  };
+}
+
 // ============= GET ENDPOINTS =============
 
 app.get('/api/movies/top', (_req, res) => {
@@ -252,7 +496,7 @@ app.get('/api/sessions', (_req, res) => {
     LEFT JOIN (
       SELECT hall_id, COUNT(*) AS total_seats
       FROM seat
-      WHERE is_available = 1
+      ${seatAvailabilityWhere}
       GROUP BY hall_id
     ) sc ON sc.hall_id = h.id
     LEFT JOIN (
@@ -284,7 +528,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
     LEFT JOIN (
       SELECT hall_id, COUNT(*) AS total_seats
       FROM seat
-      WHERE is_available = 1
+      ${seatAvailabilityWhere}
       GROUP BY hall_id
     ) sc ON sc.hall_id = h.id
     WHERE s.id = ?
@@ -300,7 +544,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
       s.seat_number,
       s.type,
       s.price,
-      s.is_available,
+      ${hasSeatAvailabilityFlag ? 's.is_available' : '1 AS is_available'},
       CASE WHEN t.id IS NULL THEN 0 ELSE 1 END AS occupied
     FROM seat s
     LEFT JOIN ticket t ON t.seat_id = s.id AND t.session_id = ?
@@ -422,14 +666,29 @@ app.post('/api/movies', (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
     `).run(title, overview, poster, duration, genreId, directors || null);
 
+    const movieId = Number(result.lastInsertRowid);
+    let autoSchedule;
+
+    try {
+      autoSchedule = seedUpcomingSessionsForMovie(movieId);
+    } catch (scheduleErr) {
+      console.error('Auto schedule failed for new movie:', movieId, scheduleErr);
+      autoSchedule = {
+        inserted: 0,
+        skippedPast: 0,
+        error: 'auto-schedule-failed'
+      };
+    }
+
     res.status(201).json({
-      id: result.lastInsertRowid,
+      id: movieId,
       title,
       overview,
       poster,
       duration,
       genre,
-      directors
+      directors,
+      autoSchedule
     });
   } catch (err) {
     console.error('Error creating movie:', err);
