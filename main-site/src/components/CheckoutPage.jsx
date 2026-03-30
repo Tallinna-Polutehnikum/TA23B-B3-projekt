@@ -4,6 +4,12 @@ import "./CheckoutPage.css";
 
 const paymentOptions = [
   {
+    id: "montonio",
+    title: "Montonio (test)",
+    description: "Mock bank-link payment flow",
+    accent: "#f9a8d4",
+  },
+  {
     id: "card",
     title: "Card payment",
     description: "Visa / MasterCard / MIR",
@@ -31,12 +37,21 @@ const paymentOptions = [
 
 const formatPrice = (value) => `${value.toFixed(2)} €`;
 
+const paymentProviderByMethod = {
+  montonio: "montonio",
+  card: null,
+  applepay: null,
+  googlepay: null,
+  cash: null,
+};
+
 export default function CheckoutPage({
   cart,
   totalPrice,
   onRemoveFromCart,
   onUpdateQuantity,
   onRemoveSeat,
+  onPaymentSuccess,
   onBack,
   onNavigateHome,
   onComplete,
@@ -49,6 +64,8 @@ export default function CheckoutPage({
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("idle");
+  const [bookingError, setBookingError] = useState("");
+  const [paymentInfo, setPaymentInfo] = useState(null);
 
   const cartIsEmpty = cart.length === 0;
 
@@ -71,15 +88,100 @@ export default function CheckoutPage({
     setShowPaymentDetails(true);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (cartIsEmpty || isProcessing || !paymentMethod) return;
 
+    const seatItems = cart.filter((item) => item.type === "seats");
+    const authToken = localStorage.getItem("ac_auth_token");
+    const provider = paymentProviderByMethod[paymentMethod] ?? null;
+
     setIsProcessing(true);
-    setTimeout(() => {
+    setBookingError("");
+    setStatus("idle");
+    setPaymentInfo(null);
+
+    try {
+      if (provider) {
+        const intentResponse = await fetch("/api/payments/mock-intent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+          body: JSON.stringify({
+            provider,
+            amount: totalPrice,
+            currency: "EUR",
+            method: paymentMethod,
+            metadata: {
+              seatItems: seatItems.length,
+              cartItems: cart.length,
+            },
+          }),
+        });
+
+        const intentPayload = await intentResponse.json().catch(() => null);
+        if (!intentResponse.ok || !intentPayload?.paymentId) {
+          throw new Error(intentPayload?.message || "Failed to initialize mock payment.");
+        }
+
+        const confirmResponse = await fetch("/api/payments/mock-confirm", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+          body: JSON.stringify({
+            provider,
+            paymentId: intentPayload.paymentId,
+          }),
+        });
+
+        const confirmPayload = await confirmResponse.json().catch(() => null);
+        if (!confirmResponse.ok || confirmPayload?.status !== "succeeded") {
+          throw new Error(confirmPayload?.message || "Mock payment was not approved.");
+        }
+
+        setPaymentInfo(confirmPayload);
+      }
+
+      for (const item of seatItems) {
+        const seatIds = (item.seatIds || []).filter((id) => Number.isFinite(Number(id))).map(Number);
+        if (!item.sessionId || seatIds.length === 0 || seatIds.length !== (item.seats?.length || 0)) {
+          throw new Error("Some selected seats are missing booking metadata. Please reselect seats.");
+        }
+
+        const response = await fetch(`/api/sessions/${item.sessionId}/book`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+          body: JSON.stringify({ seatIds, userId: null }),
+        });
+
+        let payload = null;
+        try {
+          payload = await response.json();
+        } catch {
+          payload = null;
+        }
+
+        if (!response.ok) {
+          throw new Error(payload?.message || "Failed to reserve seats. Please try again.");
+        }
+      }
+
+      onPaymentSuccess?.();
       setIsProcessing(false);
       setStatus("success");
-    }, 900);
+    } catch (error) {
+      console.error("Checkout booking error", error);
+      setIsProcessing(false);
+      setStatus("error");
+      setBookingError(error?.message || "Unable to complete booking.");
+    }
   };
 
   const renderPaymentDetails = () => {
@@ -165,6 +267,20 @@ export default function CheckoutPage({
           <div className="checkout-payment-form checkout-payment-form--compact">
             <p className="checkout-inline-note">
               We will hold your seats. Pay at the cinema box office at least 30 minutes before the show.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    if (paymentMethod === "montonio") {
+      return (
+        <div className="checkout-payment-active">
+          {header}
+          <div className="checkout-payment-form checkout-payment-form--compact">
+            <p className="checkout-inline-note">
+              This project uses a mock integration. No real money is charged. On submit, a simulated {option?.title}
+              payment is created and confirmed.
             </p>
           </div>
         </div>
@@ -341,13 +457,18 @@ export default function CheckoutPage({
               <button
                 type="submit"
                 className="checkout-submit"
-                disabled={!acceptedTerms || cartIsEmpty || isProcessing || !paymentMethod}
+                disabled={!acceptedTerms || cartIsEmpty || isProcessing || !paymentMethod || status === "success"}
               >
                 {isProcessing ? "Processing..." : `Pay ${formatPrice(totalPrice)}`}
               </button>
               <p className="checkout-disclaimer">
                 By clicking “Pay”, you reserve seats and receive e-tickets by email and in your profile.
               </p>
+              {status === "error" && (
+                <p className="checkout-disclaimer" style={{ color: "#fca5a5" }}>
+                  {bookingError}
+                </p>
+              )}
             </div>
 
             {status === "success" && (
@@ -356,6 +477,11 @@ export default function CheckoutPage({
                 <p className="checkout-success__text">
                   We sent tickets to {contact.email || "your email"}. Receipt is available in your profile.
                 </p>
+                {paymentInfo?.paymentId && (
+                  <p className="checkout-success__text">
+                    Mock payment ID: {paymentInfo.paymentId}
+                  </p>
+                )}
                 <div className="checkout-success__actions">
                   <button type="button" className="checkout-link" onClick={onNavigateHome}>
                     Back to home
