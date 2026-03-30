@@ -14,6 +14,7 @@ env:
   SSH_HOST: spjo.eu
   SSH_USER: virt137396
   SSH_PORT: "22"
+  EXPECTED_KEY_FINGERPRINT: SHA256:6UEtNBBFQNwC21yqWZJ+B3gIpqVBlpUnAR7wQJWL/nY
   DEPLOY_ROOT: /data02/virt137396/domeenid/www.spjo.eu/htdocs
   APP_DIR: /data02/virt137396/domeenid/www.spjo.eu/htdocs/main-site
   DB_PATH: /data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite
@@ -40,18 +41,35 @@ jobs:
           fi
 
           mkdir -p ~/.ssh
-          printf "%s\n" "$ZONE_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 700 ~/.ssh
+
+          # Normalize line endings in case the secret was pasted from Windows clipboard.
+          printf "%s" "$ZONE_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+
+          # Validate secret format and surface the loaded fingerprint in logs.
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+          ACTUAL_KEY_FINGERPRINT=$(ssh-keygen -lf ~/.ssh/id_ed25519.pub -E sha256 | awk '{print $2}')
+          echo "Loaded key fingerprint: $ACTUAL_KEY_FINGERPRINT"
+          if [ "$ACTUAL_KEY_FINGERPRINT" != "$EXPECTED_KEY_FINGERPRINT" ]; then
+            echo "Key fingerprint mismatch. Check ZONE_SSH_PRIVATE_KEY secret value."
+            exit 1
+          fi
+
           ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Verify SSH auth
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "echo AUTH_OK"
 
       - name: Ensure remote directories
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$APP_DIR' '$DEPLOY_ROOT/database'"
+          ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$APP_DIR' '$DEPLOY_ROOT/database'"
 
       - name: Sync application files
         run: |
           rsync -az --delete \
-            -e "ssh -i ~/.ssh/id_ed25519 -p $SSH_PORT" \
+            -e "ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
             --exclude '.git/' \
             --exclude '.github/' \
             --exclude 'node_modules/' \
@@ -62,7 +80,7 @@ jobs:
 
       - name: Install, build and restart PM2
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "
+          ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "
             set -e
             cd '$APP_DIR'
 
