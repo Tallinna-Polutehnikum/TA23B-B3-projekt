@@ -5,9 +5,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import PDFDocument from 'pdfkit';
+import Stripe from 'stripe';
+import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const envLocalPath = path.resolve(__dirname, '..', '.env.local');
+dotenv.config({ path: fs.existsSync(envLocalPath) ? envLocalPath : undefined });
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -42,6 +46,14 @@ const PASS_LINK_TTL_MS = 1000 * 60 * 30;
 const PASS_TOKEN_SECRET = process.env.TICKET_PASS_SECRET || 'local-dev-ticket-pass-secret';
 const authSessions = new Map();
 const MOCK_PAYMENT_PROVIDERS = new Set(['montonio']);
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SK || '';
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY) : null;
+const STRIPE_ENABLED = Boolean(stripe);
+
+if (!STRIPE_ENABLED) {
+  console.warn('Stripe is not configured. Set STRIPE_SECRET_KEY to enable live PaymentIntents.');
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS payment_tx (
@@ -1143,6 +1155,126 @@ app.post('/api/auth/logout', (req, res) => {
   const token = getTokenFromRequest(req);
   if (token) authSessions.delete(token);
   res.status(204).end();
+});
+
+app.post('/api/payments/stripe/create-intent', async (req, res) => {
+  if (!STRIPE_ENABLED) {
+    return res.status(503).json({ message: 'Stripe is not configured on the server' });
+  }
+
+  const auth = getAuthUser(req);
+  const amount = Number(req.body?.amount);
+  const currency = String(req.body?.currency || 'EUR').trim().toLowerCase() || 'eur';
+  const cartItems = Number(req.body?.cartItems);
+  const seats = Number(req.body?.seats);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return res.status(400).json({ message: 'Invalid amount' });
+  }
+
+  const amountCents = Math.round(amount * 100);
+  const metadata = {
+    project: 'absolute-cinema',
+    seats: Number.isFinite(seats) ? seats : undefined,
+    cartItems: Number.isFinite(cartItems) ? cartItems : undefined,
+    userId: auth?.user?.id || undefined,
+  };
+
+  Object.keys(metadata).forEach((key) => {
+    if (metadata[key] == null) delete metadata[key];
+  });
+
+  try {
+    const intent = await stripe.paymentIntents.create({
+      amount: amountCents,
+      currency,
+      automatic_payment_methods: { enabled: true },
+      metadata,
+    });
+
+    db.prepare(`
+      INSERT INTO payment_tx (user_id, payment_id, provider, amount_cents, currency, status, method, metadata)
+      VALUES (?, ?, 'stripe', ?, ?, ?, ?, ?)
+      ON CONFLICT(payment_id) DO UPDATE SET
+        amount_cents = excluded.amount_cents,
+        currency = excluded.currency,
+        status = excluded.status,
+        method = excluded.method,
+        metadata = excluded.metadata,
+        updated_at = CURRENT_TIMESTAMP
+    `).run(
+      auth?.user?.id ?? null,
+      intent.id,
+      intent.amount,
+      (intent.currency || currency).toUpperCase(),
+      intent.status,
+      Array.isArray(intent.payment_method_types) ? intent.payment_method_types[0] || null : null,
+      intent.metadata ? JSON.stringify(intent.metadata) : null
+    );
+
+    return res.json({
+      paymentIntentId: intent.id,
+      clientSecret: intent.client_secret,
+      amount: intent.amount / 100,
+      currency: (intent.currency || currency).toUpperCase(),
+      status: intent.status,
+      provider: 'stripe',
+    });
+  } catch (err) {
+    console.error('Stripe create-intent failed:', err);
+    return res.status(err?.statusCode || 500).json({ message: err?.message || 'Failed to create Stripe PaymentIntent' });
+  }
+});
+
+app.post('/api/payments/stripe/sync', async (req, res) => {
+  if (!STRIPE_ENABLED) {
+    return res.status(503).json({ message: 'Stripe is not configured on the server' });
+  }
+
+  const auth = getAuthUser(req);
+  const paymentIntentId = String(req.body?.paymentIntentId || req.body?.id || '').trim();
+
+  if (!paymentIntentId) {
+    return res.status(400).json({ message: 'paymentIntentId is required' });
+  }
+
+  try {
+    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const method = Array.isArray(intent.payment_method_types) ? intent.payment_method_types[0] || null : null;
+
+    db.prepare(`
+      INSERT INTO payment_tx (user_id, payment_id, provider, amount_cents, currency, status, method, metadata)
+      VALUES (?, ?, 'stripe', ?, ?, ?, ?, ?)
+      ON CONFLICT(payment_id) DO UPDATE SET
+        amount_cents = excluded.amount_cents,
+        currency = excluded.currency,
+        status = excluded.status,
+        method = excluded.method,
+        metadata = excluded.metadata,
+        updated_at = CURRENT_TIMESTAMP
+    `).run(
+      auth?.user?.id ?? null,
+      intent.id,
+      intent.amount,
+      (intent.currency || 'EUR').toUpperCase(),
+      intent.status,
+      method,
+      intent.metadata ? JSON.stringify(intent.metadata) : null
+    );
+
+    return res.json({
+      paymentIntentId: intent.id,
+      status: intent.status,
+      amount: intent.amount / 100,
+      currency: (intent.currency || 'EUR').toUpperCase(),
+      provider: 'stripe',
+      method,
+      created: intent.created ? new Date(intent.created * 1000).toISOString() : null,
+    });
+  } catch (err) {
+    console.error('Stripe sync failed:', err);
+    return res.status(err?.statusCode || 500).json({ message: err?.message || 'Failed to sync Stripe payment' });
+  }
 });
 
 app.post('/api/payments/mock-intent', (req, res) => {
