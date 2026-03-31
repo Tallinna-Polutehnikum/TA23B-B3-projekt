@@ -109,9 +109,9 @@ jobs:
 
       - name: Install, build and restart PM2
         run: |
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' LOOPBACK_HOST='$LOOPBACK_HOST' APP_PORT='$APP_PORT' DB_PATH='$DB_PATH' APP_NAME='$APP_NAME' bash -se" <<'EOF'
             set -e
-            cd '$APP_DIR'
+            cd "$APP_DIR"
 
             if [ -f package-lock.json ]; then
               npm ci
@@ -120,18 +120,18 @@ jobs:
             fi
 
             npm run build
-            export HOST='$LOOPBACK_HOST' PORT='$APP_PORT' DB_PATH='$DB_PATH'
+            export HOST="$LOOPBACK_HOST" PORT="$APP_PORT" DB_PATH="$DB_PATH"
 
-            if pm2 describe '$APP_NAME' >/dev/null 2>&1; then
-              pm2 restart '$APP_NAME' --update-env
+            if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
+              pm2 restart "$APP_NAME" --update-env
             else
-              pm2 start ecosystem.config.cjs --only '$APP_NAME' --update-env
+              pm2 start ecosystem.config.cjs --only "$APP_NAME" --update-env
             fi
 
             pm2 save
 
             HEALTH_ENDPOINT='/api/genres'
-            HEALTH_HOSTS='$LOOPBACK_HOST 127.0.0.1 localhost'
+            HEALTH_HOSTS="$LOOPBACK_HOST 127.0.0.1 localhost"
             HEALTH_OK=''
             for i in $(seq 1 20); do
               for h in $HEALTH_HOSTS; do
@@ -151,11 +151,11 @@ jobs:
 
             if [ -z "$HEALTH_OK" ]; then
               echo "Health check failed after restart. PM2 status and recent logs:"
-              pm2 status '$APP_NAME' || true
-              pm2 logs '$APP_NAME' --lines 60 --nostream || true
+              pm2 status "$APP_NAME" || true
+              pm2 logs "$APP_NAME" --lines 60 --nostream || true
               exit 1
             fi
-          "
+          EOF
 
       - name: Public endpoint smoke test
         run: |
