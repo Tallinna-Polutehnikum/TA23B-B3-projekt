@@ -4,6 +4,7 @@ import cors from 'cors';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import PDFDocument from 'pdfkit';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -32,16 +33,20 @@ try {
 const seatColumns = db.prepare(`PRAGMA table_info(seat)`).all();
 const hasSeatAvailabilityFlag = seatColumns.some((col) => col.name === 'is_available');
 const seatAvailabilityWhere = hasSeatAvailabilityFlag ? 'WHERE is_available = 1' : '';
+const seatAvailabilitySelect = hasSeatAvailabilityFlag ? 's.is_available' : '1';
 
 const AUTO_SHOW_TIMES = ['12:00', '15:00', '18:00', '21:00'];
 const AUTO_WINDOW_DAYS = 7;
 const AUTH_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+const PASS_LINK_TTL_MS = 1000 * 60 * 30;
+const PASS_TOKEN_SECRET = process.env.TICKET_PASS_SECRET || 'local-dev-ticket-pass-secret';
 const authSessions = new Map();
 const MOCK_PAYMENT_PROVIDERS = new Set(['montonio']);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS payment_tx (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES user(id),
     payment_id TEXT NOT NULL UNIQUE,
     provider TEXT NOT NULL,
     amount_cents INTEGER NOT NULL,
@@ -53,6 +58,28 @@ db.exec(`
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
   )
 `);
+
+const paymentTxColumns = db.prepare(`PRAGMA table_info(payment_tx)`).all();
+const hasPaymentUserId = paymentTxColumns.some((col) => col.name === 'user_id');
+if (!hasPaymentUserId) {
+  db.exec(`ALTER TABLE payment_tx ADD COLUMN user_id INTEGER REFERENCES user(id)`);
+}
+
+const userColumns = db.prepare(`PRAGMA table_info(user)`).all();
+const hasUserAvatarColumn = userColumns.some((col) => col.name === 'avatar_url');
+if (!hasUserAvatarColumn) {
+  db.exec(`ALTER TABLE user ADD COLUMN avatar_url TEXT`);
+}
+
+function toApiUser(userRow) {
+  if (!userRow) return null;
+  return {
+    id: userRow.id,
+    username: userRow.username,
+    email: userRow.email,
+    avatarUrl: userRow.avatar_url || null,
+  };
+}
 
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -112,7 +139,7 @@ function getAuthUser(req) {
   }
 
   const user = db
-    .prepare(`SELECT id, username, email FROM user WHERE id = ?`)
+    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
     .get(session.userId);
 
   if (!user) {
@@ -120,7 +147,109 @@ function getAuthUser(req) {
     return null;
   }
 
-  return { token, user };
+  return { token, user: toApiUser(user) };
+}
+
+function signPassToken(payload) {
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = crypto
+    .createHmac('sha256', PASS_TOKEN_SECRET)
+    .update(encodedPayload)
+    .digest('base64url');
+  return `${encodedPayload}.${signature}`;
+}
+
+function verifyPassToken(token) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) {
+    return null;
+  }
+
+  const [encodedPayload, signature] = token.split('.');
+  if (!encodedPayload || !signature) {
+    return null;
+  }
+
+  const expectedSignature = crypto
+    .createHmac('sha256', PASS_TOKEN_SECRET)
+    .update(encodedPayload)
+    .digest('base64url');
+
+  const signatureBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expectedSignature);
+  if (signatureBuffer.length !== expectedBuffer.length) {
+    return null;
+  }
+
+  if (!crypto.timingSafeEqual(signatureBuffer, expectedBuffer)) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
+    if (!payload?.userId || !payload?.exp) {
+      return null;
+    }
+    if (Number(payload.exp) < Date.now()) {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function getNormalizedTicketsForUser(userId) {
+  const sessionColumns = db.prepare(`PRAGMA table_info(sessions)`).all();
+  const hasSessionHallTextColumn = sessionColumns.some((col) => col.name === 'hall');
+  const hallNumberExpr = hasSessionHallTextColumn
+    ? `COALESCE(CAST(h.hall_number AS TEXT), s.hall, 'N/A')`
+    : `COALESCE(CAST(h.hall_number AS TEXT), 'N/A')`;
+
+  const tickets = db.prepare(`
+    SELECT
+      t.id AS ticket_id,
+      t.session_id,
+      t.seat_id,
+      s.date,
+      s.time,
+      datetime(s.date || ' ' || s.time) AS starts_at,
+      m.title AS movie_title,
+      m.poster AS movie_poster,
+      COALESCE(c.name, 'Cinema') AS cinema_name,
+      ${hallNumberExpr} AS hall_number,
+      st.seat_number,
+      COALESCE(st.price, 12) AS ticket_price
+    FROM ticket t
+    JOIN sessions s ON s.id = t.session_id
+    JOIN movie m ON m.id = s.movie_id
+    LEFT JOIN cinema c ON c.id = s.cinema_id
+    LEFT JOIN hall h ON h.id = s.hall_id
+    LEFT JOIN seat st ON st.id = t.seat_id
+    WHERE t.user_id = ?
+    ORDER BY s.date ASC, s.time ASC, t.id ASC
+  `).all(userId);
+
+  const now = new Date();
+  return tickets.map((ticket) => {
+    const startsAt = new Date(`${ticket.date}T${ticket.time}:00`);
+    const hasValidStart = Number.isFinite(startsAt.getTime());
+    const isActive = hasValidStart && startsAt >= now;
+    return {
+      id: ticket.ticket_id,
+      sessionId: ticket.session_id,
+      seatId: ticket.seat_id,
+      date: ticket.date,
+      time: ticket.time,
+      startsAt: hasValidStart ? startsAt.toISOString() : null,
+      isActive,
+      movieTitle: ticket.movie_title,
+      moviePoster: ticket.movie_poster,
+      cinemaName: ticket.cinema_name,
+      hallNumber: ticket.hall_number,
+      seatNumber: ticket.seat_number,
+      price: Number(ticket.ticket_price) || 0,
+    };
+  });
 }
 
 function createMockPaymentId(provider) {
@@ -590,7 +719,7 @@ app.get('/api/sessions', (_req, res) => {
     LEFT JOIN (
       SELECT hall_id, COUNT(*) AS total_seats
       FROM seat
-      WHERE is_available = 1
+      ${seatAvailabilityWhere}
       GROUP BY hall_id
     ) sc ON sc.hall_id = h.id
     LEFT JOIN (
@@ -622,7 +751,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
     LEFT JOIN (
       SELECT hall_id, COUNT(*) AS total_seats
       FROM seat
-      WHERE is_available = 1
+      ${seatAvailabilityWhere}
       GROUP BY hall_id
     ) sc ON sc.hall_id = h.id
     WHERE s.id = ?
@@ -638,7 +767,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
       s.seat_number,
       s.type,
       s.price,
-      s.is_available,
+      ${seatAvailabilitySelect} AS is_available,
       CASE WHEN t.id IS NULL THEN 0 ELSE 1 END AS occupied
     FROM seat s
     LEFT JOIN ticket t ON t.seat_id = s.id AND t.session_id = ?
@@ -777,11 +906,11 @@ app.post('/api/auth/register', (req, res) => {
 
     const userId = Number(inserted.lastInsertRowid);
     const user = db
-      .prepare(`SELECT id, username, email FROM user WHERE id = ?`)
+      .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
       .get(userId);
 
     const token = createAuthToken(userId);
-    res.status(201).json({ token, user });
+    res.status(201).json({ token, user: toApiUser(user) });
   } catch (err) {
     console.error('Auth register failed:', err);
     res.status(500).json({ message: 'Failed to register user' });
@@ -798,7 +927,7 @@ app.post('/api/auth/login', (req, res) => {
 
   const userRow = db
     .prepare(`
-      SELECT id, username, email, pass
+      SELECT id, username, email, avatar_url, pass
       FROM user
       WHERE lower(username) = lower(?) OR lower(email) = lower(?)
       LIMIT 1
@@ -818,11 +947,7 @@ app.post('/api/auth/login', (req, res) => {
   const token = createAuthToken(userRow.id);
   res.json({
     token,
-    user: {
-      id: userRow.id,
-      username: userRow.username,
-      email: userRow.email,
-    },
+    user: toApiUser(userRow),
   });
 });
 
@@ -835,6 +960,185 @@ app.get('/api/auth/me', (req, res) => {
   res.json({ user: auth.user });
 });
 
+app.put('/api/profile/account', (req, res) => {
+  const auth = getAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const username = String(req.body?.username || '').trim();
+  const avatarUrlRaw = req.body?.avatarUrl;
+  const avatarUrl = avatarUrlRaw == null ? '' : String(avatarUrlRaw).trim();
+
+  if (!username) {
+    return res.status(400).json({ message: 'Username is required' });
+  }
+
+  if (username.length < 3) {
+    return res.status(400).json({ message: 'Username must be at least 3 characters' });
+  }
+
+  const isDataImage = avatarUrl.startsWith('data:image/');
+  const isHttpImage = /^https?:\/\//i.test(avatarUrl);
+  if (avatarUrl && !isDataImage && !isHttpImage) {
+    return res.status(400).json({ message: 'Avatar must be an image URL or uploaded image' });
+  }
+
+  if (avatarUrl.length > 1024 * 1024) {
+    return res.status(400).json({ message: 'Avatar image is too large' });
+  }
+
+  const duplicate = db
+    .prepare(`
+      SELECT id
+      FROM user
+      WHERE lower(username) = lower(?) AND id != ?
+      LIMIT 1
+    `)
+    .get(username, auth.user.id);
+
+  if (duplicate) {
+    return res.status(409).json({ message: 'Username is already taken' });
+  }
+
+  db.prepare(`
+    UPDATE user
+    SET username = ?, avatar_url = ?
+    WHERE id = ?
+  `).run(username, avatarUrl || null, auth.user.id);
+
+  const updatedUser = db
+    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
+    .get(auth.user.id);
+
+  res.json({ user: toApiUser(updatedUser) });
+});
+
+app.get('/api/profile/overview', (req, res) => {
+  const auth = getAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const normalizedTickets = getNormalizedTicketsForUser(auth.user.id);
+
+  const transactions = db.prepare(`
+    SELECT
+      payment_id,
+      provider,
+      amount_cents,
+      currency,
+      status,
+      method,
+      created_at,
+      updated_at
+    FROM payment_tx
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+    LIMIT 10
+  `).all(auth.user.id).map((row) => ({
+    paymentId: row.payment_id,
+    provider: row.provider,
+    amount: row.amount_cents / 100,
+    currency: row.currency,
+    status: row.status,
+    method: row.method,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+
+  res.json({
+    tickets: normalizedTickets,
+    transactions,
+  });
+});
+
+app.get('/api/profile/pass-link', (req, res) => {
+  const auth = getAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const activeTickets = getNormalizedTicketsForUser(auth.user.id).filter((ticket) => ticket.isActive);
+  if (activeTickets.length === 0) {
+    return res.status(400).json({ message: 'No active tickets' });
+  }
+
+  const exp = Date.now() + PASS_LINK_TTL_MS;
+  const token = signPassToken({
+    userId: auth.user.id,
+    exp,
+  });
+
+  const passPath = `/api/profile/tickets-pass.pdf?token=${encodeURIComponent(token)}`;
+  const passUrl = `${req.protocol}://${req.get('host')}${passPath}`;
+
+  res.json({
+    passUrl,
+    expiresAt: new Date(exp).toISOString(),
+    activeTickets: activeTickets.length,
+  });
+});
+
+app.get('/api/profile/tickets-pass.pdf', (req, res) => {
+  const token = String(req.query?.token || '');
+  const payload = verifyPassToken(token);
+  if (!payload) {
+    return res.status(401).json({ message: 'Invalid or expired pass link' });
+  }
+
+  const user = db
+    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
+    .get(payload.userId);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  const activeTickets = getNormalizedTicketsForUser(user.id).filter((ticket) => ticket.isActive);
+  if (activeTickets.length === 0) {
+    return res.status(404).json({ message: 'No active tickets found' });
+  }
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'inline; filename="active-tickets.pdf"');
+
+  const doc = new PDFDocument({ size: 'A4', margin: 50 });
+  doc.pipe(res);
+
+  doc.fontSize(22).text('Absolute Cinema - Active Tickets', { align: 'left' });
+  doc.moveDown(0.5);
+  doc.fontSize(12).text(`Account: ${user.username} (${user.email})`);
+  doc.text(`Generated: ${new Date().toLocaleString()}`);
+  doc.moveDown(1);
+
+  activeTickets.forEach((ticket, index) => {
+    doc
+      .fontSize(14)
+      .text(`${index + 1}. ${ticket.movieTitle}`);
+    doc
+      .fontSize(11)
+      .text(`Ticket ID: #${ticket.id}`)
+      .text(`Date & Time: ${ticket.date} ${ticket.time}`)
+      .text(`Cinema: ${ticket.cinemaName}`)
+      .text(`Hall: ${ticket.hallNumber}`)
+      .text(`Seat: ${ticket.seatNumber}`)
+      .text(`Price: EUR ${ticket.price.toFixed(2)}`);
+    doc.moveDown(0.8);
+
+    if (index < activeTickets.length - 1) {
+      doc
+        .strokeColor('#cccccc')
+        .lineWidth(1)
+        .moveTo(50, doc.y)
+        .lineTo(545, doc.y)
+        .stroke();
+      doc.moveDown(0.8);
+    }
+  });
+
+  doc.end();
+});
+
 app.post('/api/auth/logout', (req, res) => {
   const token = getTokenFromRequest(req);
   if (token) authSessions.delete(token);
@@ -842,6 +1146,7 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 app.post('/api/payments/mock-intent', (req, res) => {
+  const auth = getAuthUser(req);
   const provider = String(req.body?.provider || '').trim().toLowerCase();
   const amount = Number(req.body?.amount);
   const currency = String(req.body?.currency || 'EUR').trim().toUpperCase();
@@ -860,9 +1165,10 @@ app.post('/api/payments/mock-intent', (req, res) => {
   const paymentId = createMockPaymentId(provider);
 
   db.prepare(`
-    INSERT INTO payment_tx (payment_id, provider, amount_cents, currency, status, method, metadata)
-    VALUES (?, ?, ?, ?, 'requires_confirmation', ?, ?)
+    INSERT INTO payment_tx (user_id, payment_id, provider, amount_cents, currency, status, method, metadata)
+    VALUES (?, ?, ?, ?, ?, 'requires_confirmation', ?, ?)
   `).run(
+    auth?.user?.id ?? null,
     paymentId,
     provider,
     amountCents,

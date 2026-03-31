@@ -1,0 +1,189 @@
+name: Deploy Zone Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-zone-production
+  cancel-in-progress: true
+
+env:
+  SSH_HOST: spjo.eu
+  SSH_USER: virt137396
+  SSH_PORT: "22"
+  EXPECTED_KEY_FINGERPRINT: SHA256:6UEtNBBFQNwC21yqWZJ+B3gIpqVBlpUnAR7wQJWL/nY
+  DEPLOY_ROOT: /data02/virt137396/domeenid/www.spjo.eu/htdocs
+  APP_DIR: /data02/virt137396/domeenid/www.spjo.eu/htdocs/main-site
+  DB_PATH: /data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite
+  LOOPBACK_HOST: 127.2.63.196
+  APP_PORT: "8080"
+  APP_NAME: absolute-cinema-main
+  SYNC_DB_ON_DEPLOY: "true"
+
+jobs:
+  deploy:
+    name: Deploy to Zone
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        env:
+          ZONE_SSH_PRIVATE_KEY_B64: ${{ secrets.ZONE_SSH_PRIVATE_KEY_B64 }}
+          ZONE_SSH_PRIVATE_KEY: ${{ secrets.ZONE_SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "$ZONE_SSH_PRIVATE_KEY_B64" ] && [ -z "$ZONE_SSH_PRIVATE_KEY" ]; then
+            echo "Missing required secret: ZONE_SSH_PRIVATE_KEY_B64 (preferred) or ZONE_SSH_PRIVATE_KEY"
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          USED_SECRET=""
+          if [ -n "$ZONE_SSH_PRIVATE_KEY_B64" ]; then
+            # Preferred: single-line base64 secret avoids multiline paste corruption.
+            # Strip whitespace so accidental copy/paste line breaks do not break decoding.
+            CLEAN_B64=$(printf "%s" "$ZONE_SSH_PRIVATE_KEY_B64" | tr -d ' \t\r\n')
+            if printf "%s" "$CLEAN_B64" | base64 -d > ~/.ssh/id_ed25519 2>/dev/null; then
+              USED_SECRET="ZONE_SSH_PRIVATE_KEY_B64"
+            else
+              echo "ZONE_SSH_PRIVATE_KEY_B64 is not valid base64."
+            fi
+          fi
+
+          if [ -z "$USED_SECRET" ]; then
+            if [ -z "$ZONE_SSH_PRIVATE_KEY" ]; then
+              echo "No usable SSH key secret found."
+              echo "Provide ZONE_SSH_PRIVATE_KEY_B64 (base64 of private key) or ZONE_SSH_PRIVATE_KEY (raw key)."
+              exit 1
+            fi
+
+            # Backward compatibility with raw multiline key secret.
+            printf "%s" "$ZONE_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+            USED_SECRET="ZONE_SSH_PRIVATE_KEY"
+          fi
+
+          chmod 600 ~/.ssh/id_ed25519
+
+          # Validate secret format and surface the loaded fingerprint in logs.
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+          ACTUAL_KEY_FINGERPRINT=$(ssh-keygen -lf ~/.ssh/id_ed25519.pub -E sha256 | awk '{print $2}')
+          echo "Using key secret: $USED_SECRET"
+          echo "Loaded key fingerprint: $ACTUAL_KEY_FINGERPRINT"
+          if [ "$ACTUAL_KEY_FINGERPRINT" != "$EXPECTED_KEY_FINGERPRINT" ]; then
+            echo "Key fingerprint mismatch. Check ZONE_SSH_PRIVATE_KEY_B64 / ZONE_SSH_PRIVATE_KEY values."
+            exit 1
+          fi
+
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Verify SSH auth
+        run: |
+          echo "Runner public IP (for SSH whitelist checks):"
+          (curl -fsS https://api.ipify.org || true)
+          echo
+          echo "DNS resolution for $SSH_HOST:"
+          getent ahosts "$SSH_HOST" | awk '{print $1}' | sort -u
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "echo AUTH_OK"
+
+      - name: Ensure remote directories
+        run: |
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$APP_DIR' '$DEPLOY_ROOT/database'"
+
+      - name: Sync application files
+        run: |
+          rsync -az --delete \
+            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'node_modules/' \
+            --exclude 'dist/' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            main-site/ "$SSH_USER@$SSH_HOST:$APP_DIR/"
+
+      - name: Sync database file
+        if: env.SYNC_DB_ON_DEPLOY == 'true'
+        run: |
+          if [ ! -f database/db.sqlite ]; then
+            echo "Local database file not found at database/db.sqlite"
+            exit 1
+          fi
+
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
+            set -e
+            mkdir -p "$(dirname "$DB_PATH")"
+            if [ -f "$DB_PATH" ]; then
+              cp "$DB_PATH" "$DB_PATH.bak.$(date +%Y%m%d%H%M%S)"
+            fi
+          EOF
+
+          rsync -az \
+            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
+            database/db.sqlite "$SSH_USER@$SSH_HOST:$DB_PATH"
+
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
+            set -e
+            chmod 600 "$DB_PATH" || true
+          EOF
+
+      - name: Install, build and restart PM2
+        run: |
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' LOOPBACK_HOST='$LOOPBACK_HOST' APP_PORT='$APP_PORT' DB_PATH='$DB_PATH' APP_NAME='$APP_NAME' bash -se" <<'EOF'
+            set -e
+            cd "$APP_DIR"
+
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+
+            npm run build
+            export HOST="$LOOPBACK_HOST" PORT="$APP_PORT" DB_PATH="$DB_PATH"
+
+            if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
+              pm2 restart "$APP_NAME" --update-env
+            else
+              pm2 start ecosystem.config.cjs --only "$APP_NAME" --update-env
+            fi
+
+            pm2 save
+
+            HEALTH_ENDPOINT='/api/genres'
+            HEALTH_HOSTS="$LOOPBACK_HOST 127.0.0.1 localhost"
+            HEALTH_OK=''
+            for i in $(seq 1 20); do
+              for h in $HEALTH_HOSTS; do
+                if curl -fsS "http://$h:$APP_PORT$HEALTH_ENDPOINT" >/dev/null; then
+                  echo "Health check passed on http://$h:$APP_PORT$HEALTH_ENDPOINT"
+                  HEALTH_OK='yes'
+                  break
+                fi
+              done
+
+              if [ -n "$HEALTH_OK" ]; then
+                break
+              fi
+
+              sleep 1
+            done
+
+            if [ -z "$HEALTH_OK" ]; then
+              echo "Health check failed after restart. PM2 status and recent logs:"
+              pm2 status "$APP_NAME" || true
+              pm2 logs "$APP_NAME" --lines 60 --nostream || true
+              exit 1
+            fi
+          EOF
+
+      - name: Public endpoint smoke test
+        run: |
+          curl -fsS https://absolutecinema.spjo.eu/api/genres >/dev/null
+          echo "Deploy completed successfully"

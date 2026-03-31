@@ -59,13 +59,23 @@ function main() {
     const hasHallTextColumn = sessionColumns.some((col) => col.name === "hall");
 
     const deletedExpired = db.prepare(`
-      DELETE FROM sessions
-      WHERE datetime(date || ' ' || time) < datetime('now')
+      DELETE FROM sessions AS s
+      WHERE datetime(s.date || ' ' || s.time) < datetime('now')
+        AND NOT EXISTS (
+          SELECT 1
+          FROM ticket t
+          WHERE t.session_id = s.id
+        )
     `).run();
 
     const deletedBeyondWindow = db.prepare(`
-      DELETE FROM sessions
-      WHERE datetime(date || ' ' || time) > datetime('now', '+7 days')
+      DELETE FROM sessions AS s
+      WHERE datetime(s.date || ' ' || s.time) > datetime('now', '+${WINDOW_DAYS} days')
+        AND NOT EXISTS (
+          SELECT 1
+          FROM ticket t
+          WHERE t.session_id = s.id
+        )
     `).run();
 
     const movies = db.prepare(`SELECT id FROM movie ORDER BY id`).all();

@@ -2,15 +2,12 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./SessionCard.css";
 import SeatMap from "./SeatMap";
+import { getPosterSrc } from "../utils/movieUi";
 
 export default function SessionCard({ session, onViewAllShows, onAddSeats }) {
   const [showSeatMap, setShowSeatMap] = useState(false);
 
-  const posterSrc = session.poster
-    ? (session.poster.startsWith('http')
-        ? session.poster
-        : `https://image.tmdb.org/t/p/w342${session.poster}`)
-    : 'https://via.placeholder.com/200x300?text=No+Image';
+  const posterSrc = getPosterSrc(session.poster);
 
   const ribbonDate = session.date
     ? new Date(`${session.date}T00:00:00`).toLocaleDateString('en-GB', {
@@ -64,7 +61,6 @@ export default function SessionCard({ session, onViewAllShows, onAddSeats }) {
               </div>
             </div>
             <div className="session-card__meta-row">
-              <button className="session-card__trailer">Trailer</button>
               <div className="session-card__seats">
                 <span className="icon-seat" />
                 <span>Free seats</span>

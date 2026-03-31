@@ -200,3 +200,107 @@ npm.cmd run sync:movies
 - The project currently relies on local SQLite data, so keep database/db.sqlite available.
 
 ---
+
+## 13. Automatic Deployment (GitHub Actions -> Zone)
+
+This repository includes a production deployment workflow that runs on every push to `main`.
+
+Workflow file:
+
+- `.github/workflows/deploy-zone.yml`
+
+### 13.1 What the workflow does
+
+1. Connects to your Zone server over SSH.
+2. Synchronizes `main-site/` to `/data02/virt137396/domeenid/www.spjo.eu/htdocs/main-site`.
+3. Runs `npm ci` (or `npm install`) and `npm run build` on server.
+4. Restarts PM2 process `absolute-cinema-main` with:
+	- `HOST=127.2.63.196`
+	- `PORT=8080`
+	- `DB_PATH=/data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite`
+5. Verifies API health on local loopback and public domain.
+
+Note: The workflow does not overwrite `database/db.sqlite`.
+
+### 13.2 Required GitHub Secret
+
+Add this repository secret in GitHub:
+
+- `ZONE_SSH_PRIVATE_KEY_B64` (preferred)
+
+Value should be Base64 of your private key file:
+
+- `C:\Users\USER\.ssh\zone_ed25519`
+
+PowerShell command:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.ssh\zone_ed25519"))
+```
+
+Fallback secret (if needed):
+
+- `ZONE_SSH_PRIVATE_KEY` with raw key block (`-----BEGIN OPENSSH PRIVATE KEY----- ...`).
+
+If workflow shows `base64: invalid input`:
+
+1. Re-generate value from `C:\Users\USER\.ssh\zone_ed25519` using:
+	```powershell
+	[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.ssh\zone_ed25519"))
+	```
+2. Paste that single-line output into `ZONE_SSH_PRIVATE_KEY_B64`.
+3. Optionally clear `ZONE_SSH_PRIVATE_KEY_B64` and use only `ZONE_SSH_PRIVATE_KEY` (raw key) as fallback.
+
+### 13.3 Triggering deployment
+
+- Automatic: push or merge to `main`.
+- Manual: run `Deploy Zone Production` from the Actions tab.
+
+---
+
+## 14. CI Pipeline Coverage (Task 2)
+
+Workflow file:
+
+- `.github/workflows/ci.yml`
+
+### 14.1 What runs on each push and pull request
+
+For both projects (`main-site`, `admin-worker-site`):
+
+1. Lint (`npm run lint`)
+2. Test with coverage (`npm run test`)
+3. Coverage gate (minimum 70% statements)
+4. Build (`npm run build`)
+
+### 14.2 PR preview deployment
+
+On pull requests from this repository, CI deploys `main-site` build output to GitHub Pages under:
+
+- `https://<owner>.github.io/<repo>/previews/pr-<number>/`
+
+CI also comments the preview link directly on the PR.
+
+### 14.3 Email notification on CI failure
+
+To enable real email alerts, set these repository secrets:
+
+- `SMTP_SERVER`
+- `SMTP_PORT` (optional, default `587`)
+- `SMTP_USERNAME`
+- `SMTP_PASSWORD`
+- `CI_ALERT_EMAIL_TO`
+
+If these secrets are missing, CI logs a warning instead of sending mail.
+
+### 14.4 Blocking PR merge when checks fail
+
+Enable branch protection for `main` in GitHub settings and require these status checks:
+
+- `Web CI (main-site)`
+- `Web CI (admin-worker-site)`
+
+Optionally also require:
+
+- `PR Preview Deployment`
+

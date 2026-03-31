@@ -5,3 +5,16 @@ Sessions deleted beyond 7 days: 0
 Past times skipped: 2625
 New sessions inserted: 0
 Scheduler finished.
+Running session scheduler...
+Using database: C:\Users\USER\TA23B-B3-projekt\database\db.sqlite
+Scheduler failed: FOREIGN KEY constraint failed
+Running session scheduler...
+Using database: C:\Users\USER\TA23B-B3-projekt\database\db.sqlite
+Expired sessions deleted: 0
+Sessions deleted beyond 7 days: 0
+Duplicate sessions removed: 0
+Past times skipped: 100
+Sessions inserted: 0
+Sessions updated: 0
+Slots locked by tickets: 2
+Scheduler finished.

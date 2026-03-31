@@ -21,6 +21,17 @@ import EventsPage from "./components/EventsPage";
 import CinemasPage from "./components/CinemasPage";
 import CheckoutPage from "./components/CheckoutPage";
 
+const AUTH_USER_KEY = "ac_auth_user";
+
+function getStoredHeaderUser() {
+  try {
+    const raw = localStorage.getItem(AUTH_USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,6 +53,7 @@ function App() {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedMovies, setSelectedMovies] = useState([]);
   const [genreLoading, setGenreLoading] = useState(false);
+  const [authUser, setAuthUser] = useState(() => getStoredHeaderUser());
 
   // Ensure route changes land at the top of the page
   useEffect(() => {
@@ -52,6 +64,24 @@ function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const syncAuthUser = () => {
+      setAuthUser(getStoredHeaderUser());
+    };
+
+    syncAuthUser();
+    window.addEventListener("storage", syncAuthUser);
+    window.addEventListener("ac-auth-changed", syncAuthUser);
+    return () => {
+      window.removeEventListener("storage", syncAuthUser);
+      window.removeEventListener("ac-auth-changed", syncAuthUser);
+    };
+  }, []);
+
+  const headerInitial = (authUser?.username || authUser?.email || "U").slice(0, 1).toUpperCase();
+  const hasHeaderAvatar = Boolean(authUser?.avatarUrl);
+
   const getPosterUrl = (poster, size = 'w500') => {
     if (!poster) return `https://via.placeholder.com/${size === 'w780' ? '640x360' : '300x450'}?text=No+Image`;
     if (poster.startsWith('http')) return poster;
@@ -343,13 +373,33 @@ function App() {
                   </span>
                 )}
               </div>
-              <Link
-                to="/profile"
-                className="icon-user"
-                title="User profile"
-                aria-label="Go to profile"
-                style={{ display: 'inline-flex' }}
-              />
+              {authUser ? (
+                <Link
+                  to="/profile"
+                  className="icon-user icon-user--authed"
+                  title="User profile"
+                  aria-label="Go to profile"
+                >
+                  {hasHeaderAvatar ? (
+                    <img
+                      src={authUser.avatarUrl}
+                      alt="Profile"
+                      className="icon-user-avatar"
+                    />
+                  ) : (
+                    headerInitial
+                  )}
+                </Link>
+              ) : (
+                <div className="header-auth">
+                  <Link to="/profile?mode=login" className="header-auth-link" aria-label="Go to login">
+                    Log in
+                  </Link>
+                  <Link to="/profile?mode=register" className="header-auth-link header-auth-link--primary" aria-label="Go to register">
+                    Register
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </header>

@@ -147,24 +147,6 @@
   font-size: 12px;
 }
 
-.session-card__trailer {
-  background: #f5ede7;
-  color: #7b1fa2;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.session-card__trailer::before {
-  content: "▶";
-  font-size: 10px;
-}
-
 .session-card__seats {
   display: flex;
   align-items: center;
