@@ -80,6 +80,7 @@ function App() {
   }, []);
 
   const headerInitial = (authUser?.username || authUser?.email || "U").slice(0, 1).toUpperCase();
+  const hasHeaderAvatar = Boolean(authUser?.avatarUrl);
 
   const getPosterUrl = (poster, size = 'w500') => {
     if (!poster) return `https://via.placeholder.com/${size === 'w780' ? '640x360' : '300x450'}?text=No+Image`;
@@ -379,7 +380,15 @@ function App() {
                   title="User profile"
                   aria-label="Go to profile"
                 >
-                  {headerInitial}
+                  {hasHeaderAvatar ? (
+                    <img
+                      src={authUser.avatarUrl}
+                      alt="Profile"
+                      className="icon-user-avatar"
+                    />
+                  ) : (
+                    headerInitial
+                  )}
                 </Link>
               ) : (
                 <div className="header-auth">

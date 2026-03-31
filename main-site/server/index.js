@@ -65,6 +65,22 @@ if (!hasPaymentUserId) {
   db.exec(`ALTER TABLE payment_tx ADD COLUMN user_id INTEGER REFERENCES user(id)`);
 }
 
+const userColumns = db.prepare(`PRAGMA table_info(user)`).all();
+const hasUserAvatarColumn = userColumns.some((col) => col.name === 'avatar_url');
+if (!hasUserAvatarColumn) {
+  db.exec(`ALTER TABLE user ADD COLUMN avatar_url TEXT`);
+}
+
+function toApiUser(userRow) {
+  if (!userRow) return null;
+  return {
+    id: userRow.id,
+    username: userRow.username,
+    email: userRow.email,
+    avatarUrl: userRow.avatar_url || null,
+  };
+}
+
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = crypto.scryptSync(password, salt, 64).toString('hex');
@@ -123,7 +139,7 @@ function getAuthUser(req) {
   }
 
   const user = db
-    .prepare(`SELECT id, username, email FROM user WHERE id = ?`)
+    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
     .get(session.userId);
 
   if (!user) {
@@ -131,7 +147,7 @@ function getAuthUser(req) {
     return null;
   }
 
-  return { token, user };
+  return { token, user: toApiUser(user) };
 }
 
 function signPassToken(payload) {
@@ -890,11 +906,11 @@ app.post('/api/auth/register', (req, res) => {
 
     const userId = Number(inserted.lastInsertRowid);
     const user = db
-      .prepare(`SELECT id, username, email FROM user WHERE id = ?`)
+      .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
       .get(userId);
 
     const token = createAuthToken(userId);
-    res.status(201).json({ token, user });
+    res.status(201).json({ token, user: toApiUser(user) });
   } catch (err) {
     console.error('Auth register failed:', err);
     res.status(500).json({ message: 'Failed to register user' });
@@ -911,7 +927,7 @@ app.post('/api/auth/login', (req, res) => {
 
   const userRow = db
     .prepare(`
-      SELECT id, username, email, pass
+      SELECT id, username, email, avatar_url, pass
       FROM user
       WHERE lower(username) = lower(?) OR lower(email) = lower(?)
       LIMIT 1
@@ -931,11 +947,7 @@ app.post('/api/auth/login', (req, res) => {
   const token = createAuthToken(userRow.id);
   res.json({
     token,
-    user: {
-      id: userRow.id,
-      username: userRow.username,
-      email: userRow.email,
-    },
+    user: toApiUser(userRow),
   });
 });
 
@@ -946,6 +958,60 @@ app.get('/api/auth/me', (req, res) => {
   }
 
   res.json({ user: auth.user });
+});
+
+app.put('/api/profile/account', (req, res) => {
+  const auth = getAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const username = String(req.body?.username || '').trim();
+  const avatarUrlRaw = req.body?.avatarUrl;
+  const avatarUrl = avatarUrlRaw == null ? '' : String(avatarUrlRaw).trim();
+
+  if (!username) {
+    return res.status(400).json({ message: 'Username is required' });
+  }
+
+  if (username.length < 3) {
+    return res.status(400).json({ message: 'Username must be at least 3 characters' });
+  }
+
+  const isDataImage = avatarUrl.startsWith('data:image/');
+  const isHttpImage = /^https?:\/\//i.test(avatarUrl);
+  if (avatarUrl && !isDataImage && !isHttpImage) {
+    return res.status(400).json({ message: 'Avatar must be an image URL or uploaded image' });
+  }
+
+  if (avatarUrl.length > 1024 * 1024) {
+    return res.status(400).json({ message: 'Avatar image is too large' });
+  }
+
+  const duplicate = db
+    .prepare(`
+      SELECT id
+      FROM user
+      WHERE lower(username) = lower(?) AND id != ?
+      LIMIT 1
+    `)
+    .get(username, auth.user.id);
+
+  if (duplicate) {
+    return res.status(409).json({ message: 'Username is already taken' });
+  }
+
+  db.prepare(`
+    UPDATE user
+    SET username = ?, avatar_url = ?
+    WHERE id = ?
+  `).run(username, avatarUrl || null, auth.user.id);
+
+  const updatedUser = db
+    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
+    .get(auth.user.id);
+
+  res.json({ user: toApiUser(updatedUser) });
 });
 
 app.get('/api/profile/overview', (req, res) => {
@@ -1022,7 +1088,7 @@ app.get('/api/profile/tickets-pass.pdf', (req, res) => {
   }
 
   const user = db
-    .prepare(`SELECT id, username, email FROM user WHERE id = ?`)
+    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
     .get(payload.userId);
   if (!user) {
     return res.status(404).json({ message: 'User not found' });

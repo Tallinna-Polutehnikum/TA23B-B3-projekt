@@ -36,6 +36,12 @@
   flex: 1;
 }
 
+.profile-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .profile-avatar {
   width: 100px;
   height: 100px;
@@ -69,6 +75,12 @@
   margin: 4px 0 0;
   opacity: 0.72;
   font-size: 15px;
+}
+
+.profile-success {
+  margin: 6px 0 0;
+  color: #8cffc6;
+  font-size: 13px;
 }
 
 .profile-auth-tabs {
@@ -151,6 +163,12 @@
   min-width: 140px;
 }
 
+.profile-action--ghost {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 130px;
+}
+
 .profile-action--subtle {
   width: 100%;
   margin-top: auto;
@@ -159,6 +177,16 @@
 .profile-action:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+.profile-form--account {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.profile-form--account .profile-field input[type="file"] {
+  padding: 8px;
 }
 
 .profile-grid {
@@ -361,6 +389,16 @@
     font-size: 18px;
   }
 
+  .profile-action--logout {
+    width: 100%;
+  }
+
+  .profile-header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .profile-action--ghost,
   .profile-action--logout {
     width: 100%;
   }

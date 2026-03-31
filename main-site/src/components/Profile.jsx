@@ -51,6 +51,14 @@ export default function Profile() {
   const [transactions, setTransactions] = useState([]);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [passPdfUrl, setPassPdfUrl] = useState("");
+  const [editingAccount, setEditingAccount] = useState(false);
+  const [savingAccount, setSavingAccount] = useState(false);
+  const [accountSaveError, setAccountSaveError] = useState("");
+  const [accountSaveSuccess, setAccountSaveSuccess] = useState("");
+  const [accountForm, setAccountForm] = useState({
+    username: "",
+    avatarUrl: "",
+  });
   const [token, setToken] = useState(() => localStorage.getItem(AUTH_TOKEN_KEY) || "");
   const [user, setUser] = useState(() => getStoredUser());
 
@@ -178,6 +186,15 @@ export default function Profile() {
   }, [user, token]);
 
   useEffect(() => {
+    setAccountForm({
+      username: user?.username || "",
+      avatarUrl: user?.avatarUrl || "",
+    });
+    setAccountSaveError("");
+    setAccountSaveSuccess("");
+  }, [user]);
+
+  useEffect(() => {
     const createQr = async () => {
       if (!user || !token || activeTickets.length === 0) {
         setQrCodeUrl("");
@@ -227,6 +244,87 @@ export default function Profile() {
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAccountFormChange = (field, value) => {
+    setAccountForm((prev) => ({ ...prev, [field]: value }));
+    setAccountSaveError("");
+    setAccountSaveSuccess("");
+  };
+
+  const handleAvatarFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setAccountSaveError("Please choose an image file.");
+      return;
+    }
+
+    if (file.size > 800 * 1024) {
+      setAccountSaveError("Image is too large. Please use an image under 800KB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const nextValue = typeof reader.result === "string" ? reader.result : "";
+      handleAccountFormChange("avatarUrl", nextValue);
+    };
+    reader.onerror = () => {
+      setAccountSaveError("Could not read the image file.");
+    };
+    reader.readAsDataURL(file);
+
+    // Allows selecting the same file again if the user wants to retry.
+    event.target.value = "";
+  };
+
+  const handleAccountSave = async (event) => {
+    event.preventDefault();
+    if (!token) {
+      setAccountSaveError("You need to be logged in.");
+      return;
+    }
+
+    const username = accountForm.username.trim();
+    const avatarUrl = accountForm.avatarUrl.trim();
+
+    if (!username) {
+      setAccountSaveError("Username is required.");
+      return;
+    }
+
+    setSavingAccount(true);
+    setAccountSaveError("");
+    setAccountSaveSuccess("");
+
+    try {
+      const response = await fetch("/api/profile/account", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username, avatarUrl }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setAccountSaveError(data?.message || "Failed to update account.");
+        return;
+      }
+
+      if (data?.user) {
+        persistAuth(token, data.user);
+      }
+      setEditingAccount(false);
+      setAccountSaveSuccess("Profile updated.");
+    } catch {
+      setAccountSaveError("Could not save account settings right now.");
+    } finally {
+      setSavingAccount(false);
+    }
   };
 
   const goToLogin = () => {
@@ -348,16 +446,68 @@ export default function Profile() {
       <section className="profile profile--account">
         <div className="profile-card profile-card--account">
           <div className="profile-header">
-            <div className="profile-avatar profile-avatar--initials">{initials}</div>
+            {user.avatarUrl ? (
+              <img className="profile-avatar" src={user.avatarUrl} alt={`${user.username} avatar`} />
+            ) : (
+              <div className="profile-avatar profile-avatar--initials">{initials}</div>
+            )}
             <div className="profile-header-main">
               <h2 className="profile-name">{user.username}</h2>
               <p className="profile-email">{user.email}</p>
               <p className="profile-meta">Signed in</p>
+              {accountSaveSuccess && <p className="profile-success">{accountSaveSuccess}</p>}
             </div>
-            <button type="button" className="profile-action profile-action--logout" onClick={handleLogout}>
-              Log out
-            </button>
+            <div className="profile-header-actions">
+              <button
+                type="button"
+                className="profile-action profile-action--ghost"
+                onClick={() => {
+                  setEditingAccount((prev) => !prev);
+                  setAccountSaveError("");
+                  setAccountSaveSuccess("");
+                }}
+              >
+                {editingAccount ? "Cancel" : "Edit account"}
+              </button>
+              <button type="button" className="profile-action profile-action--logout" onClick={handleLogout}>
+                Log out
+              </button>
+            </div>
           </div>
+
+          {editingAccount && (
+            <form className="profile-form profile-form--account" onSubmit={handleAccountSave}>
+              <label className="profile-field">
+                <span>Display name</span>
+                <input
+                  value={accountForm.username}
+                  onChange={(e) => handleAccountFormChange("username", e.target.value)}
+                  placeholder="Your display name"
+                  autoComplete="nickname"
+                />
+              </label>
+
+              <label className="profile-field">
+                <span>Profile picture URL</span>
+                <input
+                  value={accountForm.avatarUrl}
+                  onChange={(e) => handleAccountFormChange("avatarUrl", e.target.value)}
+                  placeholder="https://..."
+                />
+              </label>
+
+              <label className="profile-field">
+                <span>Or upload image</span>
+                <input type="file" accept="image/*" onChange={handleAvatarFileChange} />
+              </label>
+
+              {accountSaveError && <p className="profile-error">{accountSaveError}</p>}
+
+              <button type="submit" className="profile-action" disabled={savingAccount}>
+                {savingAccount ? "Saving..." : "Save changes"}
+              </button>
+            </form>
+          )}
         </div>
 
         <div className="profile-grid">

@@ -21,6 +21,7 @@ env:
   LOOPBACK_HOST: 127.2.63.196
   APP_PORT: "8080"
   APP_NAME: absolute-cinema-main
+  SYNC_DB_ON_DEPLOY: "true"
 
 jobs:
   deploy:
@@ -106,6 +107,31 @@ jobs:
             --exclude '.env' \
             --exclude '.env.*' \
             main-site/ "$SSH_USER@$SSH_HOST:$APP_DIR/"
+
+      - name: Sync database file
+        if: env.SYNC_DB_ON_DEPLOY == 'true'
+        run: |
+          if [ ! -f database/db.sqlite ]; then
+            echo "Local database file not found at database/db.sqlite"
+            exit 1
+          fi
+
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
+            set -e
+            mkdir -p "$(dirname "$DB_PATH")"
+            if [ -f "$DB_PATH" ]; then
+              cp "$DB_PATH" "$DB_PATH.bak.$(date +%Y%m%d%H%M%S)"
+            fi
+          EOF
+
+          rsync -az \
+            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
+            database/db.sqlite "$SSH_USER@$SSH_HOST:$DB_PATH"
+
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
+            set -e
+            chmod 600 "$DB_PATH" || true
+          EOF
 
       - name: Install, build and restart PM2
         run: |
