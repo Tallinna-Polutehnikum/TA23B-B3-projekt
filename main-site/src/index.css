@@ -132,7 +132,79 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 .icon-user {
-  width:36px; height:36px; border-radius:50%; background:#222; margin-left:12px; border:2px solid #fff2;
+  margin-left:12px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.icon-user--authed {
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#222;
+  border:2px solid #fff2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.icon-user--guest {
+  width: auto;
+  height: auto;
+}
+
+.header-auth {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-auth-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.06);
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.header-auth-link--primary {
+  background: #a020f0;
+  border-color: transparent;
+}
+
+.header-auth-link:hover,
+.header-auth-link:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.header-auth-link--primary:hover,
+.header-auth-link--primary:focus-visible {
+  background: #b23bff;
+}
+
+@media (max-width: 860px) {
+  .header-auth {
+    gap: 6px;
+  }
+
+  .header-auth-link {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
 }
 
 /* Hero / banner placeholder */

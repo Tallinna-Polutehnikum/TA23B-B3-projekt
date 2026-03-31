@@ -242,6 +242,15 @@ Fallback secret (if needed):
 
 - `ZONE_SSH_PRIVATE_KEY` with raw key block (`-----BEGIN OPENSSH PRIVATE KEY----- ...`).
 
+If workflow shows `base64: invalid input`:
+
+1. Re-generate value from `C:\Users\USER\.ssh\zone_ed25519` using:
+	```powershell
+	[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.ssh\zone_ed25519"))
+	```
+2. Paste that single-line output into `ZONE_SSH_PRIVATE_KEY_B64`.
+3. Optionally clear `ZONE_SSH_PRIVATE_KEY_B64` and use only `ZONE_SSH_PRIVATE_KEY` (raw key) as fallback.
+
 ### 13.3 Triggering deployment
 
 - Automatic: push or merge to `main`.

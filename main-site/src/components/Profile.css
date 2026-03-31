@@ -2,31 +2,47 @@
   padding: 32px 0;
 }
 
+.profile--account {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .profile-card {
-  background: linear-gradient(135deg, #120c22 0%, #1c1233 50%, #0e0a1b 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 24px;
+  background: linear-gradient(120deg, rgba(29, 11, 68, 0.94) 0%, rgba(23, 11, 52, 0.96) 48%, rgba(14, 9, 31, 0.96) 100%);
+  border: 1px solid rgba(181, 126, 255, 0.24);
+  border-radius: 18px;
+  padding: 24px 26px;
   color: #fff;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 42px rgba(8, 3, 20, 0.48);
   max-width: 640px;
   margin: 0 auto;
 }
 
+.profile-card--account {
+  max-width: 100%;
+  margin: 0;
+}
+
 .profile-header {
   display: flex;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
-  margin-bottom: 16px;
+}
+
+.profile-header-main {
+  flex: 1;
 }
 
 .profile-avatar {
-  width: 96px;
-  height: 96px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  background: #0d0818;
+  border: 2px solid rgba(195, 151, 255, 0.3);
+  background: radial-gradient(circle at 30% 25%, #1f1440, #090514);
 }
 
 .profile-avatar--initials {
@@ -39,19 +55,20 @@
 
 .profile-name {
   margin: 0 0 6px;
-  font-size: 22px;
+  font-size: 42px;
+  line-height: 1;
 }
 
 .profile-email {
   margin: 0;
-  opacity: 0.85;
-  font-size: 14px;
+  opacity: 0.84;
+  font-size: 28px;
 }
 
 .profile-meta {
   margin: 4px 0 0;
-  opacity: 0.7;
-  font-size: 13px;
+  opacity: 0.72;
+  font-size: 15px;
 }
 
 .profile-auth-tabs {
@@ -76,6 +93,14 @@
 .profile-tab.is-active {
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
+}
+
+.profile-auth-tabs--choice {
+  width: 100%;
+  display: flex;
+  background: transparent;
+  padding: 0;
+  gap: 10px;
 }
 
 .profile-form {
@@ -114,17 +139,183 @@
 
 .profile-action {
   border: 0;
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-radius: 12px;
+  padding: 11px 15px;
   cursor: pointer;
   color: #fff;
   font-weight: 700;
-  background: linear-gradient(135deg, #7640cc, #9b6dff);
+  background: linear-gradient(135deg, #6f2dcb, #8d50f0);
+}
+
+.profile-action--logout {
+  min-width: 140px;
+}
+
+.profile-action--subtle {
+  width: 100%;
+  margin-top: auto;
 }
 
 .profile-action:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.profile-panel {
+  background: linear-gradient(145deg, rgba(24, 9, 53, 0.9) 0%, rgba(17, 9, 39, 0.93) 100%);
+  border: 1px solid rgba(181, 126, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 330px;
+}
+
+.profile-panel-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.profile-panel-icon {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #e8d7ff;
+  letter-spacing: 0.03em;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  font-weight: 700;
+  border: 1px solid rgba(188, 137, 255, 0.32);
+  background: radial-gradient(circle at 30% 20%, rgba(142, 86, 242, 0.45), rgba(39, 19, 86, 0.75));
+}
+
+.profile-panel--qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-panel-title {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.profile-ticket-list,
+.profile-transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-ticket,
+.profile-transaction-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(190, 141, 255, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.profile-ticket.is-active {
+  border-color: rgba(173, 122, 255, 0.7);
+  background: rgba(118, 64, 204, 0.18);
+}
+
+.profile-ticket-title,
+.profile-transaction-id {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profile-ticket-meta,
+.profile-transaction-meta,
+.profile-transaction-status {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.profile-ticket-status {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.profile-qr {
+  width: 180px;
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(200, 152, 255, 0.26);
+  background: radial-gradient(circle at 20% 10%, rgba(173, 122, 255, 0.3), rgba(8, 7, 15, 0.95));
+  padding: 10px;
+}
+
+.profile-pass-link {
+  color: #d9b8ff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.profile-pass-link:hover {
+  color: #f0deff;
+}
+
+.profile-card--transactions {
+  max-width: 100%;
+}
+
+.profile-transaction-amount {
+  text-align: right;
+}
+
+.profile-transaction-amount p {
+  margin: 0;
+}
+
+.profile-switch-hint {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.profile-switch-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #cda8ff;
+  font-size: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.profile-switch-link:hover {
+  color: #e2cbff;
 }
 
 .profile-body h3 {
@@ -154,10 +345,40 @@
 
   .profile-header {
     align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .profile-avatar {
     width: 76px;
     height: 76px;
+  }
+
+  .profile-name {
+    font-size: 28px;
+  }
+
+  .profile-email {
+    font-size: 18px;
+  }
+
+  .profile-action--logout {
+    width: 100%;
+  }
+
+  .profile-auth-tabs--choice {
+    flex-direction: column;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-ticket,
+  .profile-transaction-item {
+    flex-direction: column;
+  }
+
+  .profile-transaction-amount {
+    text-align: left;
   }
 }
