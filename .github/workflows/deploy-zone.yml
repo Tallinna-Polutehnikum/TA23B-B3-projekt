@@ -129,7 +129,32 @@ jobs:
             fi
 
             pm2 save
-            curl -fsS 'http://$LOOPBACK_HOST:$APP_PORT/api/genres' >/dev/null
+
+            HEALTH_ENDPOINT='/api/genres'
+            HEALTH_HOSTS='$LOOPBACK_HOST 127.0.0.1 localhost'
+            HEALTH_OK=''
+            for i in $(seq 1 20); do
+              for h in $HEALTH_HOSTS; do
+                if curl -fsS "http://$h:$APP_PORT$HEALTH_ENDPOINT" >/dev/null; then
+                  echo "Health check passed on http://$h:$APP_PORT$HEALTH_ENDPOINT"
+                  HEALTH_OK='yes'
+                  break
+                fi
+              done
+
+              if [ -n "$HEALTH_OK" ]; then
+                break
+              fi
+
+              sleep 1
+            done
+
+            if [ -z "$HEALTH_OK" ]; then
+              echo "Health check failed after restart. PM2 status and recent logs:"
+              pm2 status '$APP_NAME' || true
+              pm2 logs '$APP_NAME' --lines 60 --nostream || true
+              exit 1
+            fi
           "
 
       - name: Public endpoint smoke test
