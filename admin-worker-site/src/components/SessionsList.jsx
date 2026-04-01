@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import './SessionsList.css'
 
+const API_BASE = 'http://localhost:4000'
+
 export default function SessionsList({ refresh }) {
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -15,7 +17,7 @@ export default function SessionsList({ refresh }) {
   const fetchSessions = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/sessions')
+      const response = await fetch(`${API_BASE}/api/sessions`)
       const data = await response.json()
       setSessions(data)
     } catch (err) {
@@ -30,7 +32,7 @@ export default function SessionsList({ refresh }) {
     if (!ok) return
 
     try {
-      const res = await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' })
+      const res = await fetch(`${API_BASE}/api/sessions/${sessionId}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Delete failed')
       fetchSessions()
     } catch (err) {
@@ -68,7 +70,7 @@ export default function SessionsList({ refresh }) {
     if (format === null) return
 
     try {
-      const res = await fetch(`/api/sessions/${session.id}`, {
+      const res = await fetch(`${API_BASE}/api/sessions/${session.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -103,7 +105,7 @@ export default function SessionsList({ refresh }) {
 
     setBulkDeleting(true)
     try {
-      const res = await fetch('/api/sessions/bulk-delete', {
+      const res = await fetch(`${API_BASE}/api/sessions/bulk-delete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ startDate, endDate })

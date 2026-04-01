@@ -1,6 +1,25 @@
 import { useState, useEffect, useRef } from 'react'
 import './MoviesList.css'
 
+const FALLBACK_POSTER = 'https://via.placeholder.com/60x90?text=No+Image'
+
+function resolvePosterUrl(poster) {
+  if (!poster) return FALLBACK_POSTER
+
+  const normalized = String(poster).trim()
+  if (!normalized) return FALLBACK_POSTER
+
+  if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+    return normalized
+  }
+
+  if (normalized.startsWith('/')) {
+    return `https://image.tmdb.org/t/p/w342${normalized}`
+  }
+
+  return FALLBACK_POSTER
+}
+
 export default function MoviesList({ refresh }) {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
@@ -178,10 +197,14 @@ export default function MoviesList({ refresh }) {
                 <tr key={movie.id}>
                   <td>
                     <img
-                      src={movie.poster || 'https://via.placeholder.com/60x90'}
+                      src={resolvePosterUrl(movie.poster)}
                       alt={movie.title}
                       className="movie-poster-thumb"
-                      onError={(e) => (e.target.src = 'https://via.placeholder.com/60x90')}
+                      onError={(e) => {
+                        if (e.currentTarget.src !== FALLBACK_POSTER) {
+                          e.currentTarget.src = FALLBACK_POSTER
+                        }
+                      }}
                     />
                   </td>
                   <td className="movie-title">{movie.title}</td>

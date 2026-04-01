@@ -38,6 +38,8 @@ const seatColumns = db.prepare(`PRAGMA table_info(seat)`).all();
 const hasSeatAvailabilityFlag = seatColumns.some((col) => col.name === 'is_available');
 const seatAvailabilityWhere = hasSeatAvailabilityFlag ? 'WHERE is_available = 1' : '';
 const seatAvailabilitySelect = hasSeatAvailabilityFlag ? 's.is_available' : '1';
+const sessionColumns = db.prepare(`PRAGMA table_info(sessions)`).all();
+const hasSessionHallColumn = sessionColumns.some((col) => col.name === 'hall');
 
 const AUTO_SHOW_TIMES = ['12:00', '15:00', '18:00', '21:00'];
 const AUTO_WINDOW_DAYS = 7;
@@ -793,6 +795,31 @@ app.get('/api/sessions/:id/seats', (req, res) => {
   });
 });
 
+app.get('/api/admin/stats', (_req, res) => {
+  try {
+    const activeTickets = db.prepare(`
+      SELECT COUNT(*) AS count
+      FROM ticket t
+      INNER JOIN sessions s ON s.id = t.session_id
+      WHERE datetime(s.date || ' ' || s.time) >= datetime('now')
+    `).get();
+
+    const activeSessions = db.prepare(`
+      SELECT COUNT(*) AS count
+      FROM sessions
+      WHERE datetime(date || ' ' || time) >= datetime('now')
+    `).get();
+
+    res.json({
+      activeTickets: Number(activeTickets?.count || 0),
+      activeSessions: Number(activeSessions?.count || 0)
+    });
+  } catch (err) {
+    console.error('Error loading admin stats:', err);
+    res.status(500).json({ message: 'Failed to load admin stats' });
+  }
+});
+
 // Book seats for a session
 app.post('/api/sessions/:id/book', (req, res) => {
   const sessionId = Number(req.params.id);
@@ -1518,31 +1545,55 @@ app.post('/api/sessions', (req, res) => {
       return res.status(400).json({ message: 'hallId does not belong to the selected cinema' });
     }
 
-    const result = db.prepare(`
-      INSERT INTO sessions (
-        movie_id, 
-        cinema_id,
-        hall_id,
-        hall,
-        date, 
-        time, 
-        seats_available, 
-        language, 
-        subtitles, 
-        format
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      movieId,
-      cinemaRow.id,
-      hallRow.id,
-      hallRow.hall_number,
-      date,
-      time,
-      seatsAvailable,
-      language || 'Estonian',
-      subtitles || 'English',
-      format || '2D'
-    );
+    const result = hasSessionHallColumn
+      ? db.prepare(`
+        INSERT INTO sessions (
+          movie_id, 
+          cinema_id,
+          hall_id,
+          hall,
+          date, 
+          time, 
+          seats_available, 
+          language, 
+          subtitles, 
+          format
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        movieId,
+        cinemaRow.id,
+        hallRow.id,
+        hallRow.hall_number,
+        date,
+        time,
+        seatsAvailable,
+        language || 'Estonian',
+        subtitles || 'English',
+        format || '2D'
+      )
+      : db.prepare(`
+        INSERT INTO sessions (
+          movie_id, 
+          cinema_id,
+          hall_id,
+          date, 
+          time, 
+          seats_available, 
+          language, 
+          subtitles, 
+          format
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        movieId,
+        cinemaRow.id,
+        hallRow.id,
+        date,
+        time,
+        seatsAvailable,
+        language || 'Estonian',
+        subtitles || 'English',
+        format || '2D'
+      );
 
     res.status(201).json({
       id: result.lastInsertRowid,
@@ -1689,19 +1740,26 @@ app.post('/api/sessions/bulk-delete', (req, res) => {
 
   const isoStart = normalize(startDate);
   const isoEnd = normalize(endDate);
+  const hasShowtimeTable = Boolean(
+    db.prepare(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'showtime'`).get()
+  );
 
   try {
     const deleteSessions = db.prepare(`
       DELETE FROM sessions 
       WHERE datetime(date) >= datetime(?) AND datetime(date) < datetime(?, '+1 day')
     `);
-    const deleteShowtime = db.prepare(`
-      DELETE FROM showtime 
-      WHERE datetime(date) >= datetime(?) AND datetime(date) < datetime(?, '+1 day')
-    `);
+    const deleteShowtime = hasShowtimeTable
+      ? db.prepare(`
+        DELETE FROM showtime 
+        WHERE datetime(date) >= datetime(?) AND datetime(date) < datetime(?, '+1 day')
+      `)
+      : null;
 
     const resultSessions = isoStart && isoEnd ? deleteSessions.run(isoStart, isoEnd) : { changes: 0 };
-    const resultShowtime = isoStart && isoEnd ? deleteShowtime.run(isoStart, isoEnd) : { changes: 0 };
+    const resultShowtime = isoStart && isoEnd && deleteShowtime
+      ? deleteShowtime.run(isoStart, isoEnd)
+      : { changes: 0 };
 
     res.json({
       deletedSessions: resultSessions.changes || 0,
@@ -1719,8 +1777,20 @@ app.delete('/api/sessions/:id', (req, res) => {
   const existing = db.prepare(`SELECT id FROM sessions WHERE id = ?`).get(sessionId);
   if (!existing) return res.status(404).json({ message: 'Session not found' });
 
+  const hasShowtimeTable = Boolean(
+    db.prepare(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'showtime'`).get()
+  );
+
   try {
-    db.prepare(`DELETE FROM sessions WHERE id = ?`).run(sessionId);
+    const deleteSessionCascade = db.transaction((id) => {
+      db.prepare(`DELETE FROM ticket WHERE session_id = ?`).run(id);
+      if (hasShowtimeTable) {
+        db.prepare(`DELETE FROM showtime WHERE session_id = ?`).run(id);
+      }
+      db.prepare(`DELETE FROM sessions WHERE id = ?`).run(id);
+    });
+
+    deleteSessionCascade(sessionId);
     res.status(204).end();
   } catch (err) {
     console.error('Error deleting session:', err);
