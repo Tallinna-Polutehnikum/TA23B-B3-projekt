@@ -28,3 +28,13 @@ Sessions inserted: 100
 Sessions updated: 398
 Slots locked by tickets: 2
 Scheduler finished.
+Running session scheduler...
+Using database: c:\Users\50706044213\Desktop\TA23B-B3-projekt\database\db.sqlite
+Expired sessions deleted: 598
+Sessions deleted beyond 7 days: 0
+Duplicate sessions removed: 0
+Past times skipped: 150
+Sessions inserted: 550
+Sessions updated: 0
+Slots locked by tickets: 0
+Scheduler finished.

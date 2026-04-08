@@ -1514,8 +1514,37 @@ app.delete('/api/movies/:id', (req, res) => {
   const existing = db.prepare(`SELECT id FROM movie WHERE id = ?`).get(movieId);
   if (!existing) return res.status(404).json({ message: 'Movie not found' }); 
 
+  const hasShowtimeTable = Boolean(
+    db.prepare(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'showtime'`).get()
+  );
+
   try {
-    db.prepare(`DELETE FROM movie WHERE id = ?`).run(movieId);
+    const deleteMovieCascade = db.transaction((id) => {
+      db.prepare(`
+        DELETE FROM ticket
+        WHERE session_id IN (
+          SELECT s.id
+          FROM sessions s
+          WHERE s.movie_id = ?
+        )
+      `).run(id);
+
+      if (hasShowtimeTable) {
+        db.prepare(`
+          DELETE FROM showtime
+          WHERE session_id IN (
+            SELECT s.id
+            FROM sessions s
+            WHERE s.movie_id = ?
+          )
+        `).run(id);
+      }
+
+      db.prepare(`DELETE FROM sessions WHERE movie_id = ?`).run(id);
+      db.prepare(`DELETE FROM movie WHERE id = ?`).run(id);
+    });
+
+    deleteMovieCascade(movieId);
     res.status(204).end();
   } catch (err) {
     console.error('Error deleting movie:', err);
