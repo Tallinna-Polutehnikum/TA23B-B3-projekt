@@ -13,5 +13,5 @@ export function createInitialSessionFormData() {
 }
 
 export function buildHallsEndpoint(cinemaId) {
-  return `/api/hall?cinemaId=${cinemaId}`;
+  return `/api/halls?cinemaId=${cinemaId}`;
 }
