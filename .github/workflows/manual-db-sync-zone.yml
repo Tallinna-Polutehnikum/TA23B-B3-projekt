@@ -1,0 +1,161 @@
+name: Manual DB Sync to Zone
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_text:
+        description: "Type SYNC_DB to confirm database overwrite"
+        required: true
+        type: string
+      backup_remote:
+        description: "Create remote backup before upload"
+        required: true
+        default: true
+        type: boolean
+      restart_app:
+        description: "Restart PM2 app after DB sync"
+        required: true
+        default: false
+        type: boolean
+
+env:
+  SSH_HOST: spjo.eu
+  SSH_USER: virt137396
+  SSH_PORT: "22"
+  EXPECTED_KEY_FINGERPRINT: SHA256:6UEtNBBFQNwC21yqWZJ+B3gIpqVBlpUnAR7wQJWL/nY
+  APP_NAME: absolute-cinema-main
+  DB_PATH: /data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite
+
+jobs:
+  sync-db:
+    name: Manual DB Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Confirm destructive action
+        run: |
+          if [ "${{ github.event.inputs.confirm_text }}" != "SYNC_DB" ]; then
+            echo "Confirmation failed. Type exactly SYNC_DB to run this workflow."
+            exit 1
+          fi
+
+      - name: Ensure local DB file exists
+        run: |
+          if [ ! -f database/db.sqlite ]; then
+            echo "Local database file not found at database/db.sqlite"
+            exit 1
+          fi
+
+      - name: Prepare SSH key
+        env:
+          ZONE_SSH_PRIVATE_KEY_B64: ${{ secrets.ZONE_SSH_PRIVATE_KEY_B64 }}
+          ZONE_SSH_PRIVATE_KEY: ${{ secrets.ZONE_SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "$ZONE_SSH_PRIVATE_KEY_B64" ] && [ -z "$ZONE_SSH_PRIVATE_KEY" ]; then
+            echo "Missing required secret: ZONE_SSH_PRIVATE_KEY_B64 (preferred) or ZONE_SSH_PRIVATE_KEY"
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          USED_SECRET=""
+          if [ -n "$ZONE_SSH_PRIVATE_KEY_B64" ]; then
+            CLEAN_B64=$(printf "%s" "$ZONE_SSH_PRIVATE_KEY_B64" | tr -d ' \t\r\n')
+            if printf "%s" "$CLEAN_B64" | base64 -d > ~/.ssh/id_ed25519 2>/dev/null; then
+              USED_SECRET="ZONE_SSH_PRIVATE_KEY_B64"
+            else
+              echo "ZONE_SSH_PRIVATE_KEY_B64 is not valid base64."
+            fi
+          fi
+
+          if [ -z "$USED_SECRET" ]; then
+            if [ -z "$ZONE_SSH_PRIVATE_KEY" ]; then
+              echo "No usable SSH key secret found."
+              exit 1
+            fi
+            printf "%s" "$ZONE_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+            USED_SECRET="ZONE_SSH_PRIVATE_KEY"
+          fi
+
+          chmod 600 ~/.ssh/id_ed25519
+
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+          ACTUAL_KEY_FINGERPRINT=$(ssh-keygen -lf ~/.ssh/id_ed25519.pub -E sha256 | awk '{print $2}')
+          EXPECTED_FP=$(printf "%s" "$EXPECTED_KEY_FINGERPRINT" | tr -d '[:space:]')
+          ACTUAL_FP=$(printf "%s" "$ACTUAL_KEY_FINGERPRINT" | tr -d '[:space:]')
+          echo "Using key secret: $USED_SECRET"
+          echo "Expected key fingerprint: $EXPECTED_FP"
+          echo "Loaded key fingerprint: $ACTUAL_FP"
+          if [ "$ACTUAL_FP" != "$EXPECTED_FP" ]; then
+            echo "Key fingerprint mismatch. Check ZONE_SSH_PRIVATE_KEY_B64 / ZONE_SSH_PRIVATE_KEY values."
+            exit 1
+          fi
+
+          touch ~/.ssh/known_hosts
+          KEYSCAN_OK=""
+          for attempt in 1 2 3; do
+            if ssh-keyscan -T 10 -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/tmp/ssh-keyscan.err; then
+              KEYSCAN_OK="yes"
+              break
+            fi
+            echo "ssh-keyscan attempt $attempt failed for $SSH_HOST:$SSH_PORT"
+            if [ -s /tmp/ssh-keyscan.err ]; then
+              cat /tmp/ssh-keyscan.err
+            fi
+            sleep 2
+          done
+
+          if [ -z "$KEYSCAN_OK" ]; then
+            echo "Unable to add SSH host key to known_hosts after retries."
+            exit 1
+          fi
+
+      - name: Verify SSH auth
+        run: |
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "echo AUTH_OK"
+
+      - name: Backup remote DB
+        if: github.event.inputs.backup_remote == 'true'
+        run: |
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
+            set -e
+            mkdir -p "$(dirname "$DB_PATH")"
+            if [ -f "$DB_PATH" ]; then
+              TS="$(date +%Y%m%d%H%M%S)"
+              cp "$DB_PATH" "$DB_PATH.bak.$TS"
+              echo "Remote backup created: $DB_PATH.bak.$TS"
+            else
+              echo "Remote DB does not exist yet, skipping backup copy."
+            fi
+          EOF
+
+      - name: Sync DB file to remote
+        run: |
+          rsync -az \
+            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
+            database/db.sqlite "$SSH_USER@$SSH_HOST:$DB_PATH"
+
+      - name: Fix DB permissions
+        run: |
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
+            set -e
+            chmod 600 "$DB_PATH" || true
+            ls -l "$DB_PATH"
+          EOF
+
+      - name: Restart PM2 app
+        if: github.event.inputs.restart_app == 'true'
+        run: |
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_NAME='$APP_NAME' bash -se" <<'EOF'
+            set -e
+            pm2 restart "$APP_NAME" --update-env
+            pm2 status "$APP_NAME"
+          EOF
+
+      - name: Done
+        run: |
+          echo "Manual DB sync completed successfully."

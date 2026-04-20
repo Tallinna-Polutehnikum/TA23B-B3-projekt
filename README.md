@@ -256,6 +256,26 @@ If workflow shows `base64: invalid input`:
 - Automatic: push or merge to `main`.
 - Manual: run `Deploy Zone Production` from the Actions tab.
 
+### 13.4 Manual database sync workflow (safe mode)
+
+To avoid accidental user data loss, regular deploy no longer syncs `database/db.sqlite`.
+
+When you intentionally need to overwrite production DB from repository DB, use:
+
+- Workflow: `Manual DB Sync to Zone`
+
+This workflow requires:
+
+1. Manual confirmation text: `SYNC_DB`
+2. Optional remote backup before upload (enabled by default)
+3. Optional PM2 app restart after sync
+
+Recommended usage:
+
+1. Run regular deploy for code changes.
+2. Run manual DB sync only for planned data migration/reset operations.
+3. Keep remote backup enabled unless you have a specific reason not to.
+
 ---
 
 ## 14. CI Pipeline Coverage (Task 2)

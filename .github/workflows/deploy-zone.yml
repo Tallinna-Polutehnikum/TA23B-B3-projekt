@@ -21,7 +21,8 @@ env:
   LOOPBACK_HOST: 127.2.63.196
   APP_PORT: "8080"
   APP_NAME: absolute-cinema-main
-  SYNC_DB_ON_DEPLOY: "true"
+  # Keep production data persistent; syncing local SQLite on every deploy can overwrite users/orders.
+  SYNC_DB_ON_DEPLOY: "false"
 
 jobs:
   deploy:

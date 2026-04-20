@@ -66,9 +66,9 @@
 	overflow: visible;
 }
 
-.genres-carousel .cards.scroll-row, .genres-carousel .scroll-row { display:flex; gap:18px; overflow:hidden; scroll-behavior:smooth; padding: 12px 0 6px 0; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; align-items:flex-start; scrollbar-width: none; }
+.genres-carousel .cards.scroll-row, .genres-carousel .scroll-row { display:flex; gap:18px; overflow-x:auto; overflow-y:hidden; scroll-behavior:smooth; padding: 12px 0 6px 0; -webkit-overflow-scrolling: touch; touch-action: pan-x; scroll-snap-type: x proximity; flex-wrap: nowrap; align-items:flex-start; scrollbar-width: none; }
 .genres-carousel .scroll-row::-webkit-scrollbar { display: none; }
-.genres-carousel .scroll-row .card { flex: 0 0 180px; min-width: 180px; }
+.genres-carousel .scroll-row .card { flex: 0 0 180px; min-width: 180px; scroll-snap-align: start; }
 
 /* soft masks at left/right to avoid abrupt cut-off of the panel */
 .full-bleed::before,
@@ -104,6 +104,7 @@
 .genres-carousel .nav-button.next { right: 16px; }
 
 @media (max-width: 720px) {
-	.genres-carousel .scroll-outer { padding: 0 60px; }
+	.genres-carousel .scroll-outer { padding: 0; }
 	.genres-carousel .scroll-row .card { flex: 0 0 150px; min-width:150px; }
+	.genres-carousel .nav-button { display: none; }
 }
