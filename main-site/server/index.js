@@ -42,6 +42,11 @@ const PASS_LINK_TTL_MS = 1000 * 60 * 30;
 const PASS_TOKEN_SECRET = process.env.TICKET_PASS_SECRET || 'local-dev-ticket-pass-secret';
 const authSessions = new Map();
 const MOCK_PAYMENT_PROVIDERS = new Set(['montonio']);
+const ADMIN_USERS = [
+  { username: 'Artur', email: 'artur.genno@techno.ee' },
+  { username: 'Elnar', email: 'elnar.kast@techno.ee' },
+  { username: 'Sofja', email: 'sofja.portnova@techno.ee' },
+];
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS payment_tx (
@@ -71,6 +76,31 @@ if (!hasUserAvatarColumn) {
   db.exec(`ALTER TABLE user ADD COLUMN avatar_url TEXT`);
 }
 
+const hasUserAdminColumn = userColumns.some((col) => col.name === 'is_admin');
+if (!hasUserAdminColumn) {
+  db.exec(`ALTER TABLE user ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0`);
+}
+
+const adminEmailLookup = new Map(
+  ADMIN_USERS.map((entry) => [entry.email.toLowerCase(), entry.username])
+);
+
+const markAdminByEmail = db.prepare(`
+  UPDATE user
+  SET is_admin = 1
+  WHERE lower(email) = lower(?)
+`);
+
+const upsertAdminNameByEmail = db.prepare(`
+  UPDATE user
+  SET username = ?, is_admin = 1
+  WHERE lower(email) = lower(?)
+`);
+
+for (const adminUser of ADMIN_USERS) {
+  upsertAdminNameByEmail.run(adminUser.username, adminUser.email);
+}
+
 function toApiUser(userRow) {
   if (!userRow) return null;
   return {
@@ -78,6 +108,7 @@ function toApiUser(userRow) {
     username: userRow.username,
     email: userRow.email,
     avatarUrl: userRow.avatar_url || null,
+    isAdmin: Number(userRow.is_admin || 0) === 1,
   };
 }
 
@@ -139,7 +170,7 @@ function getAuthUser(req) {
   }
 
   const user = db
-    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
+    .prepare(`SELECT id, username, email, avatar_url, is_admin FROM user WHERE id = ?`)
     .get(session.userId);
 
   if (!user) {
@@ -900,13 +931,18 @@ app.post('/api/auth/register', (req, res) => {
 
   try {
     const hashedPassword = hashPassword(password);
+    const shouldBeAdmin = adminEmailLookup.has(email);
     const inserted = db
-      .prepare(`INSERT INTO user (username, email, pass) VALUES (?, ?, ?)`)
-      .run(username, email, hashedPassword);
+      .prepare(`INSERT INTO user (username, email, pass, is_admin) VALUES (?, ?, ?, ?)`)
+      .run(username, email, hashedPassword, shouldBeAdmin ? 1 : 0);
+
+    if (shouldBeAdmin) {
+      upsertAdminNameByEmail.run(adminEmailLookup.get(email), email);
+    }
 
     const userId = Number(inserted.lastInsertRowid);
     const user = db
-      .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
+      .prepare(`SELECT id, username, email, avatar_url, is_admin FROM user WHERE id = ?`)
       .get(userId);
 
     const token = createAuthToken(userId);
@@ -927,7 +963,7 @@ app.post('/api/auth/login', (req, res) => {
 
   const userRow = db
     .prepare(`
-      SELECT id, username, email, avatar_url, pass
+      SELECT id, username, email, avatar_url, is_admin, pass
       FROM user
       WHERE lower(username) = lower(?) OR lower(email) = lower(?)
       LIMIT 1
@@ -942,6 +978,13 @@ app.post('/api/auth/login', (req, res) => {
   if (userRow.pass && !String(userRow.pass).startsWith('scrypt$')) {
     const upgraded = hashPassword(password);
     db.prepare(`UPDATE user SET pass = ? WHERE id = ?`).run(upgraded, userRow.id);
+  }
+
+  const matchedAdminName = adminEmailLookup.get(String(userRow.email || '').toLowerCase());
+  if (matchedAdminName && Number(userRow.is_admin || 0) !== 1) {
+    upsertAdminNameByEmail.run(matchedAdminName, userRow.email);
+    userRow.is_admin = 1;
+    userRow.username = matchedAdminName;
   }
 
   const token = createAuthToken(userRow.id);
@@ -1008,7 +1051,7 @@ app.put('/api/profile/account', (req, res) => {
   `).run(username, avatarUrl || null, auth.user.id);
 
   const updatedUser = db
-    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
+    .prepare(`SELECT id, username, email, avatar_url, is_admin FROM user WHERE id = ?`)
     .get(auth.user.id);
 
   res.json({ user: toApiUser(updatedUser) });
@@ -1088,7 +1131,7 @@ app.get('/api/profile/tickets-pass.pdf', (req, res) => {
   }
 
   const user = db
-    .prepare(`SELECT id, username, email, avatar_url FROM user WHERE id = ?`)
+    .prepare(`SELECT id, username, email, avatar_url, is_admin FROM user WHERE id = ?`)
     .get(payload.userId);
   if (!user) {
     return res.status(404).json({ message: 'User not found' });

@@ -5,6 +5,14 @@ import "./Profile.css";
 
 const AUTH_TOKEN_KEY = "ac_auth_token";
 const AUTH_USER_KEY = "ac_auth_user";
+const ADMIN_PANEL_URL = (() => {
+  const configured = (import.meta.env.VITE_ADMIN_PANEL_URL || "").trim();
+  if (configured) return configured;
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return "http://localhost:5156";
+  }
+  return "/admin";
+})();
 
 function getStoredUser() {
   try {
@@ -84,6 +92,18 @@ export default function Profile() {
     setToken(nextToken);
     setUser(nextUser);
     window.dispatchEvent(new Event("ac-auth-changed"));
+  };
+
+  const redirectAfterAuth = (nextUser) => {
+    if (nextUser?.isAdmin) {
+      if (ADMIN_PANEL_URL.startsWith("http://") || ADMIN_PANEL_URL.startsWith("https://")) {
+        window.location.assign(ADMIN_PANEL_URL);
+        return;
+      }
+      navigate(ADMIN_PANEL_URL);
+      return;
+    }
+    navigate("/profile", { replace: true });
   };
 
   const clearAuth = () => {
@@ -372,6 +392,7 @@ export default function Profile() {
       }
 
       persistAuth(data.token, data.user);
+      redirectAfterAuth(data.user);
     } catch {
       setError("Unable to register right now.");
     } finally {
@@ -405,6 +426,7 @@ export default function Profile() {
       }
 
       persistAuth(data.token, data.user);
+      redirectAfterAuth(data.user);
     } catch {
       setError("Unable to login right now.");
     } finally {

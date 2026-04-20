@@ -210,7 +210,25 @@ function App() {
 
   let content = null;
   if (isAdmin) {
-    content = <AdminDashboard />;
+    if (authUser?.isAdmin) {
+      content = <AdminDashboard />;
+    } else {
+      content = (
+        <main className="site-container main-content">
+          <section className="profile">
+            <div className="profile-card">
+              <h2 className="profile-name">Admin access required</h2>
+              <p className="profile-meta">Sign in with an admin account to open this page.</p>
+              <div className="header-auth" style={{ justifyContent: "flex-start", marginTop: 14 }}>
+                <Link to="/profile?mode=login" className="header-auth-link header-auth-link--primary">
+                  Log in
+                </Link>
+              </div>
+            </div>
+          </section>
+        </main>
+      );
+    }
   } else if (isCheckout) {
     content = (
       <main className="site-container main-content">
