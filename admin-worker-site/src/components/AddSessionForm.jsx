@@ -32,9 +32,17 @@ export default function AddSessionForm({ onSuccess }) {
     }
 
     fetch(buildHallsEndpoint(formData.cinemaId))
-      .then(res => res.json())
-      .then(data => setHalls(data))
-      .catch(err => console.error('Failed to load halls', err))
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load halls: ${res.status}`)
+        }
+        return res.json()
+      })
+      .then((data) => setHalls(Array.isArray(data) ? data : []))
+      .catch((err) => {
+        setHalls([])
+        console.error('Failed to load halls', err)
+      })
   }, [formData.cinemaId])
 
   const handleChange = (e) => {
@@ -61,7 +69,16 @@ export default function AddSessionForm({ onSuccess }) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to add session')
+        let message = 'Failed to add session'
+        try {
+          const payload = await response.json()
+          if (payload?.message) {
+            message = payload.message
+          }
+        } catch {
+          // Keep generic message if response is not JSON.
+        }
+        throw new Error(message)
       }
 
       // Reset form

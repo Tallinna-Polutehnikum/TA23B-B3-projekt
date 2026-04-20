@@ -1,14 +1,10 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import "./CheckoutPage.css";
 
 const paymentOptions = [
-  {
-    id: "montonio",
-    title: "Montonio (test)",
-    description: "Mock bank-link payment flow",
-    accent: "#f9a8d4",
-  },
   {
     id: "card",
     title: "Card payment",
@@ -38,12 +34,32 @@ const paymentOptions = [
 const formatPrice = (value) => `${value.toFixed(2)} €`;
 
 const paymentProviderByMethod = {
-  montonio: "montonio",
-  card: null,
+  card: "stripe",
   applepay: null,
   googlepay: null,
   cash: null,
 };
+
+function StripeCardFields({ clientSecret, onReady }) {
+  const stripe = useStripe();
+  const elements = useElements();
+
+  useEffect(() => {
+    if (!stripe || !elements || !clientSecret) return undefined;
+
+    const confirmPayment = () => stripe.confirmPayment({ elements, redirect: "if_required" });
+    onReady?.(confirmPayment);
+
+    return () => onReady?.(null);
+  }, [stripe, elements, clientSecret, onReady]);
+
+  return (
+    <div className="checkout-card-element">
+      <PaymentElement options={{ layout: "tabs" }} />
+      <p className="checkout-inline-note">Use Stripe test card 4242 4242 4242 4242 with any future date and CVC.</p>
+    </div>
+  );
+}
 
 export default function CheckoutPage({
   cart,
@@ -58,7 +74,6 @@ export default function CheckoutPage({
 }) {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
-  const [cardData, setCardData] = useState({ number: "", expiry: "", cvc: "", holder: "" });
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
   const [note, setNote] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -66,6 +81,19 @@ export default function CheckoutPage({
   const [status, setStatus] = useState("idle");
   const [bookingError, setBookingError] = useState("");
   const [paymentInfo, setPaymentInfo] = useState(null);
+
+  const stripePromise = useMemo(() => {
+    const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    return key ? loadStripe(key) : null;
+  }, []);
+  const [stripeClientSecret, setStripeClientSecret] = useState(null);
+  const [stripeInitError, setStripeInitError] = useState("");
+  const [stripeInitLoading, setStripeInitLoading] = useState(false);
+  const stripeConfirmRef = useRef(null);
+  const handleStripeReady = useCallback((fn) => {
+    stripeConfirmRef.current = fn;
+  }, []);
+  const [showStripeModal, setShowStripeModal] = useState(false);
 
   const cartIsEmpty = cart.length === 0;
 
@@ -78,6 +106,69 @@ export default function CheckoutPage({
     () => cart.filter((item) => item.type === "gift").reduce((acc, item) => acc + (item.quantity || 0), 0),
     [cart]
   );
+
+  useEffect(() => {
+    if (paymentMethod !== "card") {
+      setStripeClientSecret(null);
+      setStripeInitError("");
+      stripeConfirmRef.current = null;
+      return;
+    }
+
+    if (cartIsEmpty || totalPrice <= 0) {
+      setStripeClientSecret(null);
+      setStripeInitError(cartIsEmpty ? "Cart is empty" : "Invalid total amount");
+      return;
+    }
+
+    if (!stripePromise) {
+      setStripeInitError("Stripe publishable key is missing. Set VITE_STRIPE_PUBLISHABLE_KEY.");
+      return;
+    }
+
+    let cancelled = false;
+    const authToken = localStorage.getItem("ac_auth_token");
+
+    const fetchIntent = async () => {
+      setStripeInitLoading(true);
+      setStripeInitError("");
+      try {
+        const response = await fetch("/api/payments/stripe/create-intent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+          body: JSON.stringify({
+            amount: totalPrice,
+            currency: "EUR",
+            cartItems: cart.length,
+            seats: seatsCount,
+          }),
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (cancelled) return;
+        if (!response.ok || !payload?.clientSecret) {
+          throw new Error(payload?.message || "Failed to initialize Stripe payment");
+        }
+        setStripeClientSecret(payload.clientSecret);
+        setPaymentInfo(null);
+      } catch (err) {
+        if (!cancelled) {
+          setStripeInitError(err?.message || "Failed to set up Stripe payment");
+          setStripeClientSecret(null);
+        }
+      } finally {
+        if (!cancelled) setStripeInitLoading(false);
+      }
+    };
+
+    fetchIntent();
+    return () => {
+      cancelled = true;
+    };
+  }, [paymentMethod, totalPrice, cart.length, seatsCount, stripePromise, cartIsEmpty]);
 
   const handleFieldChange = (key, value) => {
     setContact((prev) => ({ ...prev, [key]: value }));
@@ -102,48 +193,18 @@ export default function CheckoutPage({
     setPaymentInfo(null);
 
     try {
-      if (provider) {
-        const intentResponse = await fetch("/api/payments/mock-intent", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-          },
-          body: JSON.stringify({
-            provider,
-            amount: totalPrice,
-            currency: "EUR",
-            method: paymentMethod,
-            metadata: {
-              seatItems: seatItems.length,
-              cartItems: cart.length,
-            },
-          }),
-        });
-
-        const intentPayload = await intentResponse.json().catch(() => null);
-        if (!intentResponse.ok || !intentPayload?.paymentId) {
-          throw new Error(intentPayload?.message || "Failed to initialize mock payment.");
+      if (paymentMethod === "card") {
+        if (!stripePromise) {
+          throw new Error("Stripe publishable key is missing on the client.");
+        }
+        if (!stripeClientSecret) {
+          throw new Error("Preparing secure card form. Please try again in a moment.");
         }
 
-        const confirmResponse = await fetch("/api/payments/mock-confirm", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-          },
-          body: JSON.stringify({
-            provider,
-            paymentId: intentPayload.paymentId,
-          }),
-        });
-
-        const confirmPayload = await confirmResponse.json().catch(() => null);
-        if (!confirmResponse.ok || confirmPayload?.status !== "succeeded") {
-          throw new Error(confirmPayload?.message || "Mock payment was not approved.");
-        }
-
-        setPaymentInfo(confirmPayload);
+        // Show modal with Stripe element; payment will be finalized there.
+        setShowStripeModal(true);
+        setIsProcessing(false);
+        return;
       }
 
       for (const item of seatItems) {
@@ -206,55 +267,17 @@ export default function CheckoutPage({
         <div className="checkout-payment-active">
           {header}
           <div className="checkout-payment-form">
-            <div className="checkout-field">
-              <label htmlFor="card-holder">Name on card</label>
-              <input
-                id="card-holder"
-                value={cardData.holder}
-                onChange={(e) => setCardData({ ...cardData, holder: e.target.value })}
-                placeholder="IVAN IVANOV"
-                required
-              />
-            </div>
-            <div className="checkout-card-grid">
-              <div className="checkout-field">
-                <label htmlFor="card-number">Card number</label>
-                <input
-                  id="card-number"
-                  inputMode="numeric"
-                  maxLength={23}
-                  value={cardData.number}
-                  onChange={(e) => setCardData({ ...cardData, number: e.target.value })}
-                  placeholder="0000 0000 0000 0000"
-                  required
-                />
-              </div>
-              <div className="checkout-field">
-                <label htmlFor="card-expiry">Expiry</label>
-                <input
-                  id="card-expiry"
-                  inputMode="numeric"
-                  maxLength={7}
-                  value={cardData.expiry}
-                  onChange={(e) => setCardData({ ...cardData, expiry: e.target.value })}
-                  placeholder="MM/YY"
-                  required
-                />
-              </div>
-              <div className="checkout-field">
-                <label htmlFor="card-cvc">CVC</label>
-                <input
-                  id="card-cvc"
-                  inputMode="numeric"
-                  maxLength={4}
-                  value={cardData.cvc}
-                  onChange={(e) => setCardData({ ...cardData, cvc: e.target.value })}
-                  placeholder="123"
-                  required
-                />
-              </div>
-            </div>
-            <p className="checkout-inline-note">Data is encrypted, your bank will prompt for 3‑D Secure.</p>
+            {stripeInitError && (
+              <p className="checkout-inline-note" style={{ color: "#fca5a5" }}>
+                {stripeInitError}
+              </p>
+            )}
+            {stripeInitLoading && (
+              <p className="checkout-inline-note">Preparing secure card form...</p>
+            )}
+            {!stripeInitError && !stripeInitLoading && (
+              <p className="checkout-inline-note">Card details will be requested in a secure popup after you click Pay.</p>
+            )}
           </div>
         </div>
       );
@@ -330,7 +353,7 @@ export default function CheckoutPage({
         type="button"
         onClick={() => onUpdateQuantity?.(item.id, item.quantity - 1)}
         className="checkout-qty__btn"
-        aria-label="Уменьшить количество"
+        aria-label="Decrease quantity"
       >
         −
       </button>
@@ -348,6 +371,119 @@ export default function CheckoutPage({
 
   return (
     <section className="checkout-page">
+      {showStripeModal && (
+        <div className="checkout-modal">
+          <div className="checkout-modal__dialog">
+            <div className="checkout-modal__header">
+              <h3>Secure card payment</h3>
+              <button type="button" className="checkout-modal__close" onClick={() => setShowStripeModal(false)}>
+                ×
+              </button>
+            </div>
+            <div className="checkout-modal__body">
+              {stripeInitError && (
+                <p className="checkout-inline-note" style={{ color: "#fca5a5" }}>{stripeInitError}</p>
+              )}
+              {stripeInitLoading && <p className="checkout-inline-note">Preparing secure card form...</p>}
+              {stripePromise && stripeClientSecret && !stripeInitLoading && (
+                <Elements stripe={stripePromise} options={{ clientSecret: stripeClientSecret }}>
+                  <StripeCardFields clientSecret={stripeClientSecret} onReady={handleStripeReady} />
+                </Elements>
+              )}
+            </div>
+            <div className="checkout-modal__footer">
+              <button
+                type="button"
+                className="checkout-submit"
+                onClick={async () => {
+                  setIsProcessing(true);
+                  setBookingError("");
+                  try {
+                    if (!stripeConfirmRef.current) {
+                      throw new Error("Card form is not ready. Please wait a moment.");
+                    }
+                    const stripeResult = await stripeConfirmRef.current();
+                    if (stripeResult?.error) {
+                      throw new Error(stripeResult.error.message || "Stripe confirmation failed.");
+                    }
+
+                    const paymentIntent = stripeResult?.paymentIntent;
+                    if (!paymentIntent?.id) {
+                      throw new Error("Stripe did not return a payment intent.");
+                    }
+
+                    const authToken = localStorage.getItem("ac_auth_token");
+                    const syncResponse = await fetch("/api/payments/stripe/sync", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+                      },
+                      body: JSON.stringify({ paymentIntentId: paymentIntent.id }),
+                    });
+
+                    const syncPayload = await syncResponse.json().catch(() => null);
+                    if (!syncResponse.ok) {
+                      throw new Error(syncPayload?.message || "Failed to sync Stripe payment status.");
+                    }
+
+                    if (!["succeeded", "requires_capture"].includes(syncPayload?.status)) {
+                      throw new Error(`Payment requires additional action (${syncPayload?.status || "unknown"}).`);
+                    }
+
+                    const seatItems = cart.filter((item) => item.type === "seats");
+                    const authTokenForSeats = localStorage.getItem("ac_auth_token");
+                    for (const item of seatItems) {
+                      const seatIds = (item.seatIds || []).filter((id) => Number.isFinite(Number(id))).map(Number);
+                      if (!item.sessionId || seatIds.length === 0 || seatIds.length !== (item.seats?.length || 0)) {
+                        throw new Error("Some selected seats are missing booking metadata. Please reselect seats.");
+                      }
+
+                      const response = await fetch(`/api/sessions/${item.sessionId}/book`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          ...(authTokenForSeats ? { Authorization: `Bearer ${authTokenForSeats}` } : {}),
+                        },
+                        body: JSON.stringify({ seatIds, userId: null }),
+                      });
+
+                      let payload = null;
+                      try {
+                        payload = await response.json();
+                      } catch {
+                        payload = null;
+                      }
+
+                      if (!response.ok) {
+                        throw new Error(payload?.message || "Failed to reserve seats. Please try again.");
+                      }
+                    }
+
+                    setPaymentInfo(syncPayload);
+                    onPaymentSuccess?.();
+                    setStatus("success");
+                    setShowStripeModal(false);
+                  } catch (error) {
+                    console.error("Checkout booking error", error);
+                    setStatus("error");
+                    setBookingError(error?.message || "Unable to complete booking.");
+                  } finally {
+                    setIsProcessing(false);
+                  }
+                }}
+                disabled={isProcessing || stripeInitLoading || !!stripeInitError}
+              >
+                {isProcessing ? "Processing..." : `Pay ${formatPrice(totalPrice)}`}
+              </button>
+              <button type="button" className="checkout-link" onClick={() => setShowStripeModal(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="checkout-page__hero">
         <div>
           <p className="checkout-page__eyebrow">Booking & payment</p>
@@ -372,32 +508,6 @@ export default function CheckoutPage({
           </div>
 
           <form className="checkout-form" onSubmit={handleSubmit}>
-            {!showPaymentDetails ? (
-              <div className="checkout-payments">
-                {paymentOptions.map((option) => (
-                  <label
-                    key={option.id}
-                    className={`checkout-payments__option ${paymentMethod === option.id ? "is-active" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value={option.id}
-                      checked={paymentMethod === option.id}
-                      onChange={() => handleSelectPayment(option.id)}
-                    />
-                    <div className="checkout-payments__dot" style={{ background: option.accent }} />
-                    <div className="checkout-payments__meta">
-                      <div className="checkout-payments__title">{option.title}</div>
-                      <div className="checkout-payments__desc">{option.description}</div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            ) : (
-              renderPaymentDetails()
-            )}
-
             <div className="checkout-form__fields">
               <div className="checkout-field">
                 <label htmlFor="name">Full name</label>
@@ -453,6 +563,32 @@ export default function CheckoutPage({
               </label>
             </div>
 
+            {!showPaymentDetails ? (
+              <div className="checkout-payments">
+                {paymentOptions.map((option) => (
+                  <label
+                    key={option.id}
+                    className={`checkout-payments__option ${paymentMethod === option.id ? "is-active" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={option.id}
+                      checked={paymentMethod === option.id}
+                      onChange={() => handleSelectPayment(option.id)}
+                    />
+                    <div className="checkout-payments__dot" style={{ background: option.accent }} />
+                    <div className="checkout-payments__meta">
+                      <div className="checkout-payments__title">{option.title}</div>
+                      <div className="checkout-payments__desc">{option.description}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              renderPaymentDetails()
+            )}
+
             <div className="checkout-actions">
               <button
                 type="submit"
@@ -477,9 +613,9 @@ export default function CheckoutPage({
                 <p className="checkout-success__text">
                   We sent tickets to {contact.email || "your email"}. Receipt is available in your profile.
                 </p>
-                {paymentInfo?.paymentId && (
+                {(paymentInfo?.paymentId || paymentInfo?.paymentIntentId) && (
                   <p className="checkout-success__text">
-                    Mock payment ID: {paymentInfo.paymentId}
+                    Payment ID: {paymentInfo.paymentId || paymentInfo.paymentIntentId}
                   </p>
                 )}
                 <div className="checkout-success__actions">
@@ -521,7 +657,7 @@ export default function CheckoutPage({
                     <div className="checkout-item__meta">
                       <div className="checkout-item__title">
                         {isSeatItem
-                          ? `${item.title || "Сеанс"}${item.time ? ` · ${item.time}` : ""}`
+                          ? `${item.title || "Session"}${item.time ? ` · ${item.time}` : ""}`
                           : item.name}
                       </div>
                       {isSeatItem && item.cinema && (
@@ -545,7 +681,7 @@ export default function CheckoutPage({
                         type="button"
                         className="checkout-remove"
                         onClick={() => onRemoveFromCart?.(item.id)}
-                        aria-label="Удалить из корзины"
+                        aria-label="Remove from cart"
                       >
                         ×
                       </button>
