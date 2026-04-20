@@ -117,11 +117,21 @@ for (const adminUser of ADMIN_USERS) {
 
 function toApiUser(userRow) {
   if (!userRow) return null;
+
+  let avatarUrl = userRow.avatar_url || null;
+  if (typeof avatarUrl === 'string' && avatarUrl.startsWith('data:image/')) {
+    const savedPath = saveAvatarDataImage(userRow.id, avatarUrl);
+    if (savedPath) {
+      db.prepare(`UPDATE user SET avatar_url = ? WHERE id = ?`).run(savedPath, userRow.id);
+      avatarUrl = savedPath;
+    }
+  }
+
   return {
     id: userRow.id,
     username: userRow.username,
     email: userRow.email,
-    avatarUrl: userRow.avatar_url || null,
+    avatarUrl,
     isAdmin: Number(userRow.is_admin || 0) === 1,
   };
 }
@@ -202,6 +212,39 @@ function signPassToken(payload) {
     .update(encodedPayload)
     .digest('base64url');
   return `${encodedPayload}.${signature}`;
+}
+
+const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+const avatarsDir = path.join(uploadsDir, 'avatars');
+
+if (!fs.existsSync(avatarsDir)) {
+  fs.mkdirSync(avatarsDir, { recursive: true });
+}
+
+function saveAvatarDataImage(userId, dataImage) {
+  const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=\r\n]+)$/.exec(dataImage || '');
+  if (!match) return null;
+
+  const [, mimeType, base64Payload] = match;
+  const extensionByMime = {
+    'image/png': 'png',
+    'image/jpeg': 'jpg',
+    'image/jpg': 'jpg',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+  };
+
+  const ext = extensionByMime[mimeType.toLowerCase()];
+  if (!ext) return null;
+
+  const buffer = Buffer.from(base64Payload.replace(/\s+/g, ''), 'base64');
+  if (!buffer.length) return null;
+
+  const fileName = `user-${userId}-${Date.now()}.${ext}`;
+  const filePath = path.join(avatarsDir, fileName);
+  fs.writeFileSync(filePath, buffer);
+
+  return `/uploads/avatars/${fileName}`;
 }
 
 function verifyPassToken(token) {
@@ -1062,7 +1105,8 @@ app.put('/api/profile/account', (req, res) => {
 
   const isDataImage = avatarUrl.startsWith('data:image/');
   const isHttpImage = /^https?:\/\//i.test(avatarUrl);
-  if (avatarUrl && !isDataImage && !isHttpImage) {
+  const isRelativeUploadPath = avatarUrl.startsWith('/uploads/');
+  if (avatarUrl && !isDataImage && !isHttpImage && !isRelativeUploadPath) {
     return res.status(400).json({ message: 'Avatar must be an image URL or uploaded image' });
   }
 
@@ -1083,11 +1127,20 @@ app.put('/api/profile/account', (req, res) => {
     return res.status(409).json({ message: 'Username is already taken' });
   }
 
+  let avatarValue = avatarUrl || null;
+  if (isDataImage) {
+    const savedPath = saveAvatarDataImage(auth.user.id, avatarUrl);
+    if (!savedPath) {
+      return res.status(400).json({ message: 'Could not process uploaded image' });
+    }
+    avatarValue = savedPath;
+  }
+
   db.prepare(`
     UPDATE user
     SET username = ?, avatar_url = ?
     WHERE id = ?
-  `).run(username, avatarUrl || null, auth.user.id);
+  `).run(username, avatarValue, auth.user.id);
 
   const updatedUser = db
     .prepare(`SELECT id, username, email, avatar_url, is_admin FROM user WHERE id = ?`)
@@ -1874,6 +1927,8 @@ const APP_PORT = Number(process.env.PORT || 4000);
 const APP_HOST = process.env.HOST || '';
 const distDir = path.resolve(__dirname, '..', 'dist');
 const distIndex = path.join(distDir, 'index.html');
+
+app.use('/uploads', express.static(uploadsDir));
 
 if (fs.existsSync(distDir) && fs.existsSync(distIndex)) {
   app.use(express.static(distDir));
