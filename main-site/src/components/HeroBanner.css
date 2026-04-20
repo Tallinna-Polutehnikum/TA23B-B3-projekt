@@ -20,6 +20,10 @@
   outline: none;
 }
 
+.hero-banner__viewport--clickable {
+  cursor: pointer;
+}
+
 .hero-banner__slide {
   position: absolute;
   inset: 0;
@@ -32,6 +36,11 @@
   opacity: 0;
   transition: opacity 600ms ease-in-out;
 }
+
+.hero-banner__slide--1 { background-image: url("../assets/HeroBanner/hero1.jpg"); }
+.hero-banner__slide--2 { background-image: url("../assets/HeroBanner/hero2.jpg"); }
+.hero-banner__slide--3 { background-image: url("../assets/HeroBanner/hero3.jpg"); }
+.hero-banner__slide--4 { background-image: url("../assets/HeroBanner/hero4.jpg"); }
 
 .hero-banner__slide.active {
   opacity: 1;

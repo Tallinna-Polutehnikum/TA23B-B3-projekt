@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Footer from './Footer';
 import './MovieDetails.css';
-import { formatDurationLabel, normalizeDisplayText } from '../utils/movieUi';
+import { formatDurationLabel, getPosterSrc, normalizeDisplayText } from '../utils/movieUi';
 
 export default function MovieDetails() {
   const { id } = useParams();
@@ -68,7 +68,7 @@ export default function MovieDetails() {
         <div className="hero">
           <div className="media">
             {movie.poster ? (
-              <img src={`https://image.tmdb.org/t/p/w780${movie.poster}`} alt={movie.title} />
+              <img src={getPosterSrc(movie.poster, 'w780')} alt={movie.title} />
             ) : (
               <div className="no-poster">Poster not available</div>
             )}

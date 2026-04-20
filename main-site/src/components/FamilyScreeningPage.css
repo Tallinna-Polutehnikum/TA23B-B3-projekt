@@ -14,6 +14,11 @@
   align-items: center;
 }
 
+.family-hero--1 { background-image: linear-gradient(110deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.45) 48%, rgba(10,0,26,0.1) 76%), url("../assets/HeroBanner/hero1.jpg"); }
+.family-hero--2 { background-image: linear-gradient(110deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.45) 48%, rgba(10,0,26,0.1) 76%), url("../assets/HeroBanner/hero2.jpg"); }
+.family-hero--3 { background-image: linear-gradient(110deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.45) 48%, rgba(10,0,26,0.1) 76%), url("../assets/HeroBanner/hero3.jpg"); }
+.family-hero--4 { background-image: linear-gradient(110deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.45) 48%, rgba(10,0,26,0.1) 76%), url("../assets/HeroBanner/hero4.jpg"); }
+
 .family-hero__copy {
   max-width: 1080px;
   margin: 0 auto;

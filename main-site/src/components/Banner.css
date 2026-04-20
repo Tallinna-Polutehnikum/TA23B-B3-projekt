@@ -24,6 +24,10 @@
   transition: transform 700ms cubic-bezier(.2,.9,.2,1);
 }
 
+.slides--0 { transform: translateX(0%); }
+.slides--1 { transform: translateX(-100%); }
+.slides--2 { transform: translateX(-200%); }
+
 .slide {
   flex: 0 0 100%;
   display: flex;
@@ -34,6 +38,10 @@
   background-size: cover;
   background-position: center;
 }
+
+.slide--1 { background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02)), #e6e6e6; }
+.slide--2 { background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02)), #dcd7f7; }
+.slide--3 { background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02)), #f7e6e6; }
 
 .slide-content {
   color: #111;

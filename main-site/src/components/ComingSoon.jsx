@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './ComingSoon.css';
+import { getPosterSrc } from '../utils/movieUi';
 
 export default function ComingSoon() {
   const [movies, setMovies] = useState([]);
@@ -41,7 +42,7 @@ export default function ComingSoon() {
             <Link key={movie.id} to={`/movie/${movie.id}`} className="card">
               {movie.poster && (
                 <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster}`}
+                  src={getPosterSrc(movie.poster, 'w500')}
                   alt={movie.title}
                   loading="lazy"
                 />

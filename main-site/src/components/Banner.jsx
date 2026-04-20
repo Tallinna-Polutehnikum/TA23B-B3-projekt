@@ -30,13 +30,12 @@ export default function Banner() {
   return (
     <section className="hero" role="region" aria-label="Featured carousel">
       <div className="hero-inner">
-        <div className="slides" style={{ transform: `translateX(-${index * 100}%)` }}>
-          {slides.map((s) => (
+        <div className={`slides slides--${index}`}>
+          {slides.map((s, slideIndex) => (
             <article
-              className="slide"
+              className={`slide slide--${slideIndex + 1}`}
               key={s.id}
-              aria-hidden={index !== slides.indexOf(s)}
-              style={{ background: `linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02)), ${s.color}` }}
+              aria-hidden={index !== slideIndex}
             >
               <div className="slide-content">
                 <h2 className="slide-title">{s.title}</h2>

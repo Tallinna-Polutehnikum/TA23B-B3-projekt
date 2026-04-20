@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HeroBanner.css";
-import hero1 from "../assets/HeroBanner/hero1.jpg";
-import hero2 from "../assets/HeroBanner/hero2.jpg";
-import hero3 from "../assets/HeroBanner/hero3.jpg";
-import hero4 from "../assets/HeroBanner/hero4.jpg";
-import heroBirthday from "../assets/HeroBanner/hero-birthday.svg";
 
-const slides = [hero1, hero2, hero3, hero4];
+const slides = [1, 2, 3, 4];
 
 const HeroBanner = () => {
   const [current, setCurrent] = useState(0);
@@ -59,13 +54,12 @@ const HeroBanner = () => {
           }
         }}
         aria-label={isClickable ? "Ava kampaanialeht" : "Vaheta slaidi"}
-        style={{ cursor: isClickable ? "pointer" : "default" }}
+        className={`hero-banner__viewport${isClickable ? " hero-banner__viewport--clickable" : ""}`}
       >
-        {slides.map((image, idx) => (
+        {slides.map((slideNo, idx) => (
           <div
             key={idx}
-            className={`hero-banner__slide ${idx === current ? "active" : ""}`}
-            style={{ backgroundImage: `url(${image})` }}
+            className={`hero-banner__slide hero-banner__slide--${slideNo} ${idx === current ? "active" : ""}`}
             role="group"
             aria-roledescription="slide"
             aria-label={`${idx + 1} of ${slides.length}`}

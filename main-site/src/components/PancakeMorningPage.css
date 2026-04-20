@@ -17,6 +17,11 @@
   align-items: center;
 }
 
+.pancake-hero--1 { background-image: linear-gradient(115deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.5) 46%, rgba(10,0,26,0.18) 74%), url("../assets/HeroBanner/hero1.jpg"); }
+.pancake-hero--2 { background-image: linear-gradient(115deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.5) 46%, rgba(10,0,26,0.18) 74%), url("../assets/HeroBanner/hero2.jpg"); }
+.pancake-hero--3 { background-image: linear-gradient(115deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.5) 46%, rgba(10,0,26,0.18) 74%), url("../assets/HeroBanner/hero3.jpg"); }
+.pancake-hero--4 { background-image: linear-gradient(115deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.5) 46%, rgba(10,0,26,0.18) 74%), url("../assets/HeroBanner/hero4.jpg"); }
+
 .pancake-hero__copy {
   max-width: 1080px;
   margin: 0 auto;

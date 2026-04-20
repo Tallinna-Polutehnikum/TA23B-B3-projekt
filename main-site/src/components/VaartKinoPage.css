@@ -20,6 +20,11 @@
   box-shadow: 0 28px 70px rgba(0,0,0,0.45);
 }
 
+.vaartkino-hero--1 { background-image: linear-gradient(110deg, rgba(12,0,28,0.9) 0%, rgba(12,0,28,0.55) 46%, rgba(12,0,28,0.18) 78%), url("../assets/HeroBanner/hero-vaartkino-pattern.svg"), url("../assets/HeroBanner/hero1.jpg"); }
+.vaartkino-hero--2 { background-image: linear-gradient(110deg, rgba(12,0,28,0.9) 0%, rgba(12,0,28,0.55) 46%, rgba(12,0,28,0.18) 78%), url("../assets/HeroBanner/hero-vaartkino-pattern.svg"), url("../assets/HeroBanner/hero2.jpg"); }
+.vaartkino-hero--3 { background-image: linear-gradient(110deg, rgba(12,0,28,0.9) 0%, rgba(12,0,28,0.55) 46%, rgba(12,0,28,0.18) 78%), url("../assets/HeroBanner/hero-vaartkino-pattern.svg"), url("../assets/HeroBanner/hero3.jpg"); }
+.vaartkino-hero--4 { background-image: linear-gradient(110deg, rgba(12,0,28,0.9) 0%, rgba(12,0,28,0.55) 46%, rgba(12,0,28,0.18) 78%), url("../assets/HeroBanner/hero-vaartkino-pattern.svg"), url("../assets/HeroBanner/hero4.jpg"); }
+
 .vaartkino-hero__overlay {
   position: absolute;
   inset: 0;
@@ -307,6 +312,11 @@
   box-shadow: 0 20px 44px rgba(0,0,0,0.42);
   border: 1px solid rgba(255,255,255,0.08);
 }
+
+.vaartkino-collage--1 { background-image: linear-gradient(140deg, rgba(10,0,26,0.72) 0%, rgba(10,0,26,0.4) 46%, rgba(10,0,26,0.8) 100%), url("../assets/HeroBanner/hero1.jpg"); }
+.vaartkino-collage--2 { background-image: linear-gradient(140deg, rgba(10,0,26,0.72) 0%, rgba(10,0,26,0.4) 46%, rgba(10,0,26,0.8) 100%), url("../assets/HeroBanner/hero2.jpg"); }
+.vaartkino-collage--3 { background-image: linear-gradient(140deg, rgba(10,0,26,0.72) 0%, rgba(10,0,26,0.4) 46%, rgba(10,0,26,0.8) 100%), url("../assets/HeroBanner/hero3.jpg"); }
+.vaartkino-collage--4 { background-image: linear-gradient(140deg, rgba(10,0,26,0.72) 0%, rgba(10,0,26,0.4) 46%, rgba(10,0,26,0.8) 100%), url("../assets/HeroBanner/hero4.jpg"); }
 
 .vaartkino-collage__tag {
   position: absolute;

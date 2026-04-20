@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "./PancakeMorningPage.css";
-import hero1 from "../assets/HeroBanner/hero1.jpg";
 import hero2 from "../assets/HeroBanner/hero2.jpg";
 import hero3 from "../assets/HeroBanner/hero3.jpg";
 import hero4 from "../assets/HeroBanner/hero4.jpg";
@@ -15,19 +14,16 @@ const featureItems = [
 
 const PancakeMorningPage = () => {
   const [params] = useSearchParams();
-  const slides = useMemo(() => [hero1, hero2, hero3, hero4], []);
+  const slides = useMemo(() => [1, 2, 3, 4], []);
   const rawIndex = Number(params.get("slide"));
   const slideIndex = Number.isNaN(rawIndex) ? 3 : rawIndex;
-  const heroImage = slides[Math.max(0, Math.min(slides.length - 1, slideIndex))];
+  const heroVariant = slides[Math.max(0, Math.min(slides.length - 1, slideIndex))];
   const gallery = useMemo(() => [hero4, hero2], []);
 
   return (
     <div className="pancake-page">
       <section
-        className="pancake-hero"
-        style={{
-          backgroundImage: `linear-gradient(115deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.5) 46%, rgba(10,0,26,0.18) 74%), url(${heroImage})`,
-        }}
+        className={`pancake-hero pancake-hero--${heroVariant}`}
       >
         <div className="pancake-hero__copy">
           <span className="pancake-hero__eyebrow">Weekend treat</span>

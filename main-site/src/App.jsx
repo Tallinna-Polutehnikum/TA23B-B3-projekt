@@ -20,6 +20,7 @@ import PancakeMorningPage from "./components/PancakeMorningPage";
 import EventsPage from "./components/EventsPage";
 import CinemasPage from "./components/CinemasPage";
 import CheckoutPage from "./components/CheckoutPage";
+import { getPosterSrc } from "./utils/movieUi";
 
 const AUTH_USER_KEY = "ac_auth_user";
 
@@ -54,6 +55,9 @@ function App() {
   const [selectedMovies, setSelectedMovies] = useState([]);
   const [genreLoading, setGenreLoading] = useState(false);
   const [authUser, setAuthUser] = useState(() => getStoredHeaderUser());
+  const [isPhone, setIsPhone] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 700px)').matches
+  );
 
   // Ensure route changes land at the top of the page
   useEffect(() => {
@@ -79,14 +83,24 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const media = window.matchMedia('(max-width: 700px)');
+    const onChange = (event) => setIsPhone(event.matches);
+
+    setIsPhone(media.matches);
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', onChange);
+      return () => media.removeEventListener('change', onChange);
+    }
+
+    media.addListener(onChange);
+    return () => media.removeListener(onChange);
+  }, []);
+
   const headerInitial = (authUser?.username || authUser?.email || "U").slice(0, 1).toUpperCase();
   const hasHeaderAvatar = Boolean(authUser?.avatarUrl);
-
-  const getPosterUrl = (poster, size = 'w500') => {
-    if (!poster) return `https://via.placeholder.com/${size === 'w780' ? '640x360' : '300x450'}?text=No+Image`;
-    if (poster.startsWith('http')) return poster;
-    return `https://image.tmdb.org/t/p/${size}${poster}`;
-  };
 
   const handleGenreSelect = async (genre) => {
     setSelectedGenre(genre);
@@ -219,7 +233,7 @@ function App() {
             <div className="profile-card">
               <h2 className="profile-name">Admin access required</h2>
               <p className="profile-meta">Sign in with an admin account to open this page.</p>
-              <div className="header-auth" style={{ justifyContent: "flex-start", marginTop: 14 }}>
+              <div className="header-auth header-auth--inline-start">
                 <Link to="/profile?mode=login" className="header-auth-link header-auth-link--primary">
                   Log in
                 </Link>
@@ -322,11 +336,11 @@ function App() {
     <div className="app-root">
       {!isAdmin && (
         <header className="site-header">
-          <div className="site-container" style={{ display: "flex", alignItems: "center", width: "100%", padding: 0 }}>
+          <div className="site-container site-header-inner">
             <div className="site-brand">
-              <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+              <Link to="/" className="site-brand-link">
                 Absolute Cinema
-                <small style={{ fontSize: 10, color: "#fff2", marginLeft: 6 }}>KINO·CINEMA</small>
+                <small className="site-brand-sub">KINO·CINEMA</small>
               </Link>
             </div>
             <nav className="site-nav">
@@ -353,17 +367,7 @@ function App() {
               <div
                 className="icon-cart"
                 onClick={() => setShowCart(true)}
-                style={{
-                  position: 'relative',
-                  width: 28,
-                  height: 28,
-                  cursor: 'pointer',
-                  marginLeft: 20,
-                  marginRight: 12,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
+                className="icon-cart-button"
                 title="Cart"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -372,21 +376,7 @@ function App() {
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                 </svg>
                 {getTotalItems() > 0 && (
-                  <span style={{
-                    position: 'absolute',
-                    top: -4,
-                    right: -4,
-                    background: '#a020f0',
-                    color: '#fff',
-                    borderRadius: '50%',
-                    width: 18,
-                    height: 18,
-                    fontSize: 11,
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
+                  <span className="icon-cart-badge">
                     {getTotalItems()}
                   </span>
                 )}
@@ -429,72 +419,34 @@ function App() {
 
       {showCart && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
+          className="cart-overlay"
           onClick={() => setShowCart(false)}
         >
           <div
-            style={{
-              background: 'linear-gradient(135deg, #0a001a 0%, #1a0033 40%, #2a0845 70%, #3d1a5a 100%)',
-              color: '#fff',
-              borderRadius: 20,
-              minWidth: 400,
-              maxWidth: 500,
-              maxHeight: '80vh',
-              padding: 32,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
+            className={`cart-modal${isPhone ? ' cart-modal--phone' : ''}`}
             onClick={e => e.stopPropagation()}
           >
             <button
               onClick={() => setShowCart(false)}
-              style={{
-                position: 'absolute',
-                top: 12,
-                right: 16,
-                background: 'transparent',
-                border: 'none',
-                color: '#fff',
-                fontSize: 24,
-                cursor: 'pointer',
-              }}
+              className="cart-close-btn"
             >
               ×
             </button>
-            <h2 style={{ margin: '0 0 20px' }}>Shopping Cart</h2>
+            <h2 className="cart-title">Shopping Cart</h2>
             {cart.length === 0 ? (
-              <p style={{ textAlign: 'center', opacity: 0.7, padding: '40px 0' }}>Your cart is empty</p>
+              <p className="cart-empty">Your cart is empty</p>
             ) : (
               <>
-                <div style={{ flex: 1, overflowY: 'auto', marginBottom: 20 }}>
+                <div className="cart-items">
                   {cart.map(item => {
                     const isSeatItem = item.type === 'seats';
                     return (
                       <div
                         key={item.id}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '12px 0',
-                          borderBottom: '1px solid rgba(255,255,255,0.1)'
-                        }}
+                        className={`cart-item-row${isPhone ? ' cart-item-row--phone' : ''}`}
                       >
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 'bold' }}>
+                        <div className="cart-item-info">
+                          <div className="cart-item-name">
                             {isSeatItem
                               ? `${item.title || 'Session'}${item.time ? ' · ' + item.time : ''}`
                               : item.name}
@@ -502,39 +454,23 @@ function App() {
                           {isSeatItem ? (
                             <>
                               {item.cinema && (
-                                <div style={{ fontSize: 13, opacity: 0.8, marginTop: 2 }}>
+                                <div className="cart-item-cinema">
                                   {item.cinema}
                                 </div>
                               )}
-                              <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>
+                              <div className="cart-item-seats-label">
                                 Seats:
                               </div>
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
+                              <div className="cart-seat-chips">
                                 {item.seats?.map((seatLabel) => (
                                   <span
                                     key={seatLabel}
-                                    style={{
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      gap: 6,
-                                      background: 'rgba(255,255,255,0.08)',
-                                      borderRadius: 999,
-                                      padding: '4px 10px',
-                                      fontSize: 13,
-                                    }}
+                                    className="cart-seat-chip"
                                   >
                                     {seatLabel}
                                     <button
                                       onClick={() => removeSeatFromCartItem(item.id, seatLabel)}
-                                      style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        color: '#fff',
-                                        cursor: 'pointer',
-                                        fontSize: 14,
-                                        lineHeight: 1,
-                                        padding: 0,
-                                      }}
+                                      className="cart-seat-remove"
                                       aria-label={`Remove seat ${seatLabel}`}
                                     >
                                       ×
@@ -542,75 +478,46 @@ function App() {
                                   </span>
                                 ))}
                               </div>
-                              <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>
+                              <div className="cart-seat-price-note">
                                 €{item.price} per seat
                               </div>
                             </>
                           ) : (
-                            <div style={{ fontSize: 14, opacity: 0.8, marginTop: 4 }}>
+                            <div className="cart-item-unit-price">
                               {item.price} € each
                             </div>
                           )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div className={`cart-item-actions${isPhone ? ' cart-item-actions--phone' : ''}`}>
                           {isSeatItem ? (
-                            <div style={{ fontSize: 14, opacity: 0.85 }}>
+                            <div className="cart-seat-qty">
                               × {item.quantity} seat{item.quantity > 1 ? 's' : ''}
                             </div>
                           ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div className="cart-qty-controls">
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                style={{
-                                  background: 'rgba(255,255,255,0.15)',
-                                  border: 'none',
-                                  color: '#fff',
-                                  width: 24,
-                                  height: 24,
-                                  borderRadius: 4,
-                                  cursor: 'pointer',
-                                  fontSize: 16,
-                                  fontWeight: 'bold'
-                                }}
+                                className="cart-qty-btn"
                               >
                                 −
                               </button>
-                              <span style={{ minWidth: 20, textAlign: 'center', fontSize: 15 }}>
+                              <span className="cart-qty-value">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                style={{
-                                  background: 'rgba(255,255,255,0.15)',
-                                  border: 'none',
-                                  color: '#fff',
-                                  width: 24,
-                                  height: 24,
-                                  borderRadius: 4,
-                                  cursor: 'pointer',
-                                  fontSize: 16,
-                                  fontWeight: 'bold'
-                                }}
+                                className="cart-qty-btn"
                               >
                                 +
                               </button>
                             </div>
                           )}
-                          <span style={{ fontWeight: 'bold', minWidth: 60, textAlign: 'right' }}>
+                          <span className="cart-item-total">
                             {(item.price * item.quantity).toFixed(2)} €
                           </span>
                           <button
                             onClick={() => removeFromCart(item.id)}
-                            style={{
-                              background: 'rgba(255,255,255,0.1)',
-                              border: 'none',
-                              color: '#fff',
-                              width: 24,
-                              height: 24,
-                              borderRadius: 4,
-                              cursor: 'pointer',
-                              fontSize: 16
-                            }}
+                            className="cart-remove-btn"
                           >
                             ×
                           </button>
@@ -619,24 +526,13 @@ function App() {
                     );
                   })}
                 </div>
-                <div style={{ borderTop: '2px solid rgba(255,255,255,0.2)', paddingTop: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
+                <div className="cart-summary">
+                  <div className="cart-total-row">
                     <span>Total:</span>
                     <span>{getTotalPrice().toFixed(2)} €</span>
                   </div>
                   <button
-                    style={{
-                      width: '100%',
-                      background: '#fff',
-                      color: '#18122b',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '12px 24px',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      cursor: cart.length === 0 ? 'not-allowed' : 'pointer',
-                      opacity: cart.length === 0 ? 0.4 : 1,
-                    }}
+                    className="cart-checkout-btn"
                     disabled={cart.length === 0}
                     onClick={() => {
                       if (cart.length === 0) return;
@@ -655,93 +551,60 @@ function App() {
 
       {selectedGenre && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
+          className="genre-overlay"
           onClick={() => { setSelectedGenre(null); setSelectedMovie(null); }}
         >
           <div
-            style={{
-              background: '#0b0b0d',
-              color: '#fff',
-              borderRadius: 12,
-              minWidth: 540,
-              maxWidth: 1100,
-              width: '90vw',
-              padding: 28,
-              maxHeight: '85vh',
-              overflowY: 'auto',
-              boxSizing: 'border-box',
-              boxShadow: '0 12px 60px rgba(0,0,0,0.7)',
-              position: 'relative'
-            }}
+            className={`genre-modal${isPhone ? ' genre-modal--phone' : ''}`}
             onClick={e => e.stopPropagation()}
           >
             <button
               onClick={() => { setSelectedGenre(null); setSelectedMovie(null); }}
-              style={{
-                position: 'absolute',
-                top: 10,
-                right: 12,
-                background: 'transparent',
-                border: 'none',
-                color: '#fff',
-                fontSize: 22,
-                cursor: 'pointer'
-              }}
+              className="genre-close-btn"
             >
               ×
             </button>
-            <h3 style={{ marginTop: 0 }}>{selectedGenre}</h3>
+            <h3 className="genre-title">{selectedGenre}</h3>
             {genreLoading ? (
-              <div style={{ padding: 24, opacity: 0.8 }}>Loading movies...</div>
+              <div className="genre-status">Loading movies...</div>
             ) : selectedMovie ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                    <div style={{ flex: '0 0 auto' }}>
+              <div className="genre-content">
+                <div className="genre-main">
+                  <div className="genre-poster-col">
                     <Link
                       to={`/movie/${selectedMovie.id}`}
                       onClick={() => { setSelectedGenre(null); setSelectedMovie(null); setSelectedMovies([]); }}
-                      style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+                      className="genre-link-reset"
                     >
-                        <img src={getPosterUrl(selectedMovie.poster, 'w780')} alt={selectedMovie.title} style={{ flex: '0 0 320px', width: '100%', maxWidth: 360, borderRadius: 8, boxShadow: '0 8px 28px rgba(0,0,0,0.6)' }} />
+                      <img src={getPosterSrc(selectedMovie.poster, 'w780')} alt={selectedMovie.title} className="genre-main-poster" />
                     </Link>
                   </div>
-                    <div style={{ flex: 1, minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word', maxHeight: '70vh', overflowY: 'auto', paddingRight: 6 }}>
+                  <div className="genre-details">
                     <Link
                       to={`/movie/${selectedMovie.id}`}
                       onClick={() => { setSelectedGenre(null); setSelectedMovie(null); setSelectedMovies([]); }}
-                      style={{ textDecoration: 'none', color: 'inherit' }}
+                      className="genre-link-reset"
                     >
-                        <h2 style={{ margin: '0 0 8px', fontSize: 'clamp(20px, 4vw, 30px)' }}>{selectedMovie.title}</h2>
+                      <h2 className="genre-main-title">{selectedMovie.title}</h2>
                     </Link>
-                    <div style={{ opacity: 0.85, fontSize: 14, marginBottom: 12 }}>{selectedMovie.genre}</div>
-                      <p style={{ marginTop: 8, opacity: 0.95, lineHeight: 1.5, overflowWrap: 'break-word', wordBreak: 'break-word' }}>{selectedMovie.overview}</p>
+                    <div className="genre-main-meta">{selectedMovie.genre}</div>
+                    <p className="genre-main-overview">{selectedMovie.overview}</p>
                   </div>
                 </div>
 
                 {selectedMovies && selectedMovies.length > 1 && (
-                  <div>
-                    <div style={{ marginBottom: 8, color: '#ddd', fontSize: 14 }}>Also in this genre:</div>
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 6 }}>
+                  <div className="genre-more-section">
+                    <div className="genre-more-title">Also in this genre:</div>
+                    <div className="genre-more-list">
                       {selectedMovies.map((m) => (
-                        <div key={m.id} style={{ minWidth: 140, maxWidth: 180, cursor: 'pointer' }}>
+                        <div key={m.id} className="genre-more-item">
                           <Link
                             to={`/movie/${m.id}`}
                             onClick={() => { setSelectedGenre(null); setSelectedMovie(null); setSelectedMovies([]); }}
-                            style={{ textDecoration: 'none', color: 'inherit' }}
+                            className="genre-link-reset"
                           >
-                            <img src={getPosterUrl(m.poster, 'w342')} alt={m.title} style={{ width: '100%', borderRadius: 6, display: 'block', boxShadow: '0 6px 18px rgba(0,0,0,0.5)' }} />
-                            <div style={{ marginTop: 8, fontSize: 14, fontWeight: 600 }}>{m.title.length > 36 ? m.title.substring(0,36)+'…' : m.title}</div>
+                            <img src={getPosterSrc(m.poster, 'w342')} alt={m.title} className="genre-more-poster" />
+                            <div className="genre-more-name">{m.title.length > 36 ? m.title.substring(0,36)+'…' : m.title}</div>
                           </Link>
                         </div>
                       ))}
@@ -750,7 +613,7 @@ function App() {
                 )}
               </div>
             ) : (
-              <div style={{ padding: 24, opacity: 0.8 }}>No movies found for this genre.</div>
+              <div className="genre-status">No movies found for this genre.</div>
             )}
           </div>
         </div>

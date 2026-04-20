@@ -268,7 +268,7 @@ export default function CheckoutPage({
           {header}
           <div className="checkout-payment-form">
             {stripeInitError && (
-              <p className="checkout-inline-note" style={{ color: "#fca5a5" }}>
+              <p className="checkout-inline-note checkout-inline-note--error">
                 {stripeInitError}
               </p>
             )}
@@ -382,7 +382,7 @@ export default function CheckoutPage({
             </div>
             <div className="checkout-modal__body">
               {stripeInitError && (
-                <p className="checkout-inline-note" style={{ color: "#fca5a5" }}>{stripeInitError}</p>
+                <p className="checkout-inline-note checkout-inline-note--error">{stripeInitError}</p>
               )}
               {stripeInitLoading && <p className="checkout-inline-note">Preparing secure card form...</p>}
               {stripePromise && stripeClientSecret && !stripeInitLoading && (
@@ -577,7 +577,7 @@ export default function CheckoutPage({
                       checked={paymentMethod === option.id}
                       onChange={() => handleSelectPayment(option.id)}
                     />
-                    <div className="checkout-payments__dot" style={{ background: option.accent }} />
+                    <div className={`checkout-payments__dot checkout-payments__dot--${option.id}`} />
                     <div className="checkout-payments__meta">
                       <div className="checkout-payments__title">{option.title}</div>
                       <div className="checkout-payments__desc">{option.description}</div>
@@ -601,7 +601,7 @@ export default function CheckoutPage({
                 By clicking “Pay”, you reserve seats and receive e-tickets by email and in your profile.
               </p>
               {status === "error" && (
-                <p className="checkout-disclaimer" style={{ color: "#fca5a5" }}>
+                <p className="checkout-disclaimer checkout-disclaimer--error">
                   {bookingError}
                 </p>
               )}
