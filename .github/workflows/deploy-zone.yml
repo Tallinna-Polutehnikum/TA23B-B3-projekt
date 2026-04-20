@@ -84,7 +84,28 @@ jobs:
             exit 1
           fi
 
-          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          # Host key scan can fail transiently (DNS/network hiccup). Retry to avoid flaky deploy failures.
+          touch ~/.ssh/known_hosts
+          KEYSCAN_OK=""
+          for attempt in 1 2 3; do
+            if ssh-keyscan -T 10 -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/tmp/ssh-keyscan.err; then
+              KEYSCAN_OK="yes"
+              break
+            fi
+
+            echo "ssh-keyscan attempt $attempt failed for $SSH_HOST:$SSH_PORT"
+            if [ -s /tmp/ssh-keyscan.err ]; then
+              cat /tmp/ssh-keyscan.err
+            fi
+            sleep 2
+          done
+
+          if [ -z "$KEYSCAN_OK" ]; then
+            echo "Unable to add SSH host key to known_hosts after retries."
+            echo "DNS resolution for $SSH_HOST:"
+            getent ahosts "$SSH_HOST" | awk '{print $1}' | sort -u || true
+            exit 1
+          fi
 
       - name: Verify SSH auth
         run: |
