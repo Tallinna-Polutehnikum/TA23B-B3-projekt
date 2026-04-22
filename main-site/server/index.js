@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import PDFDocument from 'pdfkit';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -54,6 +55,25 @@ const STRIPE_ENABLED = Boolean(stripe);
 if (!STRIPE_ENABLED) {
   console.warn('Stripe is not configured. Set STRIPE_SECRET_KEY to enable live PaymentIntents.');
 }
+
+const SMTP_HOST = process.env.SMTP_HOST || '';
+const SMTP_PORT = Number(process.env.SMTP_PORT || 0) || 0;
+const SMTP_USER = process.env.SMTP_USER || process.env.SMTP_USERNAME || '';
+const SMTP_PASS = process.env.SMTP_PASS || process.env.SMTP_PASSWORD || '';
+const SMTP_FROM = process.env.SMTP_FROM || 'tickets@absolute-cinema.local';
+const SMTP_ENABLED = Boolean(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS);
+
+const mailer = SMTP_ENABLED
+  ? nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS,
+      },
+    })
+  : null;
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS payment_tx (
@@ -292,6 +312,42 @@ function groupHallsByCinema(halls) {
       halls: cinemaHalls.sort((a, b) => a.id - b.id)
     }))
     .sort((a, b) => a.cinemaId - b.cinemaId);
+}
+
+async function sendTicketEmail({ to, name, session, seats }) {
+  if (!SMTP_ENABLED || !mailer) {
+    console.warn('SMTP is not configured; skipping ticket email');
+    return { sent: false, reason: 'smtp-not-configured' };
+  }
+
+  if (!to || !String(to).includes('@')) {
+    return { sent: false, reason: 'invalid-recipient' };
+  }
+
+  const subject = `Your tickets for ${session.movieTitle} on ${session.date} ${session.time}`;
+
+  const lines = [
+    name ? `Hi ${name},` : 'Hi,',
+    '',
+    'Here are your cinema tickets:',
+    `Movie: ${session.movieTitle}`,
+    `Date & Time: ${session.date} ${session.time}`,
+    `Cinema: ${session.cinemaName}`,
+    `Hall: ${session.hallNumber}`,
+    `Seats: ${seats.join(', ')}`,
+    '',
+    'Show this email at the entrance. Enjoy your movie!',
+    'Absolute Cinema'
+  ];
+
+  await mailer.sendMail({
+    from: SMTP_FROM,
+    to,
+    subject,
+    text: lines.join('\n'),
+  });
+
+  return { sent: true };
 }
 
 function seedUpcomingSessionsForMovie(movieId) {
@@ -793,10 +849,10 @@ app.get('/api/sessions/:id/seats', (req, res) => {
   });
 });
 
-// Book seats for a session
-app.post('/api/sessions/:id/book', (req, res) => {
+// Book seats for a session and optionally send tickets via email
+app.post('/api/sessions/:id/book', async (req, res) => {
   const sessionId = Number(req.params.id);
-  const { seatIds, userId } = req.body || {};
+  const { seatIds, userId, contactEmail, contactName } = req.body || {};
   const auth = getAuthUser(req);
   const effectiveUserId = userId ?? auth?.user?.id ?? null;
 
@@ -863,10 +919,54 @@ app.post('/api/sessions/:id/book', (req, res) => {
       WHERE id = ?
     `).get(sessionId);
 
+    // Gather session and seat details for email receipt
+    const sessionDetails = db.prepare(`
+      SELECT
+        s.date,
+        s.time,
+        m.title AS movie_title,
+        COALESCE(c.name, 'Cinema') AS cinema_name,
+        COALESCE(h.hall_number, s.hall, 'N/A') AS hall_number
+      FROM sessions s
+      LEFT JOIN movie m ON m.id = s.movie_id
+      LEFT JOIN cinema c ON c.id = s.cinema_id
+      LEFT JOIN hall h ON h.id = s.hall_id
+      WHERE s.id = ?
+      LIMIT 1
+    `).get(sessionId);
+
+    const seatRows = db.prepare(`
+      SELECT seat_number
+      FROM seat
+      WHERE id IN (${placeholders})
+    `).all(...seatIds);
+
+    const seatLabels = seatRows.map((row) => row.seat_number).filter(Boolean);
+
+    if (contactEmail && sessionDetails) {
+      try {
+        await sendTicketEmail({
+          to: contactEmail,
+          name: contactName,
+          session: {
+            movieTitle: sessionDetails.movie_title || 'Movie',
+            date: sessionDetails.date,
+            time: sessionDetails.time,
+            cinemaName: sessionDetails.cinema_name,
+            hallNumber: sessionDetails.hall_number,
+          },
+          seats: seatLabels,
+        });
+      } catch (mailErr) {
+        console.error('Failed to send ticket email:', mailErr);
+      }
+    }
+
     res.status(201).json({
       sessionId,
       seatsBooked: seatIds,
-      seatsRemaining: remaining?.seats ?? null
+      seatsRemaining: remaining?.seats ?? null,
+      emailed: Boolean(contactEmail && sessionDetails),
     });
   } catch (err) {
     console.error('Error booking seats:', err);

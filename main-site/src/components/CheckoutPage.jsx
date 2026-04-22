@@ -445,7 +445,12 @@ export default function CheckoutPage({
                           "Content-Type": "application/json",
                           ...(authTokenForSeats ? { Authorization: `Bearer ${authTokenForSeats}` } : {}),
                         },
-                        body: JSON.stringify({ seatIds, userId: null }),
+                        body: JSON.stringify({
+                          seatIds,
+                          userId: null,
+                          contactEmail: contact.email,
+                          contactName: contact.name,
+                        }),
                       });
 
                       let payload = null;
@@ -593,7 +598,7 @@ export default function CheckoutPage({
               <button
                 type="submit"
                 className="checkout-submit"
-                disabled={!acceptedTerms || cartIsEmpty || isProcessing || !paymentMethod || status === "success"}
+                disabled={!acceptedTerms || cartIsEmpty || isProcessing || !paymentMethod || status === "success" || !contact.email}
               >
                 {isProcessing ? "Processing..." : `Pay ${formatPrice(totalPrice)}`}
               </button>
