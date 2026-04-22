@@ -8,6 +8,7 @@ import PDFDocument from 'pdfkit';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
+import QRCode from 'qrcode';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -81,6 +82,17 @@ const mailer = SMTP_ENABLED
       },
     })
   : null;
+
+if (SMTP_ENABLED && mailer) {
+  mailer
+    .verify()
+    .then(() => {
+      console.log(`SMTP connection verified (${SMTP_HOST}:${SMTP_PORT})`);
+    })
+    .catch((err) => {
+      console.error('SMTP verification failed:', err?.message || err);
+    });
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS payment_tx (
@@ -384,7 +396,7 @@ function groupHallsByCinema(halls) {
     .sort((a, b) => a.cinemaId - b.cinemaId);
 }
 
-async function sendTicketEmail({ to, name, session, seats }) {
+async function sendTicketEmail({ to, name, session, seats, passUrl }) {
   if (!SMTP_ENABLED || !mailer) {
     console.warn('SMTP is not configured; skipping ticket email');
     return { sent: false, reason: 'smtp-not-configured' };
@@ -399,25 +411,76 @@ async function sendTicketEmail({ to, name, session, seats }) {
   const lines = [
     name ? `Hi ${name},` : 'Hi,',
     '',
+    'Thank you for choosing Absolute Cinema and buying your ticket with us.',
+    'We are happy to see you and hope you enjoy the movie!',
+    '',
     'Here are your cinema tickets:',
     `Movie: ${session.movieTitle}`,
     `Date & Time: ${session.date} ${session.time}`,
     `Cinema: ${session.cinemaName}`,
     `Hall: ${session.hallNumber}`,
     `Seats: ${seats.join(', ')}`,
+    passUrl ? `Your QR pass link: ${passUrl}` : '',
     '',
     'Show this email at the entrance. Enjoy your movie!',
     'Absolute Cinema'
-  ];
+  ].filter(Boolean);
 
-  await mailer.sendMail({
-    from: SMTP_FROM,
-    to,
-    subject,
-    text: lines.join('\n'),
-  });
+  let qrPngBuffer = null;
+  if (passUrl) {
+    try {
+      qrPngBuffer = await QRCode.toBuffer(passUrl, {
+        type: 'png',
+        width: 280,
+        margin: 2,
+      });
+    } catch (err) {
+      console.error('QR generation failed:', err?.message || err);
+    }
+  }
 
-  return { sent: true };
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.45;color:#111;">
+      <p>${name ? `Hi ${name},` : 'Hi,'}</p>
+      <p>Thank you for choosing Absolute Cinema and buying your ticket with us.</p>
+      <p>We are happy to see you and hope you enjoy the movie.</p>
+      <p><strong>Movie:</strong> ${session.movieTitle}<br/>
+      <strong>Date & Time:</strong> ${session.date} ${session.time}<br/>
+      <strong>Cinema:</strong> ${session.cinemaName}<br/>
+      <strong>Hall:</strong> ${session.hallNumber}<br/>
+      <strong>Seats:</strong> ${seats.join(', ')}</p>
+      ${passUrl ? `<p><strong>Your pass link:</strong> <a href="${passUrl}">${passUrl}</a></p>` : ''}
+      ${qrPngBuffer ? '<p><strong>QR for your ticket pass:</strong><br/><img src="cid:ticket-pass-qr" alt="Ticket pass QR code" width="220" height="220"/></p>' : ''}
+      <p>Show this email or the QR code at the entrance.</p>
+      <p>Absolute Cinema</p>
+    </div>
+  `;
+
+  try {
+    await mailer.sendMail({
+      from: SMTP_FROM,
+      to,
+      subject,
+      text: lines.join('\n'),
+      html,
+      attachments: qrPngBuffer
+        ? [
+            {
+              filename: 'ticket-pass-qr.png',
+              content: qrPngBuffer,
+              cid: 'ticket-pass-qr',
+            },
+          ]
+        : [],
+    });
+    return { sent: true };
+  } catch (err) {
+    console.error('Ticket email send failed:', err?.message || err);
+    return {
+      sent: false,
+      reason: String(err?.code || err?.responseCode || 'smtp-send-failed'),
+    };
+  }
 }
 
 function _seedUpcomingSessionsForMovie(movieId) {
@@ -950,6 +1013,8 @@ app.post('/api/sessions/:id/book', async (req, res) => {
   const { seatIds, userId, contactEmail, contactName } = req.body || {};
   const auth = getAuthUser(req);
   const effectiveUserId = userId ?? auth?.user?.id ?? null;
+  const recipientEmail = String(contactEmail || auth?.user?.email || '').trim().toLowerCase();
+  const recipientName = String(contactName || auth?.user?.username || '').trim();
 
   if (!sessionId || !Array.isArray(seatIds) || seatIds.length === 0) {
     return res.status(400).json({ message: 'sessionId and seatIds[] are required' });
@@ -1014,46 +1079,67 @@ app.post('/api/sessions/:id/book', async (req, res) => {
       WHERE id = ?
     `).get(sessionId);
 
-    // Gather session and seat details for email receipt
-    const sessionDetails = db.prepare(`
-      SELECT
-        s.date,
-        s.time,
-        m.title AS movie_title,
-        COALESCE(c.name, 'Cinema') AS cinema_name,
-        COALESCE(h.hall_number, s.hall, 'N/A') AS hall_number
-      FROM sessions s
-      LEFT JOIN movie m ON m.id = s.movie_id
-      LEFT JOIN cinema c ON c.id = s.cinema_id
-      LEFT JOIN hall h ON h.id = s.hall_id
-      WHERE s.id = ?
-      LIMIT 1
-    `).get(sessionId);
-
-    const seatRows = db.prepare(`
-      SELECT seat_number
-      FROM seat
-      WHERE id IN (${placeholders})
-    `).all(...seatIds);
-
-    const seatLabels = seatRows.map((row) => row.seat_number).filter(Boolean);
-
-    if (contactEmail && sessionDetails) {
+    let emailResult = { sent: false, reason: 'not-requested' };
+    if (recipientEmail) {
       try {
-        await sendTicketEmail({
-          to: contactEmail,
-          name: contactName,
-          session: {
-            movieTitle: sessionDetails.movie_title || 'Movie',
-            date: sessionDetails.date,
-            time: sessionDetails.time,
-            cinemaName: sessionDetails.cinema_name,
-            hallNumber: sessionDetails.hall_number,
-          },
-          seats: seatLabels,
-        });
+        const passUrl = effectiveUserId
+          ? (() => {
+              const exp = Date.now() + PASS_LINK_TTL_MS;
+              const token = signPassToken({
+                userId: effectiveUserId,
+                exp,
+              });
+              return `${req.protocol}://${req.get('host')}/api/profile/tickets-pass.pdf?token=${encodeURIComponent(token)}`;
+            })()
+          : null;
+
+        const hallNumberExpr = hasSessionHallColumn
+          ? `COALESCE(h.hall_number, s.hall, 'N/A')`
+          : `COALESCE(h.hall_number, 'N/A')`;
+
+        const sessionDetails = db.prepare(`
+          SELECT
+            s.date,
+            s.time,
+            m.title AS movie_title,
+            COALESCE(c.name, 'Cinema') AS cinema_name,
+            ${hallNumberExpr} AS hall_number
+          FROM sessions s
+          LEFT JOIN movie m ON m.id = s.movie_id
+          LEFT JOIN cinema c ON c.id = s.cinema_id
+          LEFT JOIN hall h ON h.id = s.hall_id
+          WHERE s.id = ?
+          LIMIT 1
+        `).get(sessionId);
+
+        if (!sessionDetails) {
+          emailResult = { sent: false, reason: 'session-not-found-for-email' };
+        } else {
+          const seatRows = db.prepare(`
+            SELECT seat_number
+            FROM seat
+            WHERE id IN (${placeholders})
+          `).all(...seatIds);
+
+          const seatLabels = seatRows.map((row) => row.seat_number).filter(Boolean);
+
+          emailResult = await sendTicketEmail({
+            to: recipientEmail,
+            name: recipientName,
+            session: {
+              movieTitle: sessionDetails.movie_title || 'Movie',
+              date: sessionDetails.date,
+              time: sessionDetails.time,
+              cinemaName: sessionDetails.cinema_name,
+              hallNumber: sessionDetails.hall_number,
+            },
+            seats: seatLabels,
+            passUrl,
+          });
+        }
       } catch (mailErr) {
-        console.error('Failed to send ticket email:', mailErr);
+        console.error('Failed to prepare or send ticket email:', mailErr);
+        emailResult = { sent: false, reason: 'email-flow-failed' };
       }
     }
 
@@ -1061,7 +1147,8 @@ app.post('/api/sessions/:id/book', async (req, res) => {
       sessionId,
       seatsBooked: seatIds,
       seatsRemaining: remaining?.seats ?? null,
-      emailed: Boolean(contactEmail && sessionDetails),
+      emailed: emailResult.sent,
+      emailReason: emailResult.reason,
     });
   } catch (err) {
     console.error('Error booking seats:', err);

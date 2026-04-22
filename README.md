@@ -112,6 +112,27 @@ npm.cmd run dev
 Main site default URL:
 - http://localhost:5173
 
+### 7.1 Configure e-ticket email sending (SMTP)
+
+To send tickets automatically after successful booking, create file:
+
+- `main-site/.env.local`
+
+Add these variables:
+
+```env
+SMTP_HOST=smtp.your-provider.com
+SMTP_PORT=587
+SMTP_USER=your_smtp_login
+SMTP_PASS=your_smtp_password
+SMTP_FROM="Absolute Cinema <tickets@your-domain.com>"
+```
+
+Notes:
+- For SSL SMTP, usually use `SMTP_PORT=465`.
+- If SMTP variables are missing, booking still works, but email is skipped.
+- The checkout form email is used as recipient automatically.
+
 ### Terminal 3: Admin Worker Site
 
 ```powershell

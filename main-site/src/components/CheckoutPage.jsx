@@ -211,7 +211,12 @@ export default function CheckoutPage({
             "Content-Type": "application/json",
             ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
           },
-          body: JSON.stringify({ seatIds, userId: null }),
+          body: JSON.stringify({
+            seatIds,
+            userId: null,
+            contactEmail: contact.email,
+            contactName: contact.name,
+          }),
         });
 
         let payload = null;
