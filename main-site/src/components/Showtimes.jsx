@@ -56,7 +56,7 @@ export default function Showtimes({ addSeatsToCart }) {
           }
         });
         setAvailableGenres(Array.from(genres).sort());
-        setActiveDay((prev) => prev || pickInitialDay(data, selectedMovieId));
+        setActiveDay((prev) => prev || pickInitialDay(data, null));
       })
       .catch((err) => console.error('Failed to load sessions', err));
   }, []);
@@ -113,7 +113,7 @@ export default function Showtimes({ addSeatsToCart }) {
     const nextAvailable = dates.find((d) => d >= todayKey) || dates[0];
     setActiveDay(nextAvailable);
     sessionStorage.setItem('activeDay', nextAvailable);
-  }, [sessions, selectedMovieId, selectedCity, selectedGenre]);
+  }, [sessions, selectedMovieId, selectedCity, selectedGenre, activeDay]);
 
   // User can freely switch days; no auto-reset to avoid interfering with manual selection
 

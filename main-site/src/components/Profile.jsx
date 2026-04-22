@@ -158,7 +158,7 @@ export default function Profile() {
     };
 
     verify();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const loadAccountOverview = async () => {

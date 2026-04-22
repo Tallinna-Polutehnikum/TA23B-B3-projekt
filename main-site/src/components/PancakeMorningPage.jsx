@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "./PancakeMorningPage.css";
 import hero2 from "../assets/HeroBanner/hero2.jpg";
-import hero3 from "../assets/HeroBanner/hero3.jpg";
 import hero4 from "../assets/HeroBanner/hero4.jpg";
 
 const featureItems = [

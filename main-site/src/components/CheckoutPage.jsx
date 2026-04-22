@@ -33,13 +33,6 @@ const paymentOptions = [
 
 const formatPrice = (value) => `${value.toFixed(2)} €`;
 
-const paymentProviderByMethod = {
-  card: "stripe",
-  applepay: null,
-  googlepay: null,
-  cash: null,
-};
-
 function StripeCardFields({ clientSecret, onReady }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -185,7 +178,6 @@ export default function CheckoutPage({
 
     const seatItems = cart.filter((item) => item.type === "seats");
     const authToken = localStorage.getItem("ac_auth_token");
-    const provider = paymentProviderByMethod[paymentMethod] ?? null;
 
     setIsProcessing(true);
     setBookingError("");

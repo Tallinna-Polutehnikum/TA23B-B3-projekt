@@ -119,12 +119,6 @@ const adminEmailLookup = new Map(
   ADMIN_USERS.map((entry) => [entry.email.toLowerCase(), entry.username])
 );
 
-const markAdminByEmail = db.prepare(`
-  UPDATE user
-  SET is_admin = 1
-  WHERE lower(email) = lower(?)
-`);
-
 const upsertAdminNameByEmail = db.prepare(`
   UPDATE user
   SET username = ?, is_admin = 1
@@ -426,7 +420,7 @@ async function sendTicketEmail({ to, name, session, seats }) {
   return { sent: true };
 }
 
-function seedUpcomingSessionsForMovie(movieId) {
+function _seedUpcomingSessionsForMovie(movieId) {
   const sessionColumns = db.prepare(`PRAGMA table_info(sessions)`).all();
   const hasHallTextColumn = sessionColumns.some((col) => col.name === 'hall');
 
@@ -925,8 +919,6 @@ app.get('/api/sessions/:id/seats', (req, res) => {
   });
 });
 
-// Book seats for a session and optionally send tickets via email
-app.post('/api/sessions/:id/book', async (req, res) => {
 app.get('/api/admin/stats', (_req, res) => {
   try {
     const activeTickets = db.prepare(`
@@ -953,7 +945,7 @@ app.get('/api/admin/stats', (_req, res) => {
 });
 
 // Book seats for a session
-app.post('/api/sessions/:id/book', (req, res) => {
+app.post('/api/sessions/:id/book', async (req, res) => {
   const sessionId = Number(req.params.id);
   const { seatIds, userId, contactEmail, contactName } = req.body || {};
   const auth = getAuthUser(req);
@@ -1616,7 +1608,7 @@ app.post('/api/payments/mock-confirm', (req, res) => {
 });
 
 app.post('/api/movies', (req, res) => {
-  const { title, originalTitle, overview, poster, duration, genre, directors, releaseDate } = req.body;
+  const { title, overview, poster, duration, genre, directors } = req.body;
 
   // Validate required fields
   if (!title || !overview || !poster || !duration) {
@@ -1859,8 +1851,6 @@ app.put('/api/sessions/:id', (req, res) => {
     }
 
     let resolvedHallId = existing.hall_id;
-    let resolvedHallNumber = null;
-
     if (hallId !== undefined) {
       const hallRow = db.prepare(`SELECT id, hall_number, cinema_id FROM hall WHERE id = ?`).get(hallId);
       if (!hallRow) return res.status(400).json({ message: 'Invalid hallId' });
@@ -1872,14 +1862,10 @@ app.put('/api/sessions/:id', (req, res) => {
         }
       }
       resolvedHallId = hallRow.id;
-      resolvedHallNumber = hallRow.hall_number;
     } else if (cinemaId !== undefined && resolvedHallId) {
       const hallRow = db.prepare(`SELECT id, hall_number, cinema_id FROM hall WHERE id = ?`).get(resolvedHallId);
       if (hallRow && hallRow.cinema_id !== resolvedCinemaId) {
         return res.status(400).json({ message: 'Current hall does not belong to the new cinema. Please choose a hall.' });
-      }
-      if (hallRow) {
-        resolvedHallNumber = hallRow.hall_number;
       }
     }
 

@@ -11,7 +11,7 @@
       const r = await fetch(url);
       console.log(' status', r.status);
       const text = await r.text();
-      try{ console.log(' body (json):', JSON.parse(text)); }catch(e){ console.log(' body (text):', text.substring(0,300)); }
+      try{ console.log(' body (json):', JSON.parse(text)); }catch{ console.log(' body (text):', text.substring(0,300)); }
     }
   }catch(e){ console.error(e); }
 })();
