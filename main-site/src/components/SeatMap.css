@@ -223,6 +223,10 @@
   font-weight: 600;
 }
 
+.selected-seats-empty {
+  color: #999;
+}
+
 .seat-map-actions {
   display: flex;
   gap: 12px;

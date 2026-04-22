@@ -1,22 +1,17 @@
 import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "./BirthdayPage.css";
-import hero1 from "../assets/HeroBanner/hero1.jpg";
-import hero2 from "../assets/HeroBanner/hero2.jpg";
-import hero3 from "../assets/HeroBanner/hero3.jpg";
-import hero4 from "../assets/HeroBanner/hero4.jpg";
 
 const BirthdayPage = () => {
   const [params] = useSearchParams();
-  const slides = useMemo(() => [hero1, hero2, hero3, hero4], []);
+  const slides = useMemo(() => [1, 2, 3, 4], []);
   const slideIndex = Number(params.get("slide")) || 1;
-  const heroImage = slides[Number.isNaN(slideIndex) ? 1 : Math.max(0, Math.min(slides.length - 1, slideIndex))];
+  const heroVariant = slides[Number.isNaN(slideIndex) ? 1 : Math.max(0, Math.min(slides.length - 1, slideIndex))];
 
   return (
     <div className="birthday-page">
       <section
-        className="birthday-hero"
-        style={{ backgroundImage: `linear-gradient(115deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.5) 42%, rgba(10,0,26,0.15) 74%), url(${heroImage})` }}
+        className={`birthday-hero birthday-hero--${heroVariant}`}
       >
         <div className="birthday-hero__copy">
           <span className="birthday-hero__eyebrow">Absolute Cinema Mustamäe</span>

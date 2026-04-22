@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "./FamilyScreeningPage.css";
-import hero1 from "../assets/HeroBanner/hero1.jpg";
 import hero2 from "../assets/HeroBanner/hero2.jpg";
 import hero3 from "../assets/HeroBanner/hero3.jpg";
 import hero4 from "../assets/HeroBanner/hero4.jpg";
@@ -31,16 +30,15 @@ const featureItems = [
 
 const FamilyScreeningPage = () => {
   const [params] = useSearchParams();
-  const slides = useMemo(() => [hero1, hero2, hero3, hero4], []);
+  const slides = useMemo(() => [1, 2, 3, 4], []);
   const slideIndex = Number(params.get("slide")) || 0;
-  const heroImage = slides[Number.isNaN(slideIndex) ? 0 : Math.max(0, Math.min(slides.length - 1, slideIndex))];
+  const heroVariant = slides[Number.isNaN(slideIndex) ? 0 : Math.max(0, Math.min(slides.length - 1, slideIndex))];
   const gallery = useMemo(() => [hero2, hero3, hero4], []);
 
   return (
     <div className="family-page">
       <section
-        className="family-hero"
-        style={{ backgroundImage: `linear-gradient(110deg, rgba(10,0,26,0.9) 0%, rgba(10,0,26,0.45) 48%, rgba(10,0,26,0.1) 76%), url(${heroImage})` }}
+        className={`family-hero family-hero--${heroVariant}`}
       >
         <div className="family-hero__copy">
           <span className="family-hero__eyebrow">Family morning special</span>

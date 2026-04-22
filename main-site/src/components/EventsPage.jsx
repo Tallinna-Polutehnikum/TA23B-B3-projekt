@@ -1,10 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./EventsPage.css";
-import hero1 from "../assets/HeroBanner/hero1.jpg";
-import hero2 from "../assets/HeroBanner/hero2.jpg";
-import hero3 from "../assets/HeroBanner/hero3.jpg";
-import hero4 from "../assets/HeroBanner/hero4.jpg";
 
 const cards = [
   {
@@ -13,7 +9,7 @@ const cards = [
     descr: "Softer sound, dimmed lights, and two films in one morning for kids and parents.",
     cta: "Go to Family page",
     to: "/family",
-    img: hero1,
+    imageClass: "events-card--1",
   },
   {
     title: "Birthday Celebration",
@@ -21,7 +17,7 @@ const cards = [
     descr: "Pick a film, gather friends, and celebrate with party bundles and popcorn deals.",
     cta: "View birthday offer",
     to: "/birthday",
-    img: hero2,
+    imageClass: "events-card--2",
   },
   {
     title: "Arthouse & Festival Picks",
@@ -29,7 +25,7 @@ const cards = [
     descr: "Curated auteur cinema, award winners, and Black Nights Film Festival highlights.",
     cta: "Explore Väärtkino",
     to: "/vaartkino",
-    img: hero3,
+    imageClass: "events-card--3",
   },
   {
     title: "Pancake Morning",
@@ -37,7 +33,7 @@ const cards = [
     descr: "Sunday screenings with warm pancakes, gentle lighting, and playful intros.",
     cta: "See Pancake Morning",
     to: "/pancake-morning",
-    img: hero4,
+    imageClass: "events-card--4",
   },
 ];
 
@@ -57,7 +53,7 @@ const EventsPage = () => {
 
       <section className="events-list">
         {cards.map((card) => (
-          <article key={card.title} className="events-card" style={{ backgroundImage: `linear-gradient(120deg, rgba(10,0,26,0.82) 0%, rgba(10,0,26,0.55) 48%, rgba(10,0,26,0.22) 82%), url(${card.img})` }}>
+          <article key={card.title} className={`events-card ${card.imageClass}`}>
             <div className="events-card__body">
               <span className="events-card__eyebrow">{card.eyebrow}</span>
               <h2 className="events-card__title">{card.title}</h2>

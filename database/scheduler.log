@@ -18,3 +18,33 @@ Sessions inserted: 0
 Sessions updated: 0
 Slots locked by tickets: 2
 Scheduler finished.
+Running session scheduler...
+Using database: C:\Users\USER\TA23B-B3-projekt\database\db.sqlite
+Expired sessions deleted: 97
+Sessions deleted beyond 7 days: 0
+Duplicate sessions removed: 0
+Past times skipped: 100
+Sessions inserted: 100
+Sessions updated: 500
+Slots locked by tickets: 0
+Scheduler finished.
+Running session scheduler...
+Using database: C:\Users\USER\TA23B-B3-projekt\database\db.sqlite
+Expired sessions deleted: 100
+Sessions deleted beyond 7 days: 0
+Duplicate sessions removed: 0
+Past times skipped: 100
+Sessions inserted: 100
+Sessions updated: 500
+Slots locked by tickets: 0
+Scheduler finished.
+Running session scheduler...
+Using database: C:\Users\USER\TA23B-B3-projekt\database\db.sqlite
+Expired sessions deleted: 600
+Sessions deleted beyond 7 days: 0
+Duplicate sessions removed: 0
+Past times skipped: 125
+Sessions inserted: 575
+Sessions updated: 0
+Slots locked by tickets: 0
+Scheduler finished.

@@ -9,20 +9,33 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
   const [refresh, setRefresh] = useState(0)
   const [movieCount, setMovieCount] = useState(0)
+  const [activeSessionsCount, setActiveSessionsCount] = useState(0)
+  const [activeTicketsCount, setActiveTicketsCount] = useState(0)
 
   useEffect(() => {
-    const loadMovieCount = async () => {
+    const loadStats = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/movies')
-        if (response.ok) {
-          const movies = await response.json()
-          setMovieCount(movies.length)
+        const [moviesResponse, statsResponse] = await Promise.all([
+          fetch('http://localhost:4000/api/movies'),
+          fetch('http://localhost:4000/api/admin/stats')
+        ])
+
+        if (moviesResponse.ok) {
+          const movies = await moviesResponse.json()
+          setMovieCount(Array.isArray(movies) ? movies.length : 0)
+        }
+
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json()
+          setActiveSessionsCount(Number(stats.activeSessions || 0))
+          setActiveTicketsCount(Number(stats.activeTickets || 0))
         }
       } catch (error) {
-        console.error('Error loading movie count:', error)
+        console.error('Error loading admin stats:', error)
       }
     }
-    loadMovieCount()
+
+    loadStats()
   }, [refresh])
 
   const handleRefresh = () => {
@@ -121,8 +134,15 @@ export default function AdminDashboard() {
                 <div className="stat-card">
                   <div className="stat-icon">🎫</div>
                   <div className="stat-info">
-                    <div className="stat-value">156</div>
+                    <div className="stat-value">{activeSessionsCount}</div>
                     <div className="stat-label">Active Sessions</div>
+                  </div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">🎟️</div>
+                  <div className="stat-info">
+                    <div className="stat-value">{activeTicketsCount}</div>
+                    <div className="stat-label">Active Tickets</div>
                   </div>
                 </div>
                 <div className="stat-card">

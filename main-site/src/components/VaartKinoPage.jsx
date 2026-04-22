@@ -1,11 +1,6 @@
 import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "./VaartKinoPage.css";
-import hero1 from "../assets/HeroBanner/hero1.jpg";
-import hero2 from "../assets/HeroBanner/hero2.jpg";
-import hero3 from "../assets/HeroBanner/hero3.jpg";
-import hero4 from "../assets/HeroBanner/hero4.jpg";
-import heroPattern from "../assets/HeroBanner/hero-vaartkino-pattern.svg";
 
 const highlights = [
   { title: "Awarded & acclaimed", descr: "Festival hits, laurels, and critics' picks", icon: "award" },
@@ -45,20 +40,18 @@ const iconMap = {
 
 const VaartKinoPage = () => {
   const [params] = useSearchParams();
-  const slides = useMemo(() => [hero1, hero2, hero3, hero4], []);
+  const slides = useMemo(() => [1, 2, 3, 4], []);
   const rawIndex = Number(params.get("slide"));
   const slideIndex = Number.isNaN(rawIndex) ? 2 : rawIndex;
-  const heroImage = slides[Math.max(0, Math.min(slides.length - 1, slideIndex))];
+  const heroVariant = slides[Math.max(0, Math.min(slides.length - 1, slideIndex))];
   const cinemas = [
     { value: "all", label: "Tallinn · All cinemas" },
     { value: "ulemiste", label: "Tallinn · Ülemiste Absolute Cinema" },
     { value: "tartu", label: "Tartu · Tasku Absolute Cinema" },
   ];
-  const gradientHero = `linear-gradient(110deg, rgba(12,0,28,0.9) 0%, rgba(12,0,28,0.55) 46%, rgba(12,0,28,0.18) 78%), url(${heroPattern}), url(${heroImage})`;
-
   return (
     <div className="vaartkino-page">
-      <section className="vaartkino-hero" aria-label="Väärtkino landing page" style={{ backgroundImage: gradientHero }}>
+      <section className={`vaartkino-hero vaartkino-hero--${heroVariant}`} aria-label="Väärtkino landing page">
         <div className="vaartkino-hero__overlay" />
         <div className="vaartkino-hero__content">
           <span className="vaartkino-eyebrow">Absolute Cinema × PÖFF</span>
@@ -125,7 +118,7 @@ const VaartKinoPage = () => {
           </div>
         </div>
         <div className="vaartkino-info__visual" aria-label="Väärtkino kujundus">
-          <div className="vaartkino-collage" style={{ backgroundImage: `linear-gradient(140deg, rgba(10,0,26,0.72) 0%, rgba(10,0,26,0.4) 46%, rgba(10,0,26,0.8) 100%), url(${heroImage})` }}>
+          <div className={`vaartkino-collage vaartkino-collage--${heroVariant}`}>
             <div className="vaartkino-collage__tag">Väärtkino</div>
             <div className="vaartkino-collage__label">Absolute cinema</div>
           </div>

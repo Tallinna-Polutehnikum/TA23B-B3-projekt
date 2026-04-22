@@ -108,3 +108,57 @@
 
 .coming-soon .nav-button.prev { left:16px; }
 .coming-soon .nav-button.next { right:16px; }
+
+@media (max-width: 1100px) {
+    .coming-soon .scroll-outer {
+        padding: 0 56px;
+    }
+
+    .coming-soon .card {
+        flex: 0 0 calc((100% - 24px) / 2);
+        max-width: calc((100% - 24px) / 2);
+        height: 440px;
+    }
+}
+
+@media (max-width: 700px) {
+    .coming-soon .scroll-outer {
+        padding: 0;
+    }
+
+    .coming-soon .scroll-row {
+        gap: 14px;
+        padding: 8px 4px 10px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .coming-soon .card {
+        flex: 0 0 min(78vw, 280px);
+        max-width: min(78vw, 280px);
+        height: 400px;
+    }
+
+    .coming-soon .card .meta {
+        padding: 18px;
+    }
+
+    .coming-soon .card .meta h3 {
+        font-size: 18px;
+    }
+
+    .coming-soon .nav-button {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .coming-soon .card {
+        flex: 0 0 82vw;
+        max-width: 82vw;
+        height: 370px;
+    }
+
+    .coming-soon .card .meta {
+        padding: 14px;
+    }
+}

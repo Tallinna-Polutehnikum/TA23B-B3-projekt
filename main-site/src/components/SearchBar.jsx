@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SearchBar.css";
+import { getPosterSrc } from '../utils/movieUi';
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
@@ -96,7 +97,7 @@ export default function SearchBar() {
             >
               {suggestion.poster && (
                 <img
-                  src={`https://image.tmdb.org/t/p/w92${suggestion.poster}`}
+                  src={getPosterSrc(suggestion.poster, 'w92')}
                   alt=""
                   className="search-suggestion-poster"
                 />

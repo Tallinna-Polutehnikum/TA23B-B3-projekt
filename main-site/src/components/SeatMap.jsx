@@ -189,7 +189,7 @@ export default function SeatMap({ sessionId, onClose, onAddSeatsToCart, sessionM
                 </div>
               </>
             ) : (
-              <span style={{ color: '#999' }}>No seats selected</span>
+              <span className="selected-seats-empty">No seats selected</span>
             )}
           </div>
           <div className="seat-map-actions">

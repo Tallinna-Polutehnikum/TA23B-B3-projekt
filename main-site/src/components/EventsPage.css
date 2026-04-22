@@ -66,6 +66,11 @@
   align-items: flex-end;
 }
 
+.events-card--1 { background-image: linear-gradient(120deg, rgba(10,0,26,0.82) 0%, rgba(10,0,26,0.55) 48%, rgba(10,0,26,0.22) 82%), url("../assets/HeroBanner/hero1.jpg"); }
+.events-card--2 { background-image: linear-gradient(120deg, rgba(10,0,26,0.82) 0%, rgba(10,0,26,0.55) 48%, rgba(10,0,26,0.22) 82%), url("../assets/HeroBanner/hero2.jpg"); }
+.events-card--3 { background-image: linear-gradient(120deg, rgba(10,0,26,0.82) 0%, rgba(10,0,26,0.55) 48%, rgba(10,0,26,0.22) 82%), url("../assets/HeroBanner/hero3.jpg"); }
+.events-card--4 { background-image: linear-gradient(120deg, rgba(10,0,26,0.82) 0%, rgba(10,0,26,0.55) 48%, rgba(10,0,26,0.22) 82%), url("../assets/HeroBanner/hero4.jpg"); }
+
 .events-card__body {
   padding: 22px;
   display: flex;

@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './AllMovies.css';
-
-const toPoster = (poster) => {
-  if (!poster) return 'https://via.placeholder.com/300x450?text=No+Image';
-  return poster.startsWith('http') ? poster : `https://image.tmdb.org/t/p/w500${poster}`;
-};
+import { getPosterSrc } from '../utils/movieUi';
 
 export default function AllMovies() {
   const [movies, setMovies] = useState([]);
@@ -128,7 +124,7 @@ export default function AllMovies() {
           {filtered.map((movie) => (
             <Link key={movie.id} to={`/movie/${movie.id}`} className="movie-card">
               <div className="poster-wrap">
-                <img src={toPoster(movie.poster)} alt={movie.title} loading="lazy" />
+                <img src={getPosterSrc(movie.poster, 'w500')} alt={movie.title} loading="lazy" />
               </div>
               <div className="movie-meta">
                 <h3>{movie.title}</h3>

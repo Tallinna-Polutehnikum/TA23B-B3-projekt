@@ -226,13 +226,7 @@ export default function Showtimes({ addSeatsToCart }) {
                 value={selectedGenre}
                 onChange={(e) => setSelectedGenre(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'inherit',
-                  cursor: 'pointer',
-                  fontSize: 'inherit'
-                }}
+                className="showtimes-genre-select"
               >
                 <option value="All">All Genres</option>
                 {availableGenres.map((genre) => (
@@ -247,31 +241,13 @@ export default function Showtimes({ addSeatsToCart }) {
       </div>
 
       {selectedMovieId && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            margin: '16px 0',
-            padding: '12px 16px',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 12,
-          }}
-        >
-          <span style={{ opacity: 0.8 }}>
+        <div className="showtimes-movie-filter">
+          <span className="showtimes-movie-filter__text">
             Showing sessions for <strong>{movieFilterTitle || 'this movie'}</strong>
           </span>
           <button
             onClick={() => navigate('/showtime')}
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              color: 'inherit',
-              padding: '6px 12px',
-              borderRadius: 8,
-              cursor: 'pointer',
-            }}
+            className="showtimes-movie-filter__clear"
           >
             Clear filter
           </button>
@@ -289,7 +265,7 @@ export default function Showtimes({ addSeatsToCart }) {
             />
           ))
         ) : (
-          <div style={{ padding: '60px 20px', color: '#999', textAlign: 'center' }}>
+          <div className="showtimes-empty-state">
             No sessions found for the selected filters
           </div>
         )}

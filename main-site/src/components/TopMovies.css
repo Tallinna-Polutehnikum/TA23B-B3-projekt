@@ -97,6 +97,10 @@
     margin:0;
     font-size:14px;
     line-height:1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .top-movies .nav-button {
@@ -124,3 +128,61 @@
 
 .top-movies .nav-button.prev { left:16px; }
 .top-movies .nav-button.next { right:16px; }
+
+@media (max-width: 1100px) {
+    .top-movies .scroll-outer {
+        padding: 0 56px;
+    }
+
+    .top-movies .card {
+        flex: 0 0 calc((100% - 24px) / 2);
+        max-width: calc((100% - 24px) / 2);
+        height: 440px;
+    }
+}
+
+@media (max-width: 700px) {
+    .top-movies .scroll-outer {
+        padding: 0;
+    }
+
+    .top-movies .scroll-row {
+        gap: 14px;
+        padding: 8px 4px 10px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .top-movies .card {
+        flex: 0 0 min(78vw, 280px);
+        max-width: min(78vw, 280px);
+        height: 400px;
+    }
+
+    .top-movies .card .meta {
+        padding: 18px;
+    }
+
+    .top-movies .card .meta h3 {
+        font-size: 18px;
+    }
+
+    .top-movies .nav-button {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .top-movies .card {
+        flex: 0 0 82vw;
+        max-width: 82vw;
+        height: 370px;
+    }
+
+    .top-movies .card .meta {
+        padding: 14px;
+    }
+
+    .top-movies .card .meta p {
+        font-size: 13px;
+    }
+}
