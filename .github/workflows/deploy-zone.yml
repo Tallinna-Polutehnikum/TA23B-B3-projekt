@@ -17,7 +17,6 @@ env:
   EXPECTED_KEY_FINGERPRINT: SHA256:6UEtNBBFQNwC21yqWZJ+B3gIpqVBlpUnAR7wQJWL/nY
   DEPLOY_ROOT: /data02/virt137396/domeenid/www.spjo.eu/htdocs
   APP_DIR: /data02/virt137396/domeenid/www.spjo.eu/htdocs/main-site
-  ADMIN_APP_DIR: /data02/virt137396/domeenid/www.spjo.eu/htdocs/admin-worker-site
   DB_PATH: /data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite
   LOOPBACK_HOST: 127.2.63.196
   APP_PORT: "8080"
@@ -33,6 +32,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Build admin assets in CI
+        run: |
+          cd admin-worker-site
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          VITE_BASE_PATH=/admin/ VITE_API_BASE_URL= npm run build
 
       - name: Prepare SSH key
         env:
@@ -120,7 +129,7 @@ jobs:
 
       - name: Ensure remote directories
         run: |
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$APP_DIR' '$ADMIN_APP_DIR' '$DEPLOY_ROOT/database'"
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$APP_DIR' '$APP_DIR/admin-dist' '$DEPLOY_ROOT/database'"
 
       - name: Sync application files
         run: |
@@ -134,15 +143,11 @@ jobs:
             --exclude '.env.*' \
             main-site/ "$SSH_USER@$SSH_HOST:$APP_DIR/"
 
+      - name: Sync admin built assets
+        run: |
           rsync -az --delete \
             -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
-            --exclude '.git/' \
-            --exclude '.github/' \
-            --exclude 'node_modules/' \
-            --exclude 'dist/' \
-            --exclude '.env' \
-            --exclude '.env.*' \
-            admin-worker-site/ "$SSH_USER@$SSH_HOST:$ADMIN_APP_DIR/"
+            admin-worker-site/dist/ "$SSH_USER@$SSH_HOST:$APP_DIR/admin-dist/"
 
       - name: Sync database file
         if: env.SYNC_DB_ON_DEPLOY == 'true'
@@ -171,18 +176,8 @@ jobs:
 
       - name: Install, build and restart PM2
         run: |
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' ADMIN_APP_DIR='$ADMIN_APP_DIR' LOOPBACK_HOST='$LOOPBACK_HOST' APP_PORT='$APP_PORT' DB_PATH='$DB_PATH' APP_NAME='$APP_NAME' bash -se" <<'EOF'
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' LOOPBACK_HOST='$LOOPBACK_HOST' APP_PORT='$APP_PORT' DB_PATH='$DB_PATH' APP_NAME='$APP_NAME' bash -se" <<'EOF'
             set -e
-
-            cd "$ADMIN_APP_DIR"
-
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install
-            fi
-
-            VITE_BASE_PATH=/admin/ VITE_API_BASE_URL= npm run build
 
             cd "$APP_DIR"
 
@@ -193,10 +188,6 @@ jobs:
             fi
 
             npm run build
-
-            mkdir -p "$APP_DIR/admin-dist"
-            rm -rf "$APP_DIR/admin-dist"/*
-            cp -R "$ADMIN_APP_DIR/dist/." "$APP_DIR/admin-dist/"
 
             export HOST="$LOOPBACK_HOST" PORT="$APP_PORT" DB_PATH="$DB_PATH"
 
