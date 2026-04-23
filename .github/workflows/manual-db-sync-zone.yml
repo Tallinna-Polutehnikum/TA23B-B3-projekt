@@ -19,9 +19,9 @@ on:
         type: boolean
 
 env:
-  SSH_HOST: spjo.eu
+  SSH_HOST: ${{ secrets.ZONE_SSH_HOST || 'spjo.eu' }}
   SSH_USER: virt137396
-  SSH_PORT: "22"
+  SSH_PORT: ${{ secrets.ZONE_SSH_PORT || '22' }}
   EXPECTED_KEY_FINGERPRINT: SHA256:6UEtNBBFQNwC21yqWZJ+B3gIpqVBlpUnAR7wQJWL/nY
   APP_NAME: absolute-cinema-main
   DB_PATH: /data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite
@@ -116,7 +116,27 @@ jobs:
 
       - name: Verify SSH auth
         run: |
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "echo AUTH_OK"
+          echo "Runner public IP (for SSH whitelist checks):"
+          (curl -fsS https://api.ipify.org || true)
+          echo
+          echo "DNS resolution for $SSH_HOST:"
+          getent ahosts "$SSH_HOST" | awk '{print $1}' | sort -u
+
+          echo "Checking TCP connectivity to $SSH_HOST:$SSH_PORT ..."
+          if ! nc -zvw5 "$SSH_HOST" "$SSH_PORT"; then
+            echo "Cannot reach $SSH_HOST:$SSH_PORT from this GitHub runner."
+            echo "Most likely cause: firewall/whitelist/security-group is blocking runner IP above."
+            echo "Also verify host/port secrets: ZONE_SSH_HOST / ZONE_SSH_PORT."
+            exit 1
+          fi
+
+          ssh -4 -i ~/.ssh/id_ed25519 \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o StrictHostKeyChecking=yes \
+            -p "$SSH_PORT" \
+            "$SSH_USER@$SSH_HOST" "echo AUTH_OK"
 
       - name: Backup remote DB
         if: github.event.inputs.backup_remote == 'true'
