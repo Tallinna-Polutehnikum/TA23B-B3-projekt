@@ -4,6 +4,9 @@ import AddMovieForm from './AddMovieForm'
 import AddSessionForm from './AddSessionForm'
 import MoviesList from './MoviesList'
 import SessionsList from './SessionsList'
+import UsersList from './UsersList'
+import ConfigurationPanel from './ConfigurationPanel'
+import ReportsPanel from './ReportsPanel'
 import { apiFetch } from '../utils/api'
 
 export default function AdminDashboard({ user, onLogout }) {
@@ -12,6 +15,7 @@ export default function AdminDashboard({ user, onLogout }) {
   const [movieCount, setMovieCount] = useState(0)
   const [activeSessionsCount, setActiveSessionsCount] = useState(0)
   const [activeTicketsCount, setActiveTicketsCount] = useState(0)
+  const [totalUsersCount, setTotalUsersCount] = useState(0)
 
   useEffect(() => {
     const loadStats = async () => {
@@ -30,6 +34,7 @@ export default function AdminDashboard({ user, onLogout }) {
           const stats = await statsResponse.json()
           setActiveSessionsCount(Number(stats.activeSessions || 0))
           setActiveTicketsCount(Number(stats.activeTickets || 0))
+          setTotalUsersCount(Number(stats.totalUsers || 0))
         } else if (statsResponse.status === 401 || statsResponse.status === 403) {
           onLogout()
         }
@@ -88,6 +93,13 @@ export default function AdminDashboard({ user, onLogout }) {
               <span className="icon">🎫</span>
               Sessions
             </button>
+            <button
+              className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              <span className="icon">👥</span>
+              Users
+            </button>
           </div>
 
           <div className="nav-section">
@@ -110,11 +122,17 @@ export default function AdminDashboard({ user, onLogout }) {
 
           <div className="nav-section">
             <h3>Settings</h3>
-            <button className="nav-item">
+            <button
+              className={`nav-item ${activeTab === 'configuration' ? 'active' : ''}`}
+              onClick={() => setActiveTab('configuration')}
+            >
               <span className="icon">⚙️</span>
               Configuration
             </button>
-            <button className="nav-item">
+            <button
+              className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reports')}
+            >
               <span className="icon">📋</span>
               Reports
             </button>
@@ -150,10 +168,10 @@ export default function AdminDashboard({ user, onLogout }) {
                   </div>
                 </div>
                 <div className="stat-card">
-                  <div className="stat-icon">🎭</div>
+                  <div className="stat-icon">👥</div>
                   <div className="stat-info">
-                    <div className="stat-value">8</div>
-                    <div className="stat-label">Cinemas</div>
+                    <div className="stat-value">{totalUsersCount}</div>
+                    <div className="stat-label">Registered Users</div>
                   </div>
                 </div>
               </div>
@@ -173,7 +191,10 @@ export default function AdminDashboard({ user, onLogout }) {
                   >
                     ➕ Add Session
                   </button>
-                  <button className="action-btn secondary">
+                  <button
+                    className="action-btn secondary"
+                    onClick={() => setActiveTab('reports')}
+                  >
                     📊 View Reports
                   </button>
                 </div>
@@ -238,6 +259,33 @@ export default function AdminDashboard({ user, onLogout }) {
                   setActiveTab('sessions')
                 }}
               />
+            </div>
+          )}
+
+          {activeTab === 'users' && (
+            <div className="tab-content">
+              <div className="content-header">
+                <h2>Users</h2>
+              </div>
+              <UsersList onUnauthorized={onLogout} />
+            </div>
+          )}
+
+          {activeTab === 'configuration' && (
+            <div className="tab-content">
+              <div className="content-header">
+                <h2>Configuration</h2>
+              </div>
+              <ConfigurationPanel onUnauthorized={onLogout} />
+            </div>
+          )}
+
+          {activeTab === 'reports' && (
+            <div className="tab-content">
+              <div className="content-header">
+                <h2>Reports</h2>
+              </div>
+              <ReportsPanel onUnauthorized={onLogout} />
             </div>
           )}
         </main>

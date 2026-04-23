@@ -1,0 +1,131 @@
+.reports-panel {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.reports-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.reports-panel__header h3 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.reports-panel__filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reports-panel__filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reports-panel__filters span {
+  color: #b7b7b7;
+  font-size: 12px;
+}
+
+.reports-panel__filters input {
+  background: #111;
+  border: 1px solid #373737;
+  border-radius: 6px;
+  color: #fff;
+  padding: 8px 10px;
+}
+
+.reports-btn {
+  background: linear-gradient(135deg, #00d084 0%, #00a366 100%);
+  color: #031109;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 14px;
+  font-weight: 700;
+}
+
+.reports-status {
+  padding: 10px;
+  border-radius: 6px;
+  color: #ccc;
+  background: #202020;
+  margin-bottom: 14px;
+}
+
+.reports-status--error {
+  color: #ffb3b3;
+  border: 1px solid rgba(255, 98, 98, 0.45);
+}
+
+.reports-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.reports-card {
+  border: 1px solid #343434;
+  background: #151515;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.reports-card h4 {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.reports-card strong {
+  display: block;
+  margin-top: 8px;
+  color: #fff;
+  font-size: 24px;
+}
+
+.reports-top-movies {
+  margin-top: 18px;
+  border: 1px solid #343434;
+  border-radius: 8px;
+  padding: 14px;
+  background: #151515;
+}
+
+.reports-top-movies h4 {
+  margin: 0 0 10px;
+}
+
+.reports-top-movies ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.reports-top-movies li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.reports-top-movies li:last-child {
+  border-bottom: none;
+}
+
+.reports-top-movies p {
+  color: #9c9c9c;
+  margin: 0;
+}

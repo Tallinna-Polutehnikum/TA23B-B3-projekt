@@ -113,6 +113,38 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS app_config (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+const ADMIN_CONFIG_DEFAULTS = {
+  siteName: 'Absolute Cinema',
+  supportEmail: ADMIN_LOGIN_EMAIL,
+  contactPhone: '+372 0000 0000',
+  bookingPolicy: 'Tickets can be changed before session start if seats are available.',
+};
+
+const upsertConfigValue = db.prepare(`
+  INSERT INTO app_config (key, value, updated_at)
+  VALUES (?, ?, CURRENT_TIMESTAMP)
+  ON CONFLICT(key) DO UPDATE SET
+    value = excluded.value,
+    updated_at = CURRENT_TIMESTAMP
+`);
+
+const insertConfigDefault = db.prepare(`
+  INSERT OR IGNORE INTO app_config (key, value)
+  VALUES (?, ?)
+`);
+
+for (const [configKey, configValue] of Object.entries(ADMIN_CONFIG_DEFAULTS)) {
+  insertConfigDefault.run(configKey, String(configValue));
+}
+
 const paymentTxColumns = db.prepare(`PRAGMA table_info(payment_tx)`).all();
 const hasPaymentUserId = paymentTxColumns.some((col) => col.name === 'user_id');
 if (!hasPaymentUserId) {
@@ -1039,13 +1071,214 @@ app.get('/api/admin/stats', requireAdmin, (_req, res) => {
       WHERE datetime(date || ' ' || time) >= datetime('now')
     `).get();
 
+    const totalUsers = db.prepare(`
+      SELECT COUNT(*) AS count
+      FROM user
+    `).get();
+
     res.json({
       activeTickets: Number(activeTickets?.count || 0),
-      activeSessions: Number(activeSessions?.count || 0)
+      activeSessions: Number(activeSessions?.count || 0),
+      totalUsers: Number(totalUsers?.count || 0)
     });
   } catch (err) {
     console.error('Error loading admin stats:', err);
     res.status(500).json({ message: 'Failed to load admin stats' });
+  }
+});
+
+app.get('/api/admin/users', requireAdmin, (_req, res) => {
+  try {
+    const rows = db.prepare(`
+      SELECT
+        u.id,
+        u.username,
+        u.email,
+        u.is_admin,
+        u.avatar_url,
+        COALESCE((
+          SELECT COUNT(*)
+          FROM ticket t
+          WHERE t.user_id = u.id
+        ), 0) AS tickets_count,
+        COALESCE((
+          SELECT COUNT(*)
+          FROM payment_tx p
+          WHERE p.user_id = u.id AND p.status = 'succeeded'
+        ), 0) AS paid_orders,
+        COALESCE((
+          SELECT SUM(p.amount_cents)
+          FROM payment_tx p
+          WHERE p.user_id = u.id AND p.status = 'succeeded'
+        ), 0) AS spent_cents
+      FROM user u
+      ORDER BY u.is_admin DESC, lower(u.username), u.id
+    `).all();
+
+    res.json(rows.map((row) => ({
+      id: row.id,
+      username: row.username,
+      email: row.email,
+      isAdmin: Number(row.is_admin || 0) === 1,
+      avatarUrl: row.avatar_url || null,
+      ticketsCount: Number(row.tickets_count || 0),
+      paidOrders: Number(row.paid_orders || 0),
+      spentEur: Number(row.spent_cents || 0) / 100,
+    })));
+  } catch (err) {
+    console.error('Error loading admin users:', err);
+    res.status(500).json({ message: 'Failed to load users' });
+  }
+});
+
+app.get('/api/admin/config', requireAdmin, (_req, res) => {
+  try {
+    const rows = db.prepare(`
+      SELECT key, value, updated_at
+      FROM app_config
+      ORDER BY key
+    `).all();
+
+    const config = { ...ADMIN_CONFIG_DEFAULTS };
+    const updatedAt = {};
+    rows.forEach((row) => {
+      config[row.key] = row.value;
+      updatedAt[row.key] = row.updated_at;
+    });
+
+    res.json({ config, updatedAt });
+  } catch (err) {
+    console.error('Error loading admin config:', err);
+    res.status(500).json({ message: 'Failed to load configuration' });
+  }
+});
+
+app.put('/api/admin/config', requireAdmin, (req, res) => {
+  try {
+    const siteName = String(req.body?.siteName || '').trim();
+    const supportEmail = String(req.body?.supportEmail || '').trim().toLowerCase();
+    const contactPhone = String(req.body?.contactPhone || '').trim();
+    const bookingPolicy = String(req.body?.bookingPolicy || '').trim();
+
+    if (!siteName || siteName.length < 2) {
+      return res.status(400).json({ message: 'siteName must be at least 2 characters' });
+    }
+    if (!supportEmail || !supportEmail.includes('@')) {
+      return res.status(400).json({ message: 'Please provide a valid supportEmail' });
+    }
+    if (!bookingPolicy || bookingPolicy.length < 10) {
+      return res.status(400).json({ message: 'bookingPolicy must be at least 10 characters' });
+    }
+
+    const nextConfig = {
+      siteName,
+      supportEmail,
+      contactPhone,
+      bookingPolicy,
+    };
+
+    const saveTx = db.transaction((payload) => {
+      for (const [configKey, configValue] of Object.entries(payload)) {
+        upsertConfigValue.run(configKey, String(configValue));
+      }
+    });
+
+    saveTx(nextConfig);
+
+    res.json({ config: nextConfig });
+  } catch (err) {
+    console.error('Error saving admin config:', err);
+    res.status(500).json({ message: 'Failed to save configuration' });
+  }
+});
+
+app.get('/api/admin/reports/summary', requireAdmin, (req, res) => {
+  try {
+    const startDate = String(req.query?.startDate || '').trim();
+    const endDate = String(req.query?.endDate || '').trim();
+    const sessionFilters = [];
+    const sessionParams = [];
+    const paymentFilters = [];
+    const paymentParams = [];
+
+    if (startDate) {
+      sessionFilters.push(`date(s.date) >= date(?)`);
+      sessionParams.push(startDate);
+      paymentFilters.push(`date(p.created_at) >= date(?)`);
+      paymentParams.push(startDate);
+    }
+    if (endDate) {
+      sessionFilters.push(`date(s.date) <= date(?)`);
+      sessionParams.push(endDate);
+      paymentFilters.push(`date(p.created_at) <= date(?)`);
+      paymentParams.push(endDate);
+    }
+
+    const sessionWhere = sessionFilters.length ? `WHERE ${sessionFilters.join(' AND ')}` : '';
+    const paymentWhere = paymentFilters.length
+      ? `AND ${paymentFilters.join(' AND ')}`
+      : '';
+
+    const totals = {
+      totalUsers: Number(db.prepare(`SELECT COUNT(*) AS count FROM user`).get()?.count || 0),
+      totalAdmins: Number(db.prepare(`SELECT COUNT(*) AS count FROM user WHERE is_admin = 1`).get()?.count || 0),
+      totalMovies: Number(db.prepare(`SELECT COUNT(*) AS count FROM movie`).get()?.count || 0),
+      totalSessions: Number(db.prepare(`SELECT COUNT(*) AS count FROM sessions`).get()?.count || 0),
+      sessionsInRange: Number(db.prepare(`
+        SELECT COUNT(*) AS count
+        FROM sessions s
+        ${sessionWhere}
+      `).get(...sessionParams)?.count || 0),
+      ticketsInRange: Number(db.prepare(`
+        SELECT COUNT(*) AS count
+        FROM ticket t
+        INNER JOIN sessions s ON s.id = t.session_id
+        ${sessionWhere}
+      `).get(...sessionParams)?.count || 0),
+    };
+
+    const paymentSummary = db.prepare(`
+      SELECT
+        COUNT(*) AS paid_transactions,
+        COALESCE(SUM(p.amount_cents), 0) AS revenue_cents
+      FROM payment_tx p
+      WHERE p.status = 'succeeded'
+      ${paymentWhere}
+    `).get(...paymentParams);
+
+    const topMovies = db.prepare(`
+      SELECT
+        m.id,
+        m.title,
+        COUNT(*) AS tickets_sold
+      FROM ticket t
+      INNER JOIN sessions s ON s.id = t.session_id
+      INNER JOIN movie m ON m.id = s.movie_id
+      ${sessionWhere}
+      GROUP BY m.id, m.title
+      ORDER BY tickets_sold DESC, m.title ASC
+      LIMIT 5
+    `).all(...sessionParams).map((row) => ({
+      id: row.id,
+      title: row.title,
+      ticketsSold: Number(row.tickets_sold || 0),
+    }));
+
+    res.json({
+      period: {
+        startDate: startDate || null,
+        endDate: endDate || null,
+      },
+      totals: {
+        ...totals,
+        paidTransactions: Number(paymentSummary?.paid_transactions || 0),
+        revenueEur: Number(paymentSummary?.revenue_cents || 0) / 100,
+      },
+      topMovies,
+    });
+  } catch (err) {
+    console.error('Error loading admin reports summary:', err);
+    res.status(500).json({ message: 'Failed to load reports' });
   }
 });
 
