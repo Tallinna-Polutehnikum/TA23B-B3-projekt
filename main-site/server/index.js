@@ -2409,15 +2409,30 @@ const APP_PORT = Number(process.env.PORT || 4000);
 const APP_HOST = process.env.HOST || '';
 const distDir = path.resolve(__dirname, '..', 'dist');
 const distIndex = path.join(distDir, 'index.html');
+const adminDistDir = path.resolve(__dirname, '..', 'admin-dist');
+const adminDistIndex = path.join(adminDistDir, 'index.html');
+const hasAdminDist = fs.existsSync(adminDistDir) && fs.existsSync(adminDistIndex);
 
 app.use('/uploads', express.static(uploadsDir));
 
 if (fs.existsSync(distDir) && fs.existsSync(distIndex)) {
+  if (hasAdminDist) {
+    app.use('/admin', express.static(adminDistDir));
+  }
+
   app.use(express.static(distDir));
 
   // Serve built frontend for non-API paths in production hosting.
   app.use((req, res, next) => {
     if (req.path.startsWith('/api')) return next();
+
+    if (req.path === '/admin' || req.path.startsWith('/admin/')) {
+      if (hasAdminDist) {
+        return res.sendFile(adminDistIndex);
+      }
+      return res.status(404).json({ message: 'Admin panel is not deployed' });
+    }
+
     res.sendFile(distIndex);
   });
 }
