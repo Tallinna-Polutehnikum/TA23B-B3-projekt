@@ -12,12 +12,6 @@ const paymentOptions = [
     accent: "#c084fc",
   },
   {
-    id: "montonio",
-    title: "Montonio (test)",
-    description: "Simulated online payment for local development",
-    accent: "#7dd3fc",
-  },
-  {
     id: "cash",
     title: "Pay at the cinema",
     description: "We’ll hold seats, pay at the box office",
@@ -195,51 +189,6 @@ export default function CheckoutPage({
         return;
       }
 
-      if (paymentMethod === "montonio") {
-        const paymentResponse = await fetch("/api/payments/mock-intent", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-          },
-          body: JSON.stringify({
-            provider: "montonio",
-            amount: totalPrice,
-            currency: "EUR",
-            method: "banklink",
-            metadata: {
-              cartItems: cart.length,
-              seats: seatsCount,
-              contactEmail: contact.email || null,
-            },
-          }),
-        });
-
-        const paymentPayload = await paymentResponse.json().catch(() => null);
-        if (!paymentResponse.ok || !paymentPayload?.paymentId) {
-          throw new Error(paymentPayload?.message || "Failed to initialize Montonio test payment.");
-        }
-
-        const confirmResponse = await fetch("/api/payments/mock-confirm", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-          },
-          body: JSON.stringify({
-            provider: "montonio",
-            paymentId: paymentPayload.paymentId,
-          }),
-        });
-
-        const confirmPayload = await confirmResponse.json().catch(() => null);
-        if (!confirmResponse.ok || confirmPayload?.status !== "succeeded") {
-          throw new Error(confirmPayload?.message || "Montonio test payment failed.");
-        }
-
-        setPaymentInfo(confirmPayload);
-      }
-
       for (const item of seatItems) {
         const seatIds = (item.seatIds || []).filter((id) => Number.isFinite(Number(id))).map(Number);
         if (!item.sessionId || seatIds.length === 0 || seatIds.length !== (item.seats?.length || 0)) {
@@ -328,20 +277,6 @@ export default function CheckoutPage({
           <div className="checkout-payment-form checkout-payment-form--compact">
             <p className="checkout-inline-note">
               We will hold your seats. Pay at the cinema box office at least 30 minutes before the show.
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    if (paymentMethod === "montonio") {
-      return (
-        <div className="checkout-payment-active">
-          {header}
-          <div className="checkout-payment-form checkout-payment-form--compact">
-            <p className="checkout-inline-note">
-              This project uses a mock integration. No real money is charged. On submit, a simulated {option?.title}
-              payment is created and confirmed.
             </p>
           </div>
         </div>

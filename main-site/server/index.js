@@ -49,7 +49,7 @@ const AUTH_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 const PASS_LINK_TTL_MS = 1000 * 60 * 30;
 const PASS_TOKEN_SECRET = process.env.TICKET_PASS_SECRET || 'local-dev-ticket-pass-secret';
 const authSessions = new Map();
-const MOCK_PAYMENT_PROVIDERS = new Set(['montonio']);
+const MOCK_PAYMENT_PROVIDERS = new Set();
 const ADMIN_LOGIN_EMAIL = (process.env.ADMIN_LOGIN_EMAIL || 'absolute.cinema2027@gmail.com')
   .trim()
   .toLowerCase();
@@ -67,11 +67,13 @@ if (!STRIPE_ENABLED) {
   console.warn('Stripe is not configured. Set STRIPE_SECRET_KEY to enable live PaymentIntents.');
 }
 
-const SMTP_SERVICE = process.env.SMTP_SERVICE || '';
-const SMTP_HOST = process.env.SMTP_HOST || process.env.SMTP_SERVER || '';
+const SMTP_SERVICE = String(process.env.SMTP_SERVICE || '').trim();
+const SMTP_HOST = String(process.env.SMTP_HOST || process.env.SMTP_SERVER || '').trim();
 const SMTP_PORT = Number(process.env.SMTP_PORT || 0) || 0;
-const SMTP_USER = process.env.SMTP_USER || process.env.SMTP_USERNAME || '';
-const SMTP_PASS = process.env.SMTP_PASS || process.env.SMTP_PASSWORD || '';
+const SMTP_USER = String(process.env.SMTP_USER || process.env.SMTP_USERNAME || '').trim();
+const SMTP_PASS_RAW = String(process.env.SMTP_PASS || process.env.SMTP_PASSWORD || '');
+const isGmailSmtp = SMTP_SERVICE.toLowerCase() === 'gmail' || SMTP_HOST.toLowerCase().includes('gmail.com');
+const SMTP_PASS = isGmailSmtp ? SMTP_PASS_RAW.replace(/\s+/g, '') : SMTP_PASS_RAW;
 const SMTP_SECURE_ENV = String(process.env.SMTP_SECURE || '').trim().toLowerCase();
 const SMTP_SECURE = SMTP_SECURE_ENV
   ? SMTP_SECURE_ENV === '1' || SMTP_SECURE_ENV === 'true' || SMTP_SECURE_ENV === 'yes'
@@ -110,6 +112,9 @@ if (SMTP_ENABLED && mailer) {
     })
     .catch((err) => {
       console.error('SMTP verification failed:', err?.message || err);
+      if (isGmailSmtp) {
+        console.error('Gmail SMTP hint: enable 2-Step Verification and use a 16-character App Password in SMTP_PASS.');
+      }
     });
 }
 
