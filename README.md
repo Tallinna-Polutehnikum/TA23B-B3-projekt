@@ -155,6 +155,32 @@ Production deploy note (GitHub Actions):
 - Set SMTP values as repository secrets so deploy can write `main-site/.env.local` on the server.
 - Supported secret names: `SMTP_SERVICE`, `SMTP_HOST` or `SMTP_SERVER`, `SMTP_PORT`, `SMTP_USER` or `SMTP_USERNAME`, `SMTP_PASS` or `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_SECURE`.
 
+### 7.1.1 Configure Stripe card payments
+
+Card payments are enabled only when both server and client Stripe keys are set.
+
+Create these files:
+
+- `main-site/.env.local` (server)
+- `main-site/.env` or `main-site/.env.local` (Vite client variable)
+
+Add:
+
+```env
+# Server-side secret key (never expose publicly)
+STRIPE_SECRET_KEY=sk_test_your_secret_key
+
+# Optional webhook secret
+# STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Client-side publishable key (safe for browser)
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key
+```
+
+Notes:
+- If `STRIPE_SECRET_KEY` is missing, `/api/payments/stripe/*` endpoints return 503.
+- If `VITE_STRIPE_PUBLISHABLE_KEY` is missing, the checkout hides card payment automatically.
+
 ### Terminal 3: Admin Worker Site
 
 ```powershell

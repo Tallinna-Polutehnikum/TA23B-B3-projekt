@@ -12,15 +12,9 @@ const paymentOptions = [
     accent: "#c084fc",
   },
   {
-    id: "applepay",
-    title: "Apple Pay",
-    description: "Fast checkout with Face ID",
-    accent: "#fef08a",
-  },
-  {
-    id: "googlepay",
-    title: "Google Pay",
-    description: "One-tap checkout",
+    id: "montonio",
+    title: "Montonio (test)",
+    description: "Simulated online payment for local development",
     accent: "#7dd3fc",
   },
   {
@@ -32,6 +26,26 @@ const paymentOptions = [
 ];
 
 const formatPrice = (value) => `${value.toFixed(2)} €`;
+
+function summarizeEmailDelivery(bookingPayloads) {
+  const attempts = bookingPayloads.filter((payload) => payload && Object.prototype.hasOwnProperty.call(payload, "emailed"));
+  if (attempts.length === 0) {
+    return { attempted: false, sentCount: 0, total: 0, failedReasons: [] };
+  }
+
+  const sentCount = attempts.filter((payload) => payload.emailed === true).length;
+  const failedReasons = attempts
+    .filter((payload) => payload.emailed !== true && payload.emailReason)
+    .map((payload) => payload.emailReason);
+
+  return {
+    attempted: true,
+    sentCount,
+    total: attempts.length,
+    allSent: sentCount === attempts.length,
+    failedReasons,
+  };
+}
 
 function StripeCardFields({ clientSecret, onReady }) {
   const stripe = useStripe();
@@ -74,11 +88,22 @@ export default function CheckoutPage({
   const [status, setStatus] = useState("idle");
   const [bookingError, setBookingError] = useState("");
   const [paymentInfo, setPaymentInfo] = useState(null);
+  const [ticketEmailStatus, setTicketEmailStatus] = useState(null);
+  const [isStripeServerConfigured, setIsStripeServerConfigured] = useState(false);
+  const [isSmtpConfigured, setIsSmtpConfigured] = useState(false);
+  const [paymentConfigLoading, setPaymentConfigLoading] = useState(true);
+
+  const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  const isStripeClientConfigured = Boolean(stripePublishableKey);
+  const isStripeReady = isStripeClientConfigured && isStripeServerConfigured;
+  const availablePaymentOptions = useMemo(
+    () => paymentOptions.filter((option) => option.id !== "card" || isStripeReady),
+    [isStripeReady]
+  );
 
   const stripePromise = useMemo(() => {
-    const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-    return key ? loadStripe(key) : null;
-  }, []);
+    return isStripeClientConfigured ? loadStripe(stripePublishableKey) : null;
+  }, [isStripeClientConfigured, stripePublishableKey]);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
   const [stripeInitError, setStripeInitError] = useState("");
   const [stripeInitLoading, setStripeInitLoading] = useState(false);
@@ -89,6 +114,32 @@ export default function CheckoutPage({
   const [showStripeModal, setShowStripeModal] = useState(false);
 
   const cartIsEmpty = cart.length === 0;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchPaymentConfig = async () => {
+      try {
+        const response = await fetch("/api/payments/config");
+        const payload = await response.json().catch(() => null);
+        if (cancelled) return;
+        setIsStripeServerConfigured(Boolean(payload?.stripeEnabled));
+        setIsSmtpConfigured(Boolean(payload?.smtpEnabled));
+      } catch {
+        if (!cancelled) {
+          setIsStripeServerConfigured(false);
+          setIsSmtpConfigured(false);
+        }
+      } finally {
+        if (!cancelled) setPaymentConfigLoading(false);
+      }
+    };
+
+    fetchPaymentConfig();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const seatsCount = useMemo(
     () => cart.filter((item) => item.type === "seats").reduce((acc, item) => acc + (item.seats?.length || 0), 0),
@@ -101,6 +152,14 @@ export default function CheckoutPage({
   );
 
   useEffect(() => {
+    if (paymentMethod === "card" && !isStripeReady) {
+      setPaymentMethod(null);
+      setShowPaymentDetails(false);
+      setStripeClientSecret(null);
+      setStripeInitError("Card payments are temporarily unavailable.");
+      return;
+    }
+
     if (paymentMethod !== "card") {
       setStripeClientSecret(null);
       setStripeInitError("");
@@ -161,7 +220,7 @@ export default function CheckoutPage({
     return () => {
       cancelled = true;
     };
-  }, [paymentMethod, totalPrice, cart.length, seatsCount, stripePromise, cartIsEmpty]);
+  }, [paymentMethod, totalPrice, cart.length, seatsCount, stripePromise, cartIsEmpty, isStripeReady]);
 
   const handleFieldChange = (key, value) => {
     setContact((prev) => ({ ...prev, [key]: value }));
@@ -183,6 +242,7 @@ export default function CheckoutPage({
     setBookingError("");
     setStatus("idle");
     setPaymentInfo(null);
+    setTicketEmailStatus(null);
 
     try {
       if (paymentMethod === "card") {
@@ -199,6 +259,52 @@ export default function CheckoutPage({
         return;
       }
 
+      if (paymentMethod === "montonio") {
+        const paymentResponse = await fetch("/api/payments/mock-intent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+          body: JSON.stringify({
+            provider: "montonio",
+            amount: totalPrice,
+            currency: "EUR",
+            method: "banklink",
+            metadata: {
+              cartItems: cart.length,
+              seats: seatsCount,
+              contactEmail: contact.email || null,
+            },
+          }),
+        });
+
+        const paymentPayload = await paymentResponse.json().catch(() => null);
+        if (!paymentResponse.ok || !paymentPayload?.paymentId) {
+          throw new Error(paymentPayload?.message || "Failed to initialize Montonio test payment.");
+        }
+
+        const confirmResponse = await fetch("/api/payments/mock-confirm", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+          body: JSON.stringify({
+            provider: "montonio",
+            paymentId: paymentPayload.paymentId,
+          }),
+        });
+
+        const confirmPayload = await confirmResponse.json().catch(() => null);
+        if (!confirmResponse.ok || confirmPayload?.status !== "succeeded") {
+          throw new Error(confirmPayload?.message || "Montonio test payment failed.");
+        }
+
+        setPaymentInfo(confirmPayload);
+      }
+
+      const bookingPayloads = [];
       for (const item of seatItems) {
         const seatIds = (item.seatIds || []).filter((id) => Number.isFinite(Number(id))).map(Number);
         if (!item.sessionId || seatIds.length === 0 || seatIds.length !== (item.seats?.length || 0)) {
@@ -229,7 +335,11 @@ export default function CheckoutPage({
         if (!response.ok) {
           throw new Error(payload?.message || "Failed to reserve seats. Please try again.");
         }
+
+        bookingPayloads.push(payload);
       }
+
+      setTicketEmailStatus(summarizeEmailDelivery(bookingPayloads));
 
       onPaymentSuccess?.();
       setIsProcessing(false);
@@ -395,6 +505,7 @@ export default function CheckoutPage({
                 onClick={async () => {
                   setIsProcessing(true);
                   setBookingError("");
+                  setTicketEmailStatus(null);
                   try {
                     if (!stripeConfirmRef.current) {
                       throw new Error("Card form is not ready. Please wait a moment.");
@@ -430,6 +541,7 @@ export default function CheckoutPage({
 
                     const seatItems = cart.filter((item) => item.type === "seats");
                     const authTokenForSeats = localStorage.getItem("ac_auth_token");
+                    const bookingPayloads = [];
                     for (const item of seatItems) {
                       const seatIds = (item.seatIds || []).filter((id) => Number.isFinite(Number(id))).map(Number);
                       if (!item.sessionId || seatIds.length === 0 || seatIds.length !== (item.seats?.length || 0)) {
@@ -460,9 +572,12 @@ export default function CheckoutPage({
                       if (!response.ok) {
                         throw new Error(payload?.message || "Failed to reserve seats. Please try again.");
                       }
+
+                      bookingPayloads.push(payload);
                     }
 
                     setPaymentInfo(syncPayload);
+                    setTicketEmailStatus(summarizeEmailDelivery(bookingPayloads));
                     onPaymentSuccess?.();
                     setStatus("success");
                     setShowStripeModal(false);
@@ -567,7 +682,7 @@ export default function CheckoutPage({
 
             {!showPaymentDetails ? (
               <div className="checkout-payments">
-                {paymentOptions.map((option) => (
+                {availablePaymentOptions.map((option) => (
                   <label
                     key={option.id}
                     className={`checkout-payments__option ${paymentMethod === option.id ? "is-active" : ""}`}
@@ -586,6 +701,11 @@ export default function CheckoutPage({
                     </div>
                   </label>
                 ))}
+                {!paymentConfigLoading && !isStripeReady && (
+                  <p className="checkout-inline-note">
+                    Card payment is currently unavailable in this environment. Use Montonio (test) or Pay at the cinema.
+                  </p>
+                )}
               </div>
             ) : (
               renderPaymentDetails()
@@ -595,13 +715,18 @@ export default function CheckoutPage({
               <button
                 type="submit"
                 className="checkout-submit"
-                disabled={!acceptedTerms || cartIsEmpty || isProcessing || !paymentMethod || status === "success" || !contact.email}
+                disabled={!acceptedTerms || cartIsEmpty || isProcessing || !paymentMethod || status === "success" || !contact.email || (paymentMethod === "card" && (!isStripeReady || !stripePromise || stripeInitLoading || !!stripeInitError))}
               >
                 {isProcessing ? "Processing..." : `Pay ${formatPrice(totalPrice)}`}
               </button>
               <p className="checkout-disclaimer">
                 By clicking “Pay”, you reserve seats and receive e-tickets by email and in your profile.
               </p>
+              {!paymentConfigLoading && !isSmtpConfigured && (
+                <p className="checkout-disclaimer">
+                  Email delivery is currently unavailable. Tickets will still be available in your profile.
+                </p>
+              )}
               {status === "error" && (
                 <p className="checkout-disclaimer checkout-disclaimer--error">
                   {bookingError}
@@ -612,9 +737,15 @@ export default function CheckoutPage({
             {status === "success" && (
               <div className="checkout-success">
                 <div className="checkout-success__title">Payment confirmed</div>
-                <p className="checkout-success__text">
-                  We sent tickets to {contact.email || "your email"}. Receipt is available in your profile.
-                </p>
+                {ticketEmailStatus?.allSent ? (
+                  <p className="checkout-success__text">
+                    We sent tickets to {contact.email || "your email"}. Receipt is available in your profile.
+                  </p>
+                ) : (
+                  <p className="checkout-success__text">
+                    Booking is confirmed. Ticket email is unavailable right now, but your tickets are in your profile.
+                  </p>
+                )}
                 {(paymentInfo?.paymentId || paymentInfo?.paymentIntentId) && (
                   <p className="checkout-success__text">
                     Payment ID: {paymentInfo.paymentId || paymentInfo.paymentIntentId}

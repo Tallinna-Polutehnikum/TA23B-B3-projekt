@@ -1784,6 +1784,14 @@ app.post('/api/auth/logout', (req, res) => {
   res.status(204).end();
 });
 
+app.get('/api/payments/config', (req, res) => {
+  res.json({
+    stripeEnabled: STRIPE_ENABLED,
+    smtpEnabled: SMTP_ENABLED,
+    mockProviders: Array.from(MOCK_PAYMENT_PROVIDERS),
+  });
+});
+
 app.post('/api/payments/stripe/create-intent', async (req, res) => {
   if (!STRIPE_ENABLED) {
     return res.status(503).json({ message: 'Stripe is not configured on the server' });
