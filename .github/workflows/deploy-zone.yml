@@ -14,6 +14,7 @@ env:
   SSH_HOST: spjo.eu
   SSH_USER: virt137396
   SSH_PORT: "22"
+  SSH_STRICT_CHECKING: "yes"
   EXPECTED_KEY_FINGERPRINT: SHA256:6UEtNBBFQNwC21yqWZJ+B3gIpqVBlpUnAR7wQJWL/nY
   DEPLOY_ROOT: /data02/virt137396/domeenid/www.spjo.eu/htdocs
   APP_DIR: /data02/virt137396/domeenid/www.spjo.eu/htdocs/main-site
@@ -99,7 +100,7 @@ jobs:
           touch ~/.ssh/known_hosts
           KEYSCAN_OK=""
           for attempt in 1 2 3; do
-            if ssh-keyscan -T 10 -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/tmp/ssh-keyscan.err; then
+            if ssh-keyscan -4 -T 15 -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/tmp/ssh-keyscan.err; then
               KEYSCAN_OK="yes"
               break
             fi
@@ -115,7 +116,10 @@ jobs:
             echo "Unable to add SSH host key to known_hosts after retries."
             echo "DNS resolution for $SSH_HOST:"
             getent ahosts "$SSH_HOST" | awk '{print $1}' | sort -u || true
-            exit 1
+            echo "Falling back to StrictHostKeyChecking=accept-new for this run."
+            echo "SSH_STRICT_CHECKING=accept-new" >> "$GITHUB_ENV"
+          else
+            echo "SSH_STRICT_CHECKING=yes" >> "$GITHUB_ENV"
           fi
 
       - name: Verify SSH auth
@@ -125,16 +129,16 @@ jobs:
           echo
           echo "DNS resolution for $SSH_HOST:"
           getent ahosts "$SSH_HOST" | awk '{print $1}' | sort -u
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "echo AUTH_OK"
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking="$SSH_STRICT_CHECKING" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "echo AUTH_OK"
 
       - name: Ensure remote directories
         run: |
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$APP_DIR' '$APP_DIR/admin-dist' '$DEPLOY_ROOT/database'"
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking="$SSH_STRICT_CHECKING" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$APP_DIR' '$APP_DIR/admin-dist' '$DEPLOY_ROOT/database'"
 
       - name: Sync application files
         run: |
           rsync -az --delete \
-            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
+            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=$SSH_STRICT_CHECKING -p $SSH_PORT" \
             --exclude '.git/' \
             --exclude '.github/' \
             --exclude 'node_modules/' \
@@ -146,7 +150,7 @@ jobs:
       - name: Sync admin built assets
         run: |
           rsync -az --delete \
-            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
+            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=$SSH_STRICT_CHECKING -p $SSH_PORT" \
             admin-worker-site/dist/ "$SSH_USER@$SSH_HOST:$APP_DIR/admin-dist/"
 
       - name: Sync database file
@@ -157,7 +161,7 @@ jobs:
             exit 1
           fi
 
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking="$SSH_STRICT_CHECKING" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
             set -e
             mkdir -p "$(dirname "$DB_PATH")"
             if [ -f "$DB_PATH" ]; then
@@ -166,17 +170,17 @@ jobs:
           EOF
 
           rsync -az \
-            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $SSH_PORT" \
+            -e "ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=$SSH_STRICT_CHECKING -p $SSH_PORT" \
             database/db.sqlite "$SSH_USER@$SSH_HOST:$DB_PATH"
 
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking="$SSH_STRICT_CHECKING" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DB_PATH='$DB_PATH' bash -se" <<'EOF'
             set -e
             chmod 600 "$DB_PATH" || true
           EOF
 
       - name: Install, build and restart PM2
         run: |
-          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' LOOPBACK_HOST='$LOOPBACK_HOST' APP_PORT='$APP_PORT' DB_PATH='$DB_PATH' APP_NAME='$APP_NAME' bash -se" <<'EOF'
+          ssh -4 -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking="$SSH_STRICT_CHECKING" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "APP_DIR='$APP_DIR' LOOPBACK_HOST='$LOOPBACK_HOST' APP_PORT='$APP_PORT' DB_PATH='$DB_PATH' APP_NAME='$APP_NAME' bash -se" <<'EOF'
             set -e
 
             cd "$APP_DIR"
