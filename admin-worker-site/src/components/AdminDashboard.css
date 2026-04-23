@@ -55,6 +55,21 @@
   font-weight: 500;
 }
 
+.logout-btn {
+  border: 1px solid #3a3a3a;
+  background: #1b1b1b;
+  color: #d7d7d7;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.logout-btn:hover {
+  border-color: #00d084;
+  color: #fff;
+}
+
 .admin-container {
   display: flex;
   flex: 1;

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import './AddMovieForm.css'
+import { apiFetch } from '../utils/api'
 
-export default function AddMovieForm({ onSuccess }) {
+export default function AddMovieForm({ onSuccess, onUnauthorized }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
@@ -30,16 +31,22 @@ export default function AddMovieForm({ onSuccess }) {
     setError('')
 
     try {
-      const response = await fetch('/api/movies', {
+      const response = await apiFetch('/api/movies', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
-      })
+      }, { withAuth: true })
+
+      if (response.status === 401 || response.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Session expired. Please log in again.')
+      }
 
       if (!response.ok) {
-        throw new Error('Failed to add movie')
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload?.message || 'Failed to add movie')
       }
 
       // Reset form

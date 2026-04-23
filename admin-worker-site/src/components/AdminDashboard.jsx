@@ -4,8 +4,9 @@ import AddMovieForm from './AddMovieForm'
 import AddSessionForm from './AddSessionForm'
 import MoviesList from './MoviesList'
 import SessionsList from './SessionsList'
+import { apiFetch } from '../utils/api'
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [refresh, setRefresh] = useState(0)
   const [movieCount, setMovieCount] = useState(0)
@@ -16,8 +17,8 @@ export default function AdminDashboard() {
     const loadStats = async () => {
       try {
         const [moviesResponse, statsResponse] = await Promise.all([
-          fetch('http://localhost:4000/api/movies'),
-          fetch('http://localhost:4000/api/admin/stats')
+          apiFetch('/api/movies', {}, { withAuth: true }),
+          apiFetch('/api/admin/stats', {}, { withAuth: true })
         ])
 
         if (moviesResponse.ok) {
@@ -29,6 +30,8 @@ export default function AdminDashboard() {
           const stats = await statsResponse.json()
           setActiveSessionsCount(Number(stats.activeSessions || 0))
           setActiveTicketsCount(Number(stats.activeTickets || 0))
+        } else if (statsResponse.status === 401 || statsResponse.status === 403) {
+          onLogout()
         }
       } catch (error) {
         console.error('Error loading admin stats:', error)
@@ -36,7 +39,7 @@ export default function AdminDashboard() {
     }
 
     loadStats()
-  }, [refresh])
+  }, [refresh, onLogout])
 
   const handleRefresh = () => {
     setRefresh(prev => prev + 1)
@@ -50,8 +53,9 @@ export default function AdminDashboard() {
           <p>Admin Panel</p>
         </div>
         <div className="admin-user">
-          <span className="user-avatar">A</span>
-          <span className="user-name">Admin</span>
+          <span className="user-avatar">{String(user?.username || 'A').charAt(0).toUpperCase()}</span>
+          <span className="user-name">{user?.username || 'Admin'}</span>
+          <button className="logout-btn" onClick={onLogout}>Log out</button>
         </div>
       </header>
 
@@ -188,7 +192,7 @@ export default function AdminDashboard() {
                   ➕ Add New Movie
                 </button>
               </div>
-              <MoviesList refresh={refresh} />
+              <MoviesList refresh={refresh} onUnauthorized={onLogout} />
             </div>
           )}
 
@@ -203,7 +207,7 @@ export default function AdminDashboard() {
                   ➕ Add New Session
                 </button>
               </div>
-              <SessionsList refresh={refresh} />
+              <SessionsList refresh={refresh} onUnauthorized={onLogout} />
             </div>
           )}
 
@@ -213,6 +217,7 @@ export default function AdminDashboard() {
                 <h2>Add New Movie</h2>
               </div>
               <AddMovieForm 
+                onUnauthorized={onLogout}
                 onSuccess={() => {
                   handleRefresh()
                   setActiveTab('movies')
@@ -227,6 +232,7 @@ export default function AdminDashboard() {
                 <h2>Add New Session</h2>
               </div>
               <AddSessionForm 
+                onUnauthorized={onLogout}
                 onSuccess={() => {
                   handleRefresh()
                   setActiveTab('sessions')

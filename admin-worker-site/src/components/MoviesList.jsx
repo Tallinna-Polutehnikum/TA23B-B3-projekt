@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './MoviesList.css'
+import { apiFetch } from '../utils/api'
 
 const FALLBACK_POSTER = 'https://via.placeholder.com/60x90?text=No+Image'
 
@@ -20,7 +21,7 @@ function resolvePosterUrl(poster) {
   return FALLBACK_POSTER
 }
 
-export default function MoviesList({ refresh }) {
+export default function MoviesList({ refresh, onUnauthorized }) {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
   const [genres, setGenres] = useState([])
@@ -41,7 +42,11 @@ export default function MoviesList({ refresh }) {
   const loadMovies = async () => {
     try {
       setLoading(true)
-      const res = await fetch('http://localhost:4000/api/movies')
+      const res = await apiFetch('/api/movies', {}, { withAuth: true })
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Unauthorized')
+      }
       const data = await res.json()
       setMovies(data)
     } catch (err) {
@@ -53,7 +58,7 @@ export default function MoviesList({ refresh }) {
 
   const loadGenres = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/genres')
+      const res = await apiFetch('/api/genres')
       const data = await res.json()
       setGenres(data)
     } catch (err) {
@@ -102,7 +107,7 @@ export default function MoviesList({ refresh }) {
     if (!editingId) return
 
     try {
-      const res = await fetch(`http://localhost:4000/api/movies/${editingId}`, {
+      const res = await apiFetch(`/api/movies/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,7 +118,12 @@ export default function MoviesList({ refresh }) {
           genre: editForm.genre,
           directors: editForm.directors
         })
-      })
+      }, { withAuth: true })
+
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Session expired. Please log in again.')
+      }
 
       if (!res.ok) {
         throw new Error('Failed to save')
@@ -142,9 +152,14 @@ export default function MoviesList({ refresh }) {
     }
 
     try {
-      const res = await fetch(`http://localhost:4000/api/movies/${movieId}`, {
+      const res = await apiFetch(`/api/movies/${movieId}`, {
         method: 'DELETE'
-      })
+      }, { withAuth: true })
+
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Session expired. Please log in again.')
+      }
 
       if (!res.ok) {
         throw new Error('Failed to delete')

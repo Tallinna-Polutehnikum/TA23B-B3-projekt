@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import './AddSessionForm.css'
 import { buildHallsEndpoint, createInitialSessionFormData } from '../utils/sessionForm'
+import { apiFetch } from '../utils/api'
 
-export default function AddSessionForm({ onSuccess }) {
+export default function AddSessionForm({ onSuccess, onUnauthorized }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [movies, setMovies] = useState([])
@@ -13,13 +14,13 @@ export default function AddSessionForm({ onSuccess }) {
 
   useEffect(() => {
     // Fetch movies list
-    fetch('/api/movies/top')
+    apiFetch('/api/movies/top')
       .then(res => res.json())
       .then(data => setMovies(data))
       .catch(err => console.error('Failed to load movies', err))
 
     // Fetch cinemas list
-    fetch('/api/cinemas')
+    apiFetch('/api/cinemas')
       .then(res => res.json())
       .then(data => setCinemas(data))
       .catch(err => console.error('Failed to load cinemas', err))
@@ -31,7 +32,7 @@ export default function AddSessionForm({ onSuccess }) {
       return
     }
 
-    fetch(buildHallsEndpoint(formData.cinemaId))
+    apiFetch(buildHallsEndpoint(formData.cinemaId))
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Failed to load halls: ${res.status}`)
@@ -60,13 +61,18 @@ export default function AddSessionForm({ onSuccess }) {
     setError('')
 
     try {
-      const response = await fetch('/api/sessions', {
+      const response = await apiFetch('/api/sessions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
-      })
+      }, { withAuth: true })
+
+      if (response.status === 401 || response.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Session expired. Please log in again.')
+      }
 
       if (!response.ok) {
         let message = 'Failed to add session'

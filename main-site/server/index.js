@@ -50,10 +50,13 @@ const PASS_LINK_TTL_MS = 1000 * 60 * 30;
 const PASS_TOKEN_SECRET = process.env.TICKET_PASS_SECRET || 'local-dev-ticket-pass-secret';
 const authSessions = new Map();
 const MOCK_PAYMENT_PROVIDERS = new Set(['montonio']);
+const ADMIN_LOGIN_EMAIL = (process.env.ADMIN_LOGIN_EMAIL || 'absolute.cinema2027@gmail.com')
+  .trim()
+  .toLowerCase();
+const ADMIN_LOGIN_PASSWORD = process.env.ADMIN_LOGIN_PASSWORD || 'absolute2027';
+const ADMIN_LOGIN_USERNAME = process.env.ADMIN_LOGIN_USERNAME || 'Absolute Cinema Admin';
 const ADMIN_USERS = [
-  { username: 'Artur', email: 'artur.genno@techno.ee' },
-  { username: 'Elnar', email: 'elnar.kast@techno.ee' },
-  { username: 'Sofja', email: 'sofja.portnova@techno.ee' },
+  { username: ADMIN_LOGIN_USERNAME, email: ADMIN_LOGIN_EMAIL },
 ];
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SK || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
@@ -188,6 +191,31 @@ function verifyPassword(plainPassword, storedPassword) {
   return crypto.timingSafeEqual(storedBuffer, calculatedBuffer);
 }
 
+function ensureConfiguredAdminAccount() {
+  db.prepare(`UPDATE user SET is_admin = 0 WHERE lower(email) != lower(?)`).run(ADMIN_LOGIN_EMAIL);
+
+  const adminRow = db
+    .prepare(`SELECT id FROM user WHERE lower(email) = lower(?) LIMIT 1`)
+    .get(ADMIN_LOGIN_EMAIL);
+  const hashedPassword = hashPassword(ADMIN_LOGIN_PASSWORD);
+
+  if (adminRow) {
+    db.prepare(`
+      UPDATE user
+      SET username = ?, pass = ?, is_admin = 1
+      WHERE id = ?
+    `).run(ADMIN_LOGIN_USERNAME, hashedPassword, adminRow.id);
+    return;
+  }
+
+  db.prepare(`
+    INSERT INTO user (username, email, pass, is_admin)
+    VALUES (?, ?, ?, 1)
+  `).run(ADMIN_LOGIN_USERNAME, ADMIN_LOGIN_EMAIL, hashedPassword);
+}
+
+ensureConfiguredAdminAccount();
+
 function createAuthToken(userId) {
   const token = crypto.randomBytes(32).toString('hex');
   authSessions.set(token, {
@@ -229,6 +257,20 @@ function getAuthUser(req) {
   }
 
   return { token, user: toApiUser(user) };
+}
+
+function requireAdmin(req, res, next) {
+  const auth = getAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  if (!auth.user?.isAdmin) {
+    return res.status(403).json({ message: 'Admin access required' });
+  }
+
+  req.auth = auth;
+  return next();
 }
 
 function signPassToken(payload) {
@@ -982,7 +1024,7 @@ app.get('/api/sessions/:id/seats', (req, res) => {
   });
 });
 
-app.get('/api/admin/stats', (_req, res) => {
+app.get('/api/admin/stats', requireAdmin, (_req, res) => {
   try {
     const activeTickets = db.prepare(`
       SELECT COUNT(*) AS count
@@ -1157,6 +1199,38 @@ app.post('/api/sessions/:id/book', async (req, res) => {
 });
 
 // ============= POST ENDPOINTS =============
+
+app.post('/api/admin/login', (req, res) => {
+  const email = String(req.body?.email || req.body?.identifier || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'email and password are required' });
+  }
+
+  if (email !== ADMIN_LOGIN_EMAIL) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+
+  const userRow = db
+    .prepare(`
+      SELECT id, username, email, avatar_url, is_admin, pass
+      FROM user
+      WHERE lower(email) = lower(?) AND is_admin = 1
+      LIMIT 1
+    `)
+    .get(email);
+
+  if (!userRow || !verifyPassword(password, userRow.pass)) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+
+  const token = createAuthToken(userRow.id);
+  return res.json({
+    token,
+    user: toApiUser(userRow),
+  });
+});
 
 app.post('/api/auth/register', (req, res) => {
   const username = String(req.body?.username || '').trim();
@@ -1694,7 +1768,7 @@ app.post('/api/payments/mock-confirm', (req, res) => {
   });
 });
 
-app.post('/api/movies', (req, res) => {
+app.post('/api/movies', requireAdmin, (req, res) => {
   const { title, overview, poster, duration, genre, directors } = req.body;
 
   // Validate required fields
@@ -1737,7 +1811,7 @@ app.post('/api/movies', (req, res) => {
 });
 
 // Update movie
-app.put('/api/movies/:id', (req, res) => {
+app.put('/api/movies/:id', requireAdmin, (req, res) => {
   const { title, overview, poster, duration, genre, directors } = req.body;
   const movieId = req.params.id;
 
@@ -1786,7 +1860,7 @@ app.put('/api/movies/:id', (req, res) => {
 });
 
 // Delete movie
-app.delete('/api/movies/:id', (req, res) => {
+app.delete('/api/movies/:id', requireAdmin, (req, res) => {
   const movieId = req.params.id;
   const existing = db.prepare(`SELECT id FROM movie WHERE id = ?`).get(movieId);
   if (!existing) return res.status(404).json({ message: 'Movie not found' }); 
@@ -1829,7 +1903,7 @@ app.delete('/api/movies/:id', (req, res) => {
   }
 });
 
-app.post('/api/sessions', (req, res) => {
+app.post('/api/sessions', requireAdmin, (req, res) => {
   const { movieId, cinemaId, hallId, date, time, seatsAvailable, language, subtitles, format } = req.body;
 
   if (!movieId || !cinemaId || !hallId || !date || !time || !seatsAvailable) {
@@ -1922,7 +1996,7 @@ app.post('/api/sessions', (req, res) => {
 });
 
 // Update session
-app.put('/api/sessions/:id', (req, res) => {
+app.put('/api/sessions/:id', requireAdmin, (req, res) => {
   const sessionId = req.params.id;
   const { movieId, cinemaId, hallId, date, time, seatsAvailable, language, subtitles, format } = req.body;
 
@@ -2023,7 +2097,7 @@ app.put('/api/sessions/:id', (req, res) => {
 });
 
 // Bulk delete sessions by date range
-app.post('/api/sessions/bulk-delete', (req, res) => {
+app.post('/api/sessions/bulk-delete', requireAdmin, (req, res) => {
   const { startDate, endDate } = req.body;
   if (!startDate || !endDate) return res.status(400).json({ message: 'startDate and endDate are required (YYYY-MM-DD or DD.MM.YYYY)' });
 
@@ -2072,7 +2146,7 @@ app.post('/api/sessions/bulk-delete', (req, res) => {
 });
 
 // Delete session
-app.delete('/api/sessions/:id', (req, res) => {
+app.delete('/api/sessions/:id', requireAdmin, (req, res) => {
   const sessionId = req.params.id;
   const existing = db.prepare(`SELECT id FROM sessions WHERE id = ?`).get(sessionId);
   if (!existing) return res.status(404).json({ message: 'Session not found' });

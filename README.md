@@ -143,6 +143,37 @@ npm.cmd run dev
 Admin site URL:
 - http://localhost:5156
 
+### 7.2 Admin Authentication (single account)
+
+The API now enforces one admin account for admin endpoints.
+
+Default admin credentials:
+- Email: absolute.cinema2027@gmail.com
+- Password: absolute2027
+
+You can override these in production with environment variables:
+
+```env
+ADMIN_LOGIN_EMAIL=absolute.cinema2027@gmail.com
+ADMIN_LOGIN_PASSWORD=absolute2027
+ADMIN_LOGIN_USERNAME=Absolute Cinema Admin
+```
+
+### 7.3 Host admin panel on your domain
+
+To serve admin under the same domain, for example:
+- https://absolutecinema.spjo.eu/admin/
+
+Use build-time variable in `admin-worker-site`:
+
+```env
+VITE_BASE_PATH=/admin/
+VITE_API_BASE_URL=
+```
+
+Then build and deploy `admin-worker-site/dist` to your web server path for `/admin/`.
+Because `VITE_API_BASE_URL` is empty, API calls use same-origin `/api/*`.
+
 ---
 
 ## 8. Production Build Commands
@@ -278,6 +309,21 @@ If workflow shows `base64: invalid input`:
 - Manual: run `Deploy Zone Production` from the Actions tab.
 
 ### 13.4 Manual database sync workflow (safe mode)
+
+---
+
+## 14. Google Indexing Checklist
+
+For domain indexing, the project now includes:
+- `main-site/public/robots.txt`
+- `main-site/public/sitemap.xml`
+- canonical + robots meta in `main-site/index.html`
+
+After deployment, do this once:
+1. Open Google Search Console and add property `https://absolutecinema.spjo.eu`.
+2. Verify ownership (DNS TXT is recommended).
+3. Submit sitemap URL: `https://absolutecinema.spjo.eu/sitemap.xml`.
+4. Use URL Inspection and request indexing for home page and key pages.
 
 To avoid accidental user data loss, regular deploy no longer syncs `database/db.sqlite`.
 

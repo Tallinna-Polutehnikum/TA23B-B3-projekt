@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import './SessionsList.css'
+import { apiFetch } from '../utils/api'
 
-const API_BASE = 'http://localhost:4000'
-
-export default function SessionsList({ refresh }) {
+export default function SessionsList({ refresh, onUnauthorized }) {
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
   const [startDate, setStartDate] = useState('')
@@ -17,7 +16,11 @@ export default function SessionsList({ refresh }) {
   const fetchSessions = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`${API_BASE}/api/sessions`)
+      const response = await apiFetch('/api/sessions', {}, { withAuth: true })
+      if (response.status === 401 || response.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Unauthorized')
+      }
       const data = await response.json()
       setSessions(data)
     } catch (err) {
@@ -32,7 +35,11 @@ export default function SessionsList({ refresh }) {
     if (!ok) return
 
     try {
-      const res = await fetch(`${API_BASE}/api/sessions/${sessionId}`, { method: 'DELETE' })
+      const res = await apiFetch(`/api/sessions/${sessionId}`, { method: 'DELETE' }, { withAuth: true })
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Session expired. Please log in again.')
+      }
       if (!res.ok) throw new Error('Delete failed')
       fetchSessions()
     } catch (err) {
@@ -54,8 +61,8 @@ export default function SessionsList({ refresh }) {
     const time = window.prompt('Time (HH:MM)', session.time || '')
     if (time === null) return
 
-    const hall = window.prompt('Hall', session.hall || '')
-    if (hall === null) return
+    const hallId = window.prompt('Hall ID', session.hall_id || '')
+    if (hallId === null) return
 
     const seatsAvailable = window.prompt('Seats available', session.seats ?? session.seats_available ?? '')
     if (seatsAvailable === null) return
@@ -70,21 +77,26 @@ export default function SessionsList({ refresh }) {
     if (format === null) return
 
     try {
-      const res = await fetch(`${API_BASE}/api/sessions/${session.id}`, {
+      const res = await apiFetch(`/api/sessions/${session.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           movieId: movieId ? Number(movieId) : null,
           cinemaId: cinemaId ? Number(cinemaId) : null,
+          hallId: hallId ? Number(hallId) : null,
           date,
           time,
-          hall,
           seatsAvailable: seatsAvailable ? Number(seatsAvailable) : null,
           language,
           subtitles,
           format
         })
-      })
+      }, { withAuth: true })
+
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Session expired. Please log in again.')
+      }
 
       if (!res.ok) throw new Error('Update failed')
       fetchSessions()
@@ -105,11 +117,16 @@ export default function SessionsList({ refresh }) {
 
     setBulkDeleting(true)
     try {
-      const res = await fetch(`${API_BASE}/api/sessions/bulk-delete`, {
+      const res = await apiFetch('/api/sessions/bulk-delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ startDate, endDate })
-      })
+      }, { withAuth: true })
+
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.()
+        throw new Error('Session expired. Please log in again.')
+      }
 
       if (!res.ok) throw new Error('Bulk delete failed')
       fetchSessions()
