@@ -128,6 +128,23 @@ SMTP_PASS=your_smtp_password
 SMTP_FROM="Absolute Cinema <tickets@your-domain.com>"
 ```
 
+Gmail example (recommended to use an App Password, not your normal account password):
+
+```env
+SMTP_SERVICE=gmail
+SMTP_USER=your_account@gmail.com
+SMTP_PASS=your_16_char_app_password
+SMTP_FROM="Absolute Cinema <your_account@gmail.com>"
+# Optional: force SSL (implicit TLS)
+# SMTP_PORT=465
+# SMTP_SECURE=true
+```
+
+Accepted aliases:
+- `SMTP_SERVER` works the same as `SMTP_HOST`
+- `SMTP_USERNAME` works the same as `SMTP_USER`
+- `SMTP_PASSWORD` works the same as `SMTP_PASS`
+
 Notes:
 - For SSL SMTP, usually use `SMTP_PORT=465`.
 - If SMTP variables are missing, booking still works, but email is skipped.
@@ -376,6 +393,7 @@ To enable real email alerts, set these repository secrets:
 - `SMTP_PORT` (optional, default `587`)
 - `SMTP_USERNAME`
 - `SMTP_PASSWORD`
+- `SMTP_SECURE` (optional, `true` for SSL providers like Gmail on port `465`)
 - `CI_ALERT_EMAIL_TO`
 
 If these secrets are missing, CI logs a warning instead of sending mail.

@@ -67,18 +67,24 @@ if (!STRIPE_ENABLED) {
   console.warn('Stripe is not configured. Set STRIPE_SECRET_KEY to enable live PaymentIntents.');
 }
 
-const SMTP_HOST = process.env.SMTP_HOST || '';
+const SMTP_SERVICE = process.env.SMTP_SERVICE || '';
+const SMTP_HOST = process.env.SMTP_HOST || process.env.SMTP_SERVER || '';
 const SMTP_PORT = Number(process.env.SMTP_PORT || 0) || 0;
 const SMTP_USER = process.env.SMTP_USER || process.env.SMTP_USERNAME || '';
 const SMTP_PASS = process.env.SMTP_PASS || process.env.SMTP_PASSWORD || '';
-const SMTP_FROM = process.env.SMTP_FROM || 'tickets@absolute-cinema.local';
-const SMTP_ENABLED = Boolean(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS);
+const SMTP_SECURE_ENV = String(process.env.SMTP_SECURE || '').trim().toLowerCase();
+const SMTP_SECURE = SMTP_SECURE_ENV
+  ? SMTP_SECURE_ENV === '1' || SMTP_SECURE_ENV === 'true' || SMTP_SECURE_ENV === 'yes'
+  : SMTP_PORT === 465;
+const SMTP_FROM = process.env.SMTP_FROM || SMTP_USER || 'tickets@absolute-cinema.local';
+const SMTP_ENABLED = Boolean((SMTP_HOST || SMTP_SERVICE) && SMTP_USER && SMTP_PASS);
 
 const mailer = SMTP_ENABLED
   ? nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_PORT === 465,
+      ...(SMTP_SERVICE ? { service: SMTP_SERVICE } : {}),
+    ...(SMTP_HOST ? { host: SMTP_HOST } : {}),
+      ...(SMTP_PORT ? { port: SMTP_PORT } : {}),
+      secure: SMTP_SECURE,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
@@ -90,7 +96,9 @@ if (SMTP_ENABLED && mailer) {
   mailer
     .verify()
     .then(() => {
-      console.log(`SMTP connection verified (${SMTP_HOST}:${SMTP_PORT})`);
+      console.log(
+        `SMTP connection verified (${SMTP_SERVICE || SMTP_HOST}:${SMTP_PORT || 'default'})`
+      );
     })
     .catch((err) => {
       console.error('SMTP verification failed:', err?.message || err);

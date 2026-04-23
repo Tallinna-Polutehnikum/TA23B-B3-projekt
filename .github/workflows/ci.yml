@@ -161,13 +161,13 @@ jobs:
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: 587
+          server_port: ${{ secrets.SMTP_PORT || 587 }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: "CI/CD failed for ${{ github.repository }} (${{ github.ref_name }})"
           to: ${{ secrets.CI_ALERT_EMAIL_TO }}
           from: ${{ secrets.SMTP_USERNAME }}
-          secure: false
+          secure: ${{ secrets.SMTP_SECURE || false }}
           body: |
             A CI/CD workflow failed.
 
