@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import './MoviesList.css'
 import { apiFetch } from '../utils/api'
 
@@ -38,8 +38,7 @@ export default function MoviesList({ refresh, onUnauthorized }) {
   // Use refs to track if we've already loaded data
   const genresLoadedRef = useRef(false)
 
-  // Simple fetch functions without useCallback to avoid re-render loops
-  const loadMovies = async () => {
+  const loadMovies = useCallback(async () => {
     try {
       setLoading(true)
       const res = await apiFetch('/api/movies', {}, { withAuth: true })
@@ -54,9 +53,9 @@ export default function MoviesList({ refresh, onUnauthorized }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [onUnauthorized])
 
-  const loadGenres = async () => {
+  const loadGenres = useCallback(async () => {
     try {
       const res = await apiFetch('/api/genres')
       const data = await res.json()
@@ -64,12 +63,12 @@ export default function MoviesList({ refresh, onUnauthorized }) {
     } catch (err) {
       console.error('Error loading genres:', err)
     }
-  }
+  }, [])
 
   // Load movies when refresh changes
   useEffect(() => {
     loadMovies()
-  }, [refresh])
+  }, [refresh, loadMovies])
 
   // Load genres only once on mount
   useEffect(() => {
@@ -77,7 +76,7 @@ export default function MoviesList({ refresh, onUnauthorized }) {
       genresLoadedRef.current = true
       loadGenres()
     }
-  }, [])
+  }, [loadGenres])
 
   // Prevent scroll when modal is open
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './SessionsList.css'
 import { apiFetch } from '../utils/api'
 
@@ -9,11 +9,7 @@ export default function SessionsList({ refresh, onUnauthorized }) {
   const [endDate, setEndDate] = useState('')
   const [bulkDeleting, setBulkDeleting] = useState(false)
 
-  useEffect(() => {
-    fetchSessions()
-  }, [refresh])
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     setLoading(true)
     try {
       const response = await apiFetch('/api/sessions', {}, { withAuth: true })
@@ -28,7 +24,11 @@ export default function SessionsList({ refresh, onUnauthorized }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [onUnauthorized])
+
+  useEffect(() => {
+    fetchSessions()
+  }, [refresh, fetchSessions])
 
   const handleDelete = async (sessionId) => {
     const ok = window.confirm('Delete this session?')
