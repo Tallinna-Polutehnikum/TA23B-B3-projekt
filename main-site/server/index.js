@@ -79,6 +79,14 @@ const SMTP_SECURE = SMTP_SECURE_ENV
 const SMTP_FROM = process.env.SMTP_FROM || SMTP_USER || 'tickets@absolute-cinema.local';
 const SMTP_ENABLED = Boolean((SMTP_HOST || SMTP_SERVICE) && SMTP_USER && SMTP_PASS);
 
+if (!SMTP_ENABLED) {
+  const missing = [];
+  if (!SMTP_HOST && !SMTP_SERVICE) missing.push('SMTP_HOST/SMTP_SERVER or SMTP_SERVICE');
+  if (!SMTP_USER) missing.push('SMTP_USER/SMTP_USERNAME');
+  if (!SMTP_PASS) missing.push('SMTP_PASS/SMTP_PASSWORD');
+  console.warn(`SMTP is disabled. Missing: ${missing.join(', ')}`);
+}
+
 const mailer = SMTP_ENABLED
   ? nodemailer.createTransport({
       ...(SMTP_SERVICE ? { service: SMTP_SERVICE } : {}),

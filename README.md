@@ -150,6 +150,11 @@ Notes:
 - If SMTP variables are missing, booking still works, but email is skipped.
 - The checkout form email is used as recipient automatically.
 
+Production deploy note (GitHub Actions):
+- The deploy workflow excludes `.env` and `.env.*` from rsync.
+- Set SMTP values as repository secrets so deploy can write `main-site/.env.local` on the server.
+- Supported secret names: `SMTP_SERVICE`, `SMTP_HOST` or `SMTP_SERVER`, `SMTP_PORT`, `SMTP_USER` or `SMTP_USERNAME`, `SMTP_PASS` or `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_SECURE`.
+
 ### Terminal 3: Admin Worker Site
 
 ```powershell
