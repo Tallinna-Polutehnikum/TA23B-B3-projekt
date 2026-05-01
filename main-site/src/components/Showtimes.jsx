@@ -35,6 +35,20 @@ export default function Showtimes({ addSeatsToCart }) {
   const [sessions, setSessions] = useState([]);
   const [availableGenres, setAvailableGenres] = useState([]);
 
+  const days = React.useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      return {
+        key: toDateKey(date),
+        label: date.toLocaleDateString('en-GB', { weekday: 'short' }),
+        date: date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+      };
+    });
+  }, []);
+
+  const visibleDayKeys = React.useMemo(() => new Set(days.map((d) => d.key)), [days]);
+
   const refreshSessions = React.useCallback(async () => {
     try {
       const res = await fetch('/api/sessions', { cache: 'no-store' });
@@ -99,6 +113,13 @@ export default function Showtimes({ addSeatsToCart }) {
   }, [activeDay]);
 
   useEffect(() => {
+    if (visibleDayKeys.has(activeDay)) return;
+    const fallbackDay = days[0]?.key || toDateKey(new Date());
+    setActiveDay(fallbackDay);
+    sessionStorage.setItem('activeDay', fallbackDay);
+  }, [activeDay, days, visibleDayKeys]);
+
+  useEffect(() => {
     sessionStorage.setItem('selectedCity', selectedCity);
   }, [selectedCity]);
 
@@ -127,6 +148,7 @@ export default function Showtimes({ addSeatsToCart }) {
     if (!sessions || sessions.length === 0) return;
 
     const scoped = sessions.filter((s) => {
+      if (!visibleDayKeys.has(s.date)) return false;
       const matchesMovie = !selectedMovieId || String(s.movie_id) === String(selectedMovieId);
       const sessionCity = s.cinema ? s.cinema.split('-')[0].trim() : '';
       const matchesCity = selectedCity === 'All' || sessionCity === selectedCity;
@@ -144,19 +166,9 @@ export default function Showtimes({ addSeatsToCart }) {
     const nextAvailable = dates.find((d) => d >= todayKey) || dates[0];
     setActiveDay(nextAvailable);
     sessionStorage.setItem('activeDay', nextAvailable);
-  }, [sessions, selectedMovieId, selectedCity, selectedGenre, activeDay]);
+  }, [sessions, selectedMovieId, selectedCity, selectedGenre, activeDay, visibleDayKeys]);
 
   // User can freely switch days; no auto-reset to avoid interfering with manual selection
-
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    return {
-      key: toDateKey(date),
-      label: date.toLocaleDateString('en-GB', { weekday: 'short' }),
-      date: date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
-    };
-  });
 
   const getCities = () => {
     const cities = new Set();
@@ -170,6 +182,8 @@ export default function Showtimes({ addSeatsToCart }) {
   };
 
   const filteredSessions = sessions.filter((session) => {
+    if (!visibleDayKeys.has(session.date)) return false;
+
     const todayKey = toDateKey(new Date());
     const isSessionToday = session.date === todayKey;
     const nowMinutes = isSessionToday
