@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './ComingSoon.css';
 import { getPosterSrc } from '../utils/movieUi';
@@ -7,12 +7,30 @@ export default function ComingSoon() {
   const [movies, setMovies] = useState([]);
   const scrollerRef = useRef(null);
 
-  useEffect(() => {
-    fetch('/api/movies/coming-soon')
-      .then((res) => res.json())
-      .then(setMovies)
-      .catch((err) => console.error('Failed to load movies', err));
+  const refreshComingSoon = useCallback(async () => {
+    try {
+      const res = await fetch('/api/movies/coming-soon', { cache: 'no-store' });
+      if (!res.ok) {
+        throw new Error(`Failed to load coming soon (${res.status})`);
+      }
+      const data = await res.json();
+      setMovies(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load movies', err);
+    }
   }, []);
+
+  useEffect(() => {
+    refreshComingSoon();
+
+    const intervalId = window.setInterval(() => {
+      refreshComingSoon();
+    }, 60_000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [refreshComingSoon]);
 
   const scroll = (dir) => {
     const cardWidth = scrollerRef.current?.querySelector('.card')?.offsetWidth || 440;

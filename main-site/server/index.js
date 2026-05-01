@@ -326,6 +326,12 @@ function requireAdmin(req, res, next) {
   return next();
 }
 
+function setNoStore(res) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+}
+
 function signPassToken(payload) {
   const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const signature = crypto
@@ -820,6 +826,7 @@ app.get('/api/movies', (_req, res) => {
 });
 
 app.get('/api/movies/coming-soon', (_req, res) => {
+  setNoStore(res);
   const rows = db.prepare(`
     SELECT 
       c.id,
@@ -991,6 +998,7 @@ app.get('/api/gifts', (_req, res) => {
 });
 
 app.get('/api/sessions', (_req, res) => {
+  setNoStore(res);
   const rows = db.prepare(`
     SELECT 
       s.id,
