@@ -35,6 +35,28 @@ export default function Showtimes({ addSeatsToCart }) {
   const [sessions, setSessions] = useState([]);
   const [availableGenres, setAvailableGenres] = useState([]);
 
+  const refreshSessions = React.useCallback(async () => {
+    try {
+      const res = await fetch('/api/sessions', { cache: 'no-store' });
+      if (!res.ok) {
+        throw new Error(`Failed to load sessions (${res.status})`);
+      }
+      const data = await res.json();
+      setSessions(data);
+
+      const genres = new Set();
+      data.forEach((session) => {
+        if (session.genres) {
+          session.genres.split(',').forEach((g) => genres.add(g.trim()));
+        }
+      });
+      setAvailableGenres(Array.from(genres).sort());
+      setActiveDay((prev) => prev || pickInitialDay(data, null));
+    } catch (err) {
+      console.error('Failed to load sessions', err);
+    }
+  }, []);
+
   const pickInitialDay = (list, movieId) => {
     const scoped = movieId
       ? list.filter((s) => String(s.movie_id) === String(movieId))
@@ -44,22 +66,31 @@ export default function Showtimes({ addSeatsToCart }) {
   };
 
   useEffect(() => {
-    fetch('/api/sessions')
-      .then((res) => res.json())
-      .then((data) => {
-        setSessions(data);
-        // Extract unique genres
-        const genres = new Set();
-        data.forEach((session) => {
-          if (session.genres) {
-            session.genres.split(',').forEach((g) => genres.add(g.trim()));
-          }
-        });
-        setAvailableGenres(Array.from(genres).sort());
-        setActiveDay((prev) => prev || pickInitialDay(data, null));
-      })
-      .catch((err) => console.error('Failed to load sessions', err));
-  }, []);
+    refreshSessions();
+
+    const intervalId = window.setInterval(() => {
+      refreshSessions();
+    }, 60_000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshSessions();
+      }
+    };
+
+    const handleWindowFocus = () => {
+      refreshSessions();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [refreshSessions]);
 
   useEffect(() => {
     if (activeDay) {
