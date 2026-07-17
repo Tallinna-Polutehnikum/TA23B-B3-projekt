@@ -1,442 +1,702 @@
 # Absolute Cinema
 
-Cinema platform project with a public website, an admin panel, and a local API backed by SQLite.
+A full-stack cinema platform with a public customer website, an administration panel, a REST API, online seat booking, card payments, electronic tickets, automated testing, and continuous deployment.
 
----
+This project was developed as a team project during the Software Development programme at Tallinn Polytechnic School.
 
-## 1. Project Overview
+## Project Team
 
-This repository contains two actively used web applications and one API server:
+- **Sofja Portnova**
+- **Elnar Käst**
+- **Artur Genno**
 
-- Main Site: customer-facing cinema website (movies, sessions, checkout flow, events, cinemas, gifts).
-- Admin Worker Site: internal dashboard for managing movies and sessions.
-- API Server: Express server that reads and writes data in SQLite.
+The repository contains contributions from all three developers.
 
-The backend and both frontends are developed in JavaScript.
+## Live Demo
 
----
+[Open Absolute Cinema](https://absolutecinema.spjo.eu)
 
-## 2. What This Project Includes
+> The live version may use a different database and configuration from the local development version.
 
-### Main Site Features
+## Project Overview
 
-- Home page with hero content, top movies, genres, gifts, and coming soon movies.
-- Showtime page with filtering and seat selection flow.
-- Movie catalog and movie details views.
-- Events, cinemas, family screening, birthday, and themed landing pages.
-- Cart and checkout flow for gifts and selected seats.
+Absolute Cinema consists of three main components:
 
-### Admin Features
+- **Main Site** — a customer-facing cinema website
+- **Admin Worker Site** — an internal administration dashboard
+- **API Server** — an Express REST API connected to an SQLite database
 
-- Dashboard overview.
-- Movie management: create, update, delete.
-- Session management: create, update, delete.
-- Bulk deletion of sessions by date range.
+Customers can browse movies, search for sessions, select seats, complete bookings, purchase gifts, make card payments, and receive electronic tickets by email.
 
-### Backend and Data
+Administrators can manage movies, sessions, cinemas, halls, and other platform data through a separate administration interface.
 
-- REST API for movies, genres, sessions, halls, cinemas, gifts, and seat booking.
-- SQLite database located in database/db.sqlite.
-- Booking logic that prevents double-booking of already reserved seats.
+## Main Features
 
----
+### Customer Website
 
-## 3. Technology Stack and Tools
+- Home page with featured content
+- Movie catalogue
+- Movie detail pages
+- Top movies section
+- Coming-soon movies
+- Genre filtering
+- Cinema information pages
+- Events and themed landing pages
+- Family screening information
+- Birthday event information
+- Showtime search and filtering
+- Interactive seat selection
+- Shopping cart
+- Gift purchase flow
+- Booking and checkout
+- Stripe card payment support
+- Electronic ticket delivery by email
+- Responsive design for desktop and mobile devices
 
-- Frontend: React 19, React Router, Vite 7.
-- Backend: Node.js, Express 5.
-- Database: SQLite with better-sqlite3.
-- Tooling: ESLint, npm.
-- Helper scripts: database checks, endpoint tests, and data sync scripts.
+### Administration Panel
 
----
+- Administrator authentication
+- Dashboard overview
+- Movie creation, editing, and deletion
+- Session creation, editing, and deletion
+- Bulk deletion of sessions by date range
+- Cinema and hall data management
+- Responsive administration interface
 
-## 4. Repository Structure
+### Backend and Database
 
-- main-site/: public frontend and backend server.
-- admin-worker-site/: admin frontend.
-- database/: SQLite database file.
-- queries/: SQL query examples.
-- Root scripts: helper checks and API test scripts.
+- REST API built with Node.js and Express
+- SQLite database
+- Movie management
+- Genre management
+- Session management
+- Cinema and hall management
+- Gift management
+- Seat availability management
+- Booking functionality
+- Protection against double-booking
+- Input validation
+- Error handling
+- Email ticket delivery
+- Stripe payment integration
 
----
+## Team Contribution
 
-## 5. Prerequisites
+The project was developed collaboratively by:
 
-1. Node.js LTS (recommended current LTS).
-2. npm (installed with Node.js).
-3. Local SQLite file present at database/db.sqlite.
+- Sofja Portnova
+- Elnar Käst
+- Artur Genno
 
----
+Team responsibilities included:
 
-## 6. Installation
+- frontend development;
+- backend and REST API development;
+- database integration;
+- movie and session management;
+- user and administration functionality;
+- responsive interface development;
+- booking and seat-selection functionality;
+- testing and debugging;
+- CI/CD configuration;
+- production deployment;
+- documentation.
 
-Run these commands from repository root:
+This README describes the complete team project and does not imply that one developer created the entire platform independently.
 
-```powershell
+## Technology Stack
+
+### Frontend
+
+- JavaScript
+- React 19
+- React Router
+- Vite 7
+- HTML
+- CSS
+- Responsive Web Design
+
+### Backend
+
+- Node.js
+- Express 5
+- REST API
+
+### Database
+
+- SQLite
+- `better-sqlite3`
+- SQL
+
+### Testing and Code Quality
+
+- Vitest
+- Playwright
+- API integration testing
+- End-to-end testing
+- ESLint
+- Automated test coverage
+
+### DevOps and Deployment
+
+- Git
+- GitHub
+- GitHub Actions
+- CI/CD
+- SSH deployment
+- PM2
+- GitHub Pages pull-request previews
+
+### External Services
+
+- Stripe
+- SMTP email delivery
+- Google Search Console
+
+## Repository Structure
+
+```text
+.
+├── main-site/
+│   ├── public/
+│   ├── src/
+│   ├── server/
+│   └── package.json
+│
+├── admin-worker-site/
+│   ├── public/
+│   ├── src/
+│   └── package.json
+│
+├── database/
+│   └── db.sqlite
+│
+├── queries/
+│   └── SQL query examples
+│
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       └── deploy-zone.yml
+│
+├── test_endpoints.js
+├── test_api.js
+├── check_db.js
+├── check_coming_table.js
+└── package.json
+```
+
+## Requirements
+
+Before running the project, install:
+
+- Node.js LTS
+- npm
+- Git
+
+The local SQLite database must be available at:
+
+```text
+database/db.sqlite
+```
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Tallinna-Polutehnikum/TA23B-B3-projekt.git
+```
+
+Open the project folder:
+
+```bash
+cd TA23B-B3-projekt
+```
+
+Install dependencies for the main website and API:
+
+```bash
 cd main-site
 npm install
+```
 
-cd ..\admin-worker-site
+Install dependencies for the administration website:
+
+```bash
+cd ../admin-worker-site
 npm install
+```
 
+Install root dependencies for helper scripts:
+
+```bash
 cd ..
 npm install
 ```
 
-Note: root npm install is needed if you want to run root helper scripts such as test_endpoints.js.
+## Environment Configuration
 
----
+Environment files must not be committed to GitHub.
 
-## 7. How to Run the Project
+Make sure the following entries are included in `.gitignore`:
 
-Open 3 terminals.
-
-### Terminal 1: Backend API
-
-```powershell
-cd main-site
-npm.cmd run server
+```text
+.env
+.env.local
+.env.*
 ```
 
-Backend runs on:
-- http://localhost:4000
+### Administrator Authentication
 
-### Terminal 2: Main Site
+Create or update:
 
-```powershell
-cd main-site
-npm.cmd run dev
+```text
+main-site/.env.local
 ```
 
-Main site default URL:
-- http://localhost:5173
+Add secure administrator credentials:
 
-### 7.1 Configure e-ticket email sending (SMTP)
+```env
+ADMIN_LOGIN_EMAIL=your_admin_email
+ADMIN_LOGIN_PASSWORD=your_secure_password
+ADMIN_LOGIN_USERNAME=your_admin_username
+```
 
-To send tickets automatically after successful booking, create file:
+Never publish real administrator credentials in the repository, source code, or README.
 
-- `main-site/.env.local`
+### Email Ticket Delivery
 
-Add these variables:
+To send electronic tickets after successful bookings, add SMTP configuration to:
+
+```text
+main-site/.env.local
+```
+
+Example configuration:
 
 ```env
 SMTP_HOST=smtp.your-provider.com
 SMTP_PORT=587
-SMTP_USER=your_smtp_login
+SMTP_USER=your_smtp_username
 SMTP_PASS=your_smtp_password
 SMTP_FROM="Absolute Cinema <tickets@your-domain.com>"
 ```
 
-Gmail example (recommended to use an App Password, not your normal account password):
+Gmail configuration example:
 
 ```env
 SMTP_SERVICE=gmail
-SMTP_USER=your_account@gmail.com
-SMTP_PASS=your_16_char_app_password
-SMTP_FROM="Absolute Cinema <your_account@gmail.com>"
-# Optional: force SSL (implicit TLS)
-# SMTP_PORT=465
-# SMTP_SECURE=true
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_google_app_password
+SMTP_FROM="Absolute Cinema <your_email@gmail.com>"
 ```
 
-Accepted aliases:
-- `SMTP_SERVER` works the same as `SMTP_HOST`
-- `SMTP_USERNAME` works the same as `SMTP_USER`
-- `SMTP_PASSWORD` works the same as `SMTP_PASS`
-
-Notes:
-- For SSL SMTP, usually use `SMTP_PORT=465`.
-- If SMTP variables are missing, booking still works, but email is skipped.
-- The checkout form email is used as recipient automatically.
-
-Production deploy note (GitHub Actions):
-- The deploy workflow excludes `.env` and `.env.*` from rsync.
-- Set SMTP values as repository secrets so deploy can write `main-site/.env.local` on the server.
-- Supported secret names: `SMTP_SERVICE`, `SMTP_HOST` or `SMTP_SERVER`, `SMTP_PORT`, `SMTP_USER` or `SMTP_USERNAME`, `SMTP_PASS` or `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_SECURE`.
-
-### 7.1.1 Configure Stripe card payments
-
-Card payments are enabled only when both server and client Stripe keys are set.
-
-Create these files:
-
-- `main-site/.env.local` (server)
-- `main-site/.env` or `main-site/.env.local` (Vite client variable)
-
-Add:
+Optional SSL configuration:
 
 ```env
-# Server-side secret key (never expose publicly)
+SMTP_PORT=465
+SMTP_SECURE=true
+```
+
+Accepted variable aliases may include:
+
+```env
+SMTP_SERVER=your_smtp_server
+SMTP_USERNAME=your_smtp_username
+SMTP_PASSWORD=your_smtp_password
+```
+
+If SMTP configuration is missing, booking can still work, but ticket email delivery will be skipped.
+
+Use an application-specific password when connecting a Gmail account. Do not use or publish the normal account password.
+
+### Stripe Card Payments
+
+Stripe payments require both a server-side secret key and a client-side publishable key.
+
+Add the secret key to:
+
+```text
+main-site/.env.local
+```
+
+```env
 STRIPE_SECRET_KEY=sk_test_your_secret_key
+```
 
-# Optional webhook secret
-# STRIPE_WEBHOOK_SECRET=whsec_...
+An optional webhook secret can also be configured:
 
-# Client-side publishable key (safe for browser)
+```env
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+```
+
+Add the public key to the Vite environment configuration:
+
+```env
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key
 ```
 
-Notes:
-- If `STRIPE_SECRET_KEY` is missing, `/api/payments/stripe/*` endpoints return 503.
-- If `VITE_STRIPE_PUBLISHABLE_KEY` is missing, the checkout hides card payment automatically.
+The Stripe secret key must never be exposed in frontend code or committed to GitHub.
 
-### Terminal 3: Admin Worker Site
+If the required Stripe keys are missing, card payment functionality is disabled automatically.
+
+## Running the Project
+
+Run the backend API and both frontend applications in separate terminals.
+
+### Terminal 1 — Backend API
+
+```bash
+cd main-site
+npm run server
+```
+
+The API runs by default at:
+
+```text
+http://localhost:4000
+```
+
+### Terminal 2 — Main Website
+
+```bash
+cd main-site
+npm run dev
+```
+
+The main website runs by default at:
+
+```text
+http://localhost:5173
+```
+
+### Terminal 3 — Administration Website
+
+```bash
+cd admin-worker-site
+npm run dev
+```
+
+The administration website runs by default at:
+
+```text
+http://localhost:5156
+```
+
+The backend API must be running before the frontend applications can retrieve live data.
+
+### Windows PowerShell Note
+
+If PowerShell blocks npm scripts, use `npm.cmd`:
 
 ```powershell
-cd admin-worker-site
+npm.cmd run server
+```
+
+```powershell
 npm.cmd run dev
 ```
 
-Admin site URL:
-- http://localhost:5156
+## Administration Panel Deployment
 
-### 7.2 Admin Authentication (single account)
+The administration panel can be hosted under the same domain as the public website.
 
-The API now enforces one admin account for admin endpoints.
-
-Default admin credentials:
-- Email: absolute.cinema2027@gmail.com
-- Password: absolute2027
-
-You can override these in production with environment variables:
-
-```env
-ADMIN_LOGIN_EMAIL=absolute.cinema2027@gmail.com
-ADMIN_LOGIN_PASSWORD=absolute2027
-ADMIN_LOGIN_USERNAME=Absolute Cinema Admin
-```
-
-### 7.3 Host admin panel on your domain
-
-To serve admin under the same domain, for example:
-- https://absolutecinema.spjo.eu/admin/
-
-Use build-time variable in `admin-worker-site`:
+Example build-time configuration:
 
 ```env
 VITE_BASE_PATH=/admin/
 VITE_API_BASE_URL=
 ```
 
-Then build and deploy `admin-worker-site/dist` to your web server path for `/admin/`.
-Because `VITE_API_BASE_URL` is empty, API calls use same-origin `/api/*`.
+When `VITE_API_BASE_URL` is empty, API requests use the same origin through `/api/*`.
 
----
+Production credentials and domain-specific configuration must be stored in environment variables or repository secrets.
 
-## 8. Production Build Commands
+## Production Build
 
-```powershell
+Build the main website:
+
+```bash
 cd main-site
-npm.cmd run build
-
-cd ..\admin-worker-site
-npm.cmd run build
+npm run build
 ```
 
-Both build commands were verified successfully.
+Build the administration website:
 
----
+```bash
+cd ../admin-worker-site
+npm run build
+```
 
-## 9. API Overview
+The generated production files are placed in the corresponding `dist` directories.
 
-Examples of available endpoints:
+## API Overview
 
-- GET /api/movies
-- GET /api/movies/top
-- GET /api/movies/coming-soon
-- GET /api/genres
-- GET /api/sessions
-- GET /api/sessions/:id/seats
-- POST /api/sessions/:id/book
-- POST /api/movies
-- PUT /api/movies/:id
-- DELETE /api/movies/:id
-- POST /api/sessions
-- PUT /api/sessions/:id
-- DELETE /api/sessions/:id
-- POST /api/sessions/bulk-delete
+The local API base URL is:
 
-Base URL for API:
-- http://localhost:4000
+```text
+http://localhost:4000
+```
 
----
+Example public endpoints:
 
-## 10. Useful Helper Commands
+```http
+GET /api/movies
+GET /api/movies/top
+GET /api/movies/coming-soon
+GET /api/genres
+GET /api/sessions
+GET /api/sessions/:id/seats
+POST /api/sessions/:id/book
+```
 
-From repository root:
+Example administration endpoints:
 
-```powershell
+```http
+POST /api/movies
+PUT /api/movies/:id
+DELETE /api/movies/:id
+
+POST /api/sessions
+PUT /api/sessions/:id
+DELETE /api/sessions/:id
+
+POST /api/sessions/bulk-delete
+```
+
+Administrative endpoints require authentication.
+
+## Useful Helper Commands
+
+Run endpoint checks from the repository root:
+
+```bash
 node test_endpoints.js
+```
+
+Run API checks:
+
+```bash
 node test_api.js
+```
+
+Check the database:
+
+```bash
 node check_db.js
+```
+
+Check coming-soon movie data:
+
+```bash
 node check_coming_table.js
 ```
 
-From main-site:
+Run movie synchronisation from the main-site directory:
 
-```powershell
-npm.cmd run sync:movies
+```bash
+npm run sync:movies
 ```
 
----
+## Testing
 
-## 11. Recent Development Highlights (from commits)
+Run automated tests from the relevant project directory:
 
-- Genre filtering added and improved.
-- Seat map behavior fixed and refined.
-- Events and cinemas pages added and connected in navigation.
-- Payment-related flow updates.
-- Admin panel functionality implemented and expanded.
-- Session bulk deletion by date range added in admin.
-- Database connection logic improved for session handling.
-
----
-
-## 12. Known Notes
-
-- If PowerShell blocks npm script execution, use npm.cmd instead of npm.
-- Backend must run before both frontends if you want live data.
-- The project currently relies on local SQLite data, so keep database/db.sqlite available.
-
----
-
-## 13. Automatic Deployment (GitHub Actions -> Zone)
-
-This repository includes a production deployment workflow that runs on every push to `main`.
-
-Workflow file:
-
-- `.github/workflows/deploy-zone.yml`
-
-### 13.1 What the workflow does
-
-1. Connects to your Zone server over SSH.
-2. Synchronizes `main-site/` to `/data02/virt137396/domeenid/www.spjo.eu/htdocs/main-site`.
-3. Runs `npm ci` (or `npm install`) and `npm run build` on server.
-4. Restarts PM2 process `absolute-cinema-main` with:
-	- `HOST=127.2.63.196`
-	- `PORT=8080`
-	- `DB_PATH=/data02/virt137396/domeenid/www.spjo.eu/htdocs/database/db.sqlite`
-5. Verifies API health on local loopback and public domain.
-
-Note: The workflow does not overwrite `database/db.sqlite`.
-
-### 13.2 Required GitHub Secret
-
-Add this repository secret in GitHub:
-
-- `ZONE_SSH_PRIVATE_KEY_B64` (preferred)
-
-Value should be Base64 of your private key file:
-
-- `C:\Users\USER\.ssh\zone_ed25519`
-
-PowerShell command:
-
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.ssh\zone_ed25519"))
+```bash
+npm run test
 ```
 
-Fallback secret (if needed):
+Run tests with coverage:
 
-- `ZONE_SSH_PRIVATE_KEY` with raw key block (`-----BEGIN OPENSSH PRIVATE KEY----- ...`).
+```bash
+npm run test -- --coverage
+```
 
-If workflow shows `base64: invalid input`:
+The project includes:
 
-1. Re-generate value from `C:\Users\USER\.ssh\zone_ed25519` using:
-	```powershell
-	[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.ssh\zone_ed25519"))
-	```
-2. Paste that single-line output into `ZONE_SSH_PRIVATE_KEY_B64`.
-3. Optionally clear `ZONE_SSH_PRIVATE_KEY_B64` and use only `ZONE_SSH_PRIVATE_KEY` (raw key) as fallback.
+- unit tests;
+- API integration tests;
+- Playwright end-to-end tests;
+- automated coverage validation;
+- frontend build verification.
 
-### 13.3 Triggering deployment
+## Continuous Integration
 
-- Automatic: push or merge to `main`.
-- Manual: run `Deploy Zone Production` from the Actions tab.
+The repository includes a GitHub Actions CI workflow:
 
-### 13.4 Manual database sync workflow (safe mode)
+```text
+.github/workflows/ci.yml
+```
 
----
+The workflow runs on pushes and pull requests.
 
-## 14. Google Indexing Checklist
+For the main and administration applications, CI can perform:
 
-For domain indexing, the project now includes:
-- `main-site/public/robots.txt`
-- `main-site/public/sitemap.xml`
-- canonical + robots meta in `main-site/index.html`
+- dependency installation;
+- linting;
+- automated testing;
+- test coverage validation;
+- production build verification.
 
-After deployment, do this once:
-1. Open Google Search Console and add property `https://absolutecinema.spjo.eu`.
-2. Verify ownership (DNS TXT is recommended).
-3. Submit sitemap URL: `https://absolutecinema.spjo.eu/sitemap.xml`.
-4. Use URL Inspection and request indexing for home page and key pages.
+The minimum statement coverage target is:
 
-To avoid accidental user data loss, regular deploy no longer syncs `database/db.sqlite`.
+```text
+70%
+```
 
-When you intentionally need to overwrite production DB from repository DB, use:
+## Pull Request Previews
 
-- Workflow: `Manual DB Sync to Zone`
+Pull requests created from branches in this repository can receive temporary frontend preview deployments through GitHub Pages.
 
-This workflow requires:
+A preview URL can be added automatically to the pull request by the CI workflow.
 
-1. Manual confirmation text: `SYNC_DB`
-2. Optional remote backup before upload (enabled by default)
-3. Optional PM2 app restart after sync
+## Automatic Deployment
 
-Recommended usage:
+The repository includes a production deployment workflow:
 
-1. Run regular deploy for code changes.
-2. Run manual DB sync only for planned data migration/reset operations.
-3. Keep remote backup enabled unless you have a specific reason not to.
+```text
+.github/workflows/deploy-zone.yml
+```
 
----
+The deployment process can:
 
-## 14. CI Pipeline Coverage (Task 2)
+- connect to the production server over SSH;
+- synchronise application files;
+- install dependencies;
+- build the application;
+- restart the Node.js process;
+- verify API health;
+- verify the public website.
 
-Workflow file:
+Production server addresses, usernames, SSH keys, database paths, passwords, and other sensitive values must be stored in GitHub repository secrets.
 
-- `.github/workflows/ci.yml`
+Example secret names:
 
-### 14.1 What runs on each push and pull request
+```text
+DEPLOY_HOST
+DEPLOY_USER
+DEPLOY_PATH
+DEPLOY_SSH_PRIVATE_KEY
+```
 
-For both projects (`main-site`, `admin-worker-site`):
+Do not publish real secret values in the README.
 
-1. Lint (`npm run lint`)
-2. Test with coverage (`npm run test`)
-3. Coverage gate (minimum 70% statements)
-4. Build (`npm run build`)
+## Manual Database Synchronisation
 
-### 14.2 PR preview deployment
+The normal deployment process should not overwrite the production database.
 
-On pull requests from this repository, CI deploys `main-site` build output to GitHub Pages under:
+Database replacement should only be performed through a separate manual workflow when a planned migration or reset is required.
 
-- `https://<owner>.github.io/<repo>/previews/pr-<number>/`
+Recommended safety steps:
 
-CI also comments the preview link directly on the PR.
+1. Confirm that the database replacement is intentional.
+2. Create a backup of the production database.
+3. Upload the new database.
+4. Verify the uploaded database.
+5. Restart the application if necessary.
+6. Confirm that the website and API work correctly.
 
-### 14.3 Email notification on CI failure
+A manual confirmation value can be required before the workflow runs.
 
-To enable real email alerts, set these repository secrets:
+## Search Engine Indexing
 
-- `SMTP_SERVER`
-- `SMTP_PORT` (optional, default `587`)
-- `SMTP_USERNAME`
-- `SMTP_PASSWORD`
-- `SMTP_SECURE` (optional, `true` for SSL providers like Gmail on port `465`)
-- `CI_ALERT_EMAIL_TO`
+The project includes:
 
-If these secrets are missing, CI logs a warning instead of sending mail.
+```text
+main-site/public/robots.txt
+main-site/public/sitemap.xml
+```
 
-### 14.4 Blocking PR merge when checks fail
+The main HTML file also includes canonical and robots metadata.
 
-Enable branch protection for `main` in GitHub settings and require these status checks:
+For production indexing:
 
-- `Web CI (main-site)`
-- `Web CI (admin-worker-site)`
+1. Add the production domain to Google Search Console.
+2. Verify domain ownership.
+3. Submit the sitemap.
+4. Use URL Inspection for the home page.
+5. Request indexing for important pages.
 
-Optionally also require:
+## Security Notes
 
-- `PR Preview Deployment`
+- Never commit `.env` files.
+- Never publish real passwords.
+- Never publish secret API keys.
+- Use strong and unique administrator credentials.
+- Store production secrets in GitHub repository secrets.
+- Use a Google App Password for Gmail SMTP.
+- Rotate any credential that has previously been published.
+- Restrict administrator endpoints on the backend.
+- Do not expose the production database publicly.
+- Review Git history if a secret was accidentally committed.
+- Do not rely only on frontend checks for administrator security.
+- Validate and authorise protected operations on the server.
 
+## Known Notes
+
+- The backend must be running before the frontends can use live data.
+- The local project relies on `database/db.sqlite`.
+- SMTP environment variables are required for ticket email delivery.
+- Stripe environment variables are required for card payments.
+- PowerShell users may need to use `npm.cmd`.
+- Production configuration may differ from local development.
+- The live version may contain different data from the repository database.
+
+## Development Highlights
+
+Development work included:
+
+- genre filtering;
+- movie catalogue improvements;
+- seat map improvements;
+- events and cinema pages;
+- payment flow development;
+- administration panel functionality;
+- session management;
+- bulk deletion of sessions by date range;
+- database connection improvements;
+- responsive interface improvements;
+- email ticket delivery;
+- Stripe card payment integration;
+- CI/CD implementation;
+- production deployment automation;
+- API integration tests;
+- Playwright end-to-end tests.
+
+## What We Learned
+
+This project helped the team develop practical skills in:
+
+- full-stack web development;
+- React application development;
+- Node.js and Express;
+- REST API development;
+- SQLite and SQL;
+- authentication and protected endpoints;
+- booking system development;
+- payment integration;
+- email delivery;
+- responsive interface development;
+- automated testing;
+- API integration testing;
+- end-to-end testing;
+- debugging production issues;
+- CI/CD;
+- deployment automation;
+- Git and GitHub collaboration;
+- teamwork and project organisation.
+
+## Contributors
+
+Absolute Cinema was developed by:
+
+- **Sofja Portnova**
+- **Elnar Käst**
+- **Artur Genno**
+
+This repository contains work and contributions from all members of the development team.
+
+## Repository
+
+[github.com/Tallinna-Polutehnikum/TA23B-B3-projekt](https://github.com/Tallinna-Polutehnikum/TA23B-B3-projekt)
